@@ -2954,6 +2954,13 @@
           }
 
           const data = await response.json();
+
+          // 檢查回應結構
+          if (!data.candidates || !data.candidates[0]) {
+            console.error('API 回應結構錯誤:', data);
+            throw new Error(data.error?.message || 'API 回應格式不正確');
+          }
+
           const generatedText = data.candidates[0].content.parts[0].text;
 
           // 嘗試解析 JSON（移除可能的 markdown 代碼塊）
