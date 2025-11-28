@@ -1468,7 +1468,7 @@
               <label>出生地</label>
               <input type="text" id="birthplace" placeholder="例：北方雪國的小村莊" oninput="updatePreview()">
             </div>
-            <div class="form-field full-width">
+            <div class="form-field full-width full-mode-only">
               <label>
                 背景故事
                 <button class="dice-btn" onclick="App.ui.rollDice('backstory')" type="button" title="隨機生成範例">🎲</button>
@@ -1500,7 +1500,7 @@
             <span class="section-toggle">▼</span>
           </div>
           <div class="section-content">
-            <div class="form-field full-width">
+            <div class="form-field full-width full-mode-only">
               <div class="dynamic-field-header">
                 <label>戰鬥技能 <span class="hint">(技能名稱與等級/描述)</span></label>
               </div>
@@ -1511,7 +1511,7 @@
                 ➕ 新增戰鬥技能
               </button>
             </div>
-            <div class="form-field full-width">
+            <div class="form-field full-width full-mode-only">
               <div class="dynamic-field-header">
                 <label>生活技能 <span class="hint">(技能名稱與等級/描述)</span></label>
               </div>
@@ -1532,7 +1532,7 @@
             <span class="section-toggle">▼</span>
           </div>
           <div class="section-content">
-            <div class="form-field full-width">
+            <div class="form-field full-width full-mode-only">
               <div class="dynamic-field-header">
                 <label>自訂屬性 <span class="hint">(屬性名稱與值/等級/描述)</span></label>
               </div>
@@ -1553,7 +1553,7 @@
             <span class="section-toggle">▼</span>
           </div>
           <div class="section-content">
-            <div class="form-field full-width">
+            <div class="form-field full-width full-mode-only">
               <div class="dynamic-field-header">
                 <label>說話方式 <span class="hint">(情境與對話範例)</span></label>
               </div>
@@ -3282,6 +3282,19 @@
       return objectToYAML(output, 0);
     }
 
+    /**
+     * 獲取平台顯示名稱
+     */
+    function getPlatformName(platform) {
+      const platformNames = {
+        'gemini': 'Gemini 3.0',
+        'sillytavern': 'SillyTavern',
+        'risuai': 'RisuAI',
+        'characterai': 'Character.AI'
+      };
+      return platformNames[platform] || platform;
+    }
+
     function convertToMarkdown(data, platform) {
       const platformNames = {
         'gemini': 'Gemini 3.0',
@@ -3912,7 +3925,18 @@
           useCORS: true, // 允許跨域圖片（頭像）
           allowTaint: true,
           windowWidth: cardElement.scrollWidth,
-          windowHeight: cardElement.scrollHeight
+          windowHeight: cardElement.scrollHeight,
+          onclone: (clonedDoc) => {
+            // 修復漸變色問題：將漸變替換為純色
+            const clonedCard = clonedDoc.querySelector('#previewCard .preview-card');
+            if (clonedCard) {
+              clonedCard.style.background = '#f9fafb';
+            }
+            const avatar = clonedDoc.querySelector('.preview-card-avatar');
+            if (avatar) {
+              avatar.style.background = '#667eea';
+            }
+          }
         });
 
         // 5. 轉換為 PNG 並下載
