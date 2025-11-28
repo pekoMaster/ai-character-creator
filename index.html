@@ -1236,6 +1236,11 @@
       </div>
 
       <div class="settings-login-group">
+        <!-- AI 生成按鈕 -->
+        <button class="icon-btn primary" onclick="App.ai.generateCharacter()" title="AI 一鍵創角">
+          ✨ AI 生成
+        </button>
+
         <!-- 匯入按鈕 -->
         <button class="icon-btn" onclick="document.getElementById('importFile').click()" title="匯入檔案">
           📥 匯入
@@ -1583,14 +1588,6 @@
             <span class="section-toggle">▼</span>
           </div>
           <div class="section-content">
-            <div class="form-field full-width" style="margin-bottom: 20px;">
-              <button type="button" class="btn primary" onclick="App.ai.generateCharacter()" style="width: 100%; padding: 12px; font-size: 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                ✨ AI 一鍵創角 - 輸入提示詞自動生成完整角色
-              </button>
-              <div class="hint" style="margin-top: 8px; text-align: center;">
-                使用 Gemini AI 根據您的創意自動生成角色資料（需先在設定中配置 API Key）
-              </div>
-            </div>
             <div class="form-field full-width">
               <label>角色描述 <span class="hint">(給 AI 的完整描述)</span></label>
               <textarea id="description" class="large" placeholder="這是給 AI 閱讀的完整角色描述，可整合上述所有資訊..." oninput="updatePreview()"></textarea>
