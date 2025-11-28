@@ -2982,12 +2982,19 @@
             jsonText = jsonText.replace(/```\n?/g, '');
           }
 
+          // 修復常見的 JSON 格式錯誤
+          jsonText = jsonText
+            .replace(/,\s*}/g, '}')  // 移除物件結尾的多餘逗號
+            .replace(/,\s*]/g, ']')  // 移除陣列結尾的多餘逗號
+            .trim();
+
           try {
             const characterData = JSON.parse(jsonText);
             return characterData;
           } catch (e) {
             console.error('JSON 解析失敗:', e);
             console.log('原始回應:', generatedText);
+            console.log('清理後的 JSON:', jsonText);
             throw new Error('AI 回應格式錯誤，請重試');
           }
         }
