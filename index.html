@@ -1593,7 +1593,7 @@
           </div>
           <div class="section-content">
             <div class="form-field full-width">
-              <label>角色描述 <span class="hint">(給 AI 的完整描述)</span></label>
+              <label>角色描述 <span class="hint">(給 AI 的完整描述，Character.AI 必填)</span></label>
               <textarea id="description" class="large" placeholder="這是給 AI 閱讀的完整角色描述，可整合上述所有資訊..." oninput="updatePreview()"></textarea>
             </div>
             <div class="form-field full-width full-mode-only">
@@ -1601,7 +1601,7 @@
               <textarea id="systemPrompt" class="large" placeholder="給 AI 的指令，例如：你是{{char}}，請以第一人稱回應..." oninput="updatePreview()"></textarea>
             </div>
             <div class="form-field full-width">
-              <label>第一則訊息 <span class="hint">(對話開始時角色說的話)</span></label>
+              <label>第一則訊息 <span class="hint">(對話開始時角色說的話，Character.AI 必填)</span></label>
               <textarea id="firstMessage" class="large" placeholder="*她抬起頭，從書本中望向你* 「啊，有客人嗎？歡迎來到圖書館。」" oninput="updatePreview()"></textarea>
             </div>
             <div class="form-field full-width full-mode-only">
@@ -3263,6 +3263,10 @@
           output = convertToGeminiFormat(data);
           break;
       }
+
+      // 移除空值欄位
+      output = removeEmptyFields(output);
+
       return JSON.stringify(output, null, 2);
     }
 
@@ -3283,6 +3287,10 @@
           output = convertToGeminiFormat(data);
           break;
       }
+
+      // 移除空值欄位
+      output = removeEmptyFields(output);
+
       return objectToYAML(output, 0);
     }
 
@@ -3444,6 +3452,51 @@
       md += `---\n*由 AI 角色卡創作工具生成*\n`;
       
       return md;
+    }
+
+    /**
+     * 移除物件中的空值欄位
+     */
+    function removeEmptyFields(obj) {
+      if (Array.isArray(obj)) {
+        return obj.filter(item => {
+          if (typeof item === 'object' && item !== null) {
+            return Object.keys(removeEmptyFields(item)).length > 0;
+          }
+          return item !== '' && item !== null && item !== undefined;
+        }).map(item => {
+          if (typeof item === 'object' && item !== null) {
+            return removeEmptyFields(item);
+          }
+          return item;
+        });
+      }
+
+      if (typeof obj !== 'object' || obj === null) {
+        return obj;
+      }
+
+      const result = {};
+      for (const [key, value] of Object.entries(obj)) {
+        if (value === '' || value === null || value === undefined) {
+          continue; // 跳過空值
+        }
+
+        if (Array.isArray(value)) {
+          const filtered = removeEmptyFields(value);
+          if (filtered.length > 0) {
+            result[key] = filtered;
+          }
+        } else if (typeof value === 'object') {
+          const filtered = removeEmptyFields(value);
+          if (Object.keys(filtered).length > 0) {
+            result[key] = filtered;
+          }
+        } else {
+          result[key] = value;
+        }
+      }
+      return result;
     }
 
     // 平台特定格式
