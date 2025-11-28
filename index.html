@@ -396,6 +396,7 @@
       flex: 1;
       overflow-y: auto;
       padding: 20px;
+      min-width: 0; /* 防止內容撐開容器 */
     }
 
     /* ===== 角色卡預覽樣式 ===== */
@@ -539,6 +540,9 @@
       border-radius: 8px;
       overflow-x: auto;
       font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      white-space: pre-wrap; /* 自動換行 */
+      word-wrap: break-word; /* 長單詞自動斷行 */
+      max-width: 100%; /* 限制最大寬度 */
       font-size: 0.85rem;
       line-height: 1.6;
       max-height: 500px;
@@ -3204,10 +3208,10 @@
         personalitySection.style.display = 'none';
       }
 
-      // 背景
+      // 背景（完整版限定）
       const backstorySection = document.getElementById('previewBackstorySection');
       const backstoryContent = document.getElementById('previewBackstory');
-      if (data.backstory) {
+      if (data.backstory && isFullMode) {
         backstorySection.style.display = 'block';
         backstoryContent.textContent = data.backstory;
       } else {
