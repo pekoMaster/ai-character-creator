@@ -1249,12 +1249,12 @@
           <button class="icon-btn" onclick="App.auth.logout()" title="登出">🚪</button>
         </div>
 
-        <!-- 登入按鈕（未登入時顯示）-->
-        <button class="icon-btn primary" id="loginBtn" onclick="App.auth.login()" title="Google 登入">
+        <!-- 登入按鈕（未登入時顯示）- 已停用 -->
+        <button class="icon-btn primary" id="loginBtn" onclick="App.auth.login()" title="Google 登入" style="display: none;">
           🔐 登入
         </button>
 
-        <!-- 雲端角色卡按鈕（登入後顯示）-->
+        <!-- 雲端角色卡按鈕（登入後顯示）- 已停用 -->
         <button class="icon-btn" id="cloudBtn" onclick="App.ui.openCloudManager()" title="雲端角色卡" style="display: none;">
           ☁️ 雲端
         </button>
@@ -1892,7 +1892,7 @@
       auth: {
         client: null,
         // 固定的 Google OAuth Client ID
-        GOOGLE_CLIENT_ID: '692507778051-ffi4u6c6pvh5vn9lhqcnv00mt8t058rm.apps.googleusercontent.com',
+        GOOGLE_CLIENT_ID: '692507778051-t4mpeu79rbfcel1ds2hoi0n0qhg32224.apps.googleusercontent.com',
 
         init() {
           // 初始化 Google Identity Services
@@ -4208,5 +4208,4 @@
     });
   </script>
 </body>
-
 </html>
