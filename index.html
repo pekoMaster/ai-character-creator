@@ -1544,34 +1544,78 @@
               <input type="text" id="traits" placeholder="例：內向, 善良, 固執, 好奇心強" oninput="updatePreview()">
               <div class="quick-tags-container" id="traitsTags"></div>
             </div>
+            <div class="form-field full-width full-mode-only">
+              <label>
+                針對感情 <span class="hint">(逗號分隔)</span>
+                <button class="dice-btn" onclick="App.ui.rollDice('emotionalAttitude')" type="button">🎲</button>
+              </label>
+              <input type="text" id="emotionalAttitude" placeholder="例：佔有慾, 控制欲, 尋找家人, 重視友情, 獨占欲" oninput="updatePreview()">
+              <div class="quick-tags-container" id="emotionalAttitudeTags"></div>
+            </div>
             <div class="form-row full-mode-only">
               <div class="form-field">
-                <label>優點</label>
+                <label>
+                  優點
+                  <button class="dice-btn" onclick="App.ui.rollDice('strengths')" type="button">🎲</button>
+                </label>
                 <input type="text" id="strengths" placeholder="例：聰明, 有耐心, 忠誠" oninput="updatePreview()">
               </div>
               <div class="form-field">
-                <label>缺點/弱點</label>
+                <label>
+                  缺點/弱點
+                  <button class="dice-btn" onclick="App.ui.rollDice('weaknesses')" type="button">🎲</button>
+                </label>
                 <input type="text" id="weaknesses" placeholder="例：過度謹慎, 不善交際" oninput="updatePreview()">
               </div>
             </div>
             <div class="form-row full-mode-only">
               <div class="form-field">
-                <label>喜好</label>
+                <label>
+                  喜好
+                  <button class="dice-btn" onclick="App.ui.rollDice('likes')" type="button">🎲</button>
+                </label>
                 <input type="text" id="likes" placeholder="例：閱讀, 下雨天, 茶" oninput="updatePreview()">
               </div>
               <div class="form-field">
-                <label>厭惡</label>
+                <label>
+                  厭惡
+                  <button class="dice-btn" onclick="App.ui.rollDice('dislikes')" type="button">🎲</button>
+                </label>
                 <input type="text" id="dislikes" placeholder="例：噪音, 謊言, 人群" oninput="updatePreview()">
               </div>
             </div>
             <div class="form-row full-mode-only">
               <div class="form-field">
-                <label>恐懼</label>
+                <label>
+                  恐懼
+                  <button class="dice-btn" onclick="App.ui.rollDice('fears')" type="button">🎲</button>
+                </label>
                 <input type="text" id="fears" placeholder="例：失去記憶, 背叛" oninput="updatePreview()">
               </div>
               <div class="form-field">
-                <label>目標/動機</label>
+                <label>
+                  目標/動機
+                  <button class="dice-btn" onclick="App.ui.rollDice('goals')" type="button">🎲</button>
+                </label>
                 <input type="text" id="goals" placeholder="例：尋找失落的古籍" oninput="updatePreview()">
+              </div>
+            </div>
+            <div class="form-row full-mode-only">
+              <div class="form-field">
+                <label>
+                  金錢觀
+                  <button class="dice-btn" onclick="App.ui.rollDice('moneyAttitude')" type="button">🎲</button>
+                </label>
+                <input type="text" id="moneyAttitude" placeholder="例：節儉, 奢侈, 省小錢花大錢" oninput="updatePreview()">
+                <div class="quick-tags-container" id="moneyAttitudeTags"></div>
+              </div>
+              <div class="form-field">
+                <label>
+                  道德
+                  <button class="dice-btn" onclick="App.ui.rollDice('morality')" type="button">🎲</button>
+                </label>
+                <input type="text" id="morality" placeholder="例：善良正義, 中立, 混沌邪惡" oninput="updatePreview()">
+                <div class="quick-tags-container" id="moralityTags"></div>
               </div>
             </div>
           </div>
@@ -2052,7 +2096,10 @@
         likes: ['遊戲, 角色扮演, 可愛的東西', '清潔打掃, 被稱讚, 主人的認可', '運動, 綜藝節目, 熱鬧的氣氛', '唱歌, 遊戲, 可愛的事物', '說黃段子, 娛樂觀眾, 寶藏', '胡蘿蔔, 惡作劇, 遊戲', '唱歌, 作曲, 星空', '魔法, 被寵愛, 有趣的事', '守護他人, 正義, 料理', '森林, 精靈文化, 照顧他人'],
         dislikes: ['被誤會, 過於嘈雜的環境, 恐怖遊戲', '失敗, 被批評, 弄髒的東西', '無聊的事, 靜態活動, 限制', '黑暗, 恐怖的東西, 被嚇到', '無聊, 沒有觀眾, 財寶被搶', '被抓到惡作劇, 無聊, 被限制', '不完美的表演, 辜負期待, 吵鬧', '被忽視, 無聊, 不被寵愛', '不正義的事, 傷害無辜, 背叛', '破壞自然, 喧囂, 不尊重'],
         fears: ['被所有人討厭，失去朋友', '永遠無法成為好女僕', '失去活力，變得無趣', '被遺忘，永遠孤單', '失去船員，孤獨航行', '被抓住，失去自由', '失去歌聲，辜負期待', '失去魔力，變得平凡', '無法守護重要的人', '失去記憶，忘記過去'],
-        goals: ['成為最受歡迎的 VTuber，帶給大家歡樂', '成為最棒的女僕，獲得主人的認可', '用活力感染所有人，成為頂尖藝人', '找到回家的路，唱遍全世界', '找到傳說中的寶藏，娛樂所有人', '成為最強的遊戲玩家，惡作劇到底', '用歌聲傳遞星空的訊息，成為頂尖偶像', '找到最有趣的事物，成為最強魔女', '守護所有重要的人，維護正義', '找回失落的記憶，回到故鄉']
+        goals: ['成為最受歡迎的 VTuber，帶給大家歡樂', '成為最棒的女僕，獲得主人的認可', '用活力感染所有人，成為頂尖藝人', '找到回家的路，唱遍全世界', '找到傳說中的寶藏，娛樂所有人', '成為最強的遊戲玩家，惡作劇到底', '用歌聲傳遞星空的訊息，成為頂尖偶像', '找到最有趣的事物，成為最強魔女', '守護所有重要的人，維護正義', '找回失落的記憶，回到故鄉'],
+        emotionalAttitude: ['佔有慾強，希望獨占喜歡的人', '控制欲強，喜歡掌控關係', '尋找家人般的溫暖', '重視友情，珍惜每個朋友', '獨占欲強，不願分享重要的人', '依賴型，需要被愛包圍', '自由戀愛，不受束縛', '恐懼親密關係，保持距離', '理想主義，追求完美愛情', '實用主義，看重實際價值'],
+        moneyAttitude: ['節儉，省吃儉用存錢', '奢侈，喜歡購買昂貴物品', '省小錢花大錢，日常節儉但大開銷不手軟', '理財高手，善於投資', '月光族，賺多少花多少', '守財奴，捨不得花錢', '慷慨大方，喜歡請客送禮', '金錢無感，對錢沒概念', '中庸之道，該花就花該省就省', '工作狂，只為賺錢'],
+        morality: ['善良正義，堅持做對的事', '中立平衡，不偏不倚', '混沌善良，用非常手段行善', '秩序善良，遵守規則做好事', '守序中立，嚴格遵守法律', '真實中立，完全中立', '混沌中立，自由至上', '守序邪惡，利用法律作惡', '中立邪惡，為己利不擇手段', '混沌邪惡，享受破壞與混亂']
       },
 
       // 快速標籤設定 - Hololive 風格
@@ -2068,7 +2115,10 @@
         eyes: ['藍色', '紫色', '紅色', '金色', '綠色', '粉紅', '異色瞳', '星星眼'],
         clothing: ['偶像服', '女僕裝', '和服', '制服', '連帽衫', '禮服', '運動服', '騎士甲', '巫女服', '泳裝'],
         combatSkills: ['歌唱魔法', '舞蹈戰技', '聲音攻擊', '魅力光環', '遊戲技巧', '劍術', '魔法', '忍術', '射擊', '治癒術'],
-        lifeSkills: ['唱歌', '跳舞', '遊戲', '繪畫', '料理', '演奏', '配音', '模仿', '搞笑', '主持']
+        lifeSkills: ['唱歌', '跳舞', '遊戲', '繪畫', '料理', '演奏', '配音', '模仿', '搞笑', '主持'],
+        emotionalAttitude: ['佔有慾', '控制欲', '尋找家人', '重視友情', '獨占欲', '依賴型', '自由戀愛', '保持距離', '理想主義', '實用主義'],
+        moneyAttitude: ['節儉', '奢侈', '省小錢花大錢', '理財高手', '月光族', '守財奴', '慷慨大方', '金錢無感', '中庸之道', '工作狂'],
+        morality: ['善良正義', '中立平衡', '混沌善良', '秩序善良', '守序中立', '真實中立', '混沌中立', '守序邪惡', '中立邪惡', '混沌邪惡']
       },
 
       // 設定管理
@@ -3830,6 +3880,9 @@
         dislikes: document.getElementById('dislikes').value,
         fears: document.getElementById('fears').value,
         goals: document.getElementById('goals').value,
+        emotionalAttitude: document.getElementById('emotionalAttitude').value,
+        moneyAttitude: document.getElementById('moneyAttitude').value,
+        morality: document.getElementById('morality').value,
         birthplace: document.getElementById('birthplace').value,
         backstory: document.getElementById('backstory').value,
         keyEvents: document.getElementById('keyEvents').value,
@@ -4094,16 +4147,19 @@
       }
       
       // 性格
-      if (data.personality || data.traits || data.strengths || data.weaknesses || data.likes || data.dislikes || data.fears || data.goals) {
+      if (data.personality || data.traits || data.emotionalAttitude || data.strengths || data.weaknesses || data.likes || data.dislikes || data.fears || data.goals || data.moneyAttitude || data.morality) {
         md += `## 💭 性格特質\n\n`;
         if (data.personality) md += `${data.personality}\n\n`;
         if (data.traits) md += `**特質標籤**：${data.traits}\n\n`;
+        if (data.emotionalAttitude) md += `**針對感情**：${data.emotionalAttitude}\n\n`;
         if (data.strengths) md += `**優點**：${data.strengths}\n\n`;
         if (data.weaknesses) md += `**缺點**：${data.weaknesses}\n\n`;
         if (data.likes) md += `**喜好**：${data.likes}\n\n`;
         if (data.dislikes) md += `**厭惡**：${data.dislikes}\n\n`;
         if (data.fears) md += `**恐懼**：${data.fears}\n\n`;
         if (data.goals) md += `**目標**：${data.goals}\n\n`;
+        if (data.moneyAttitude) md += `**金錢觀**：${data.moneyAttitude}\n\n`;
+        if (data.morality) md += `**道德**：${data.morality}\n\n`;
       }
       
       // 技能（動態欄位）
@@ -4236,16 +4292,19 @@
       }
 
       // 性格特質
-      if (data.personality || data.traits || data.strengths || data.weaknesses || data.likes || data.dislikes || data.fears || data.goals) {
+      if (data.personality || data.traits || data.strengths || data.weaknesses || data.likes || data.dislikes || data.fears || data.goals || data.emotionalAttitude || data.moneyAttitude || data.morality) {
         txt += '性格特質 :\n';
         if (data.personality) txt += ` -性格摘要 : ${data.personality}\n`;
         if (data.traits) txt += ` -特質標籤 : ${data.traits}\n`;
+        if (data.emotionalAttitude) txt += ` -針對感情 : ${data.emotionalAttitude}\n`;
         if (data.strengths) txt += ` -優點 : ${data.strengths}\n`;
         if (data.weaknesses) txt += ` -缺點 : ${data.weaknesses}\n`;
         if (data.likes) txt += ` -喜好 : ${data.likes}\n`;
         if (data.dislikes) txt += ` -厭惡 : ${data.dislikes}\n`;
         if (data.fears) txt += ` -恐懼 : ${data.fears}\n`;
         if (data.goals) txt += ` -目標 : ${data.goals}\n`;
+        if (data.moneyAttitude) txt += ` -金錢觀 : ${data.moneyAttitude}\n`;
+        if (data.morality) txt += ` -道德 : ${data.morality}\n`;
         txt += '\n';
       }
 
@@ -5634,6 +5693,9 @@
       App.ui.renderQuickTags('clothing', 'clothingTags');
       App.ui.renderQuickTags('personality', 'personalityTags');
       App.ui.renderQuickTags('traits', 'traitsTags');
+      App.ui.renderQuickTags('emotionalAttitude', 'emotionalAttitudeTags');
+      App.ui.renderQuickTags('moneyAttitude', 'moneyAttitudeTags');
+      App.ui.renderQuickTags('morality', 'moralityTags');
 
       // 更新預覽
       updatePreview();
