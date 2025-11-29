@@ -550,9 +550,15 @@
     }
 
     /* ===== 匯出按鈕區 ===== */
-    .export-buttons {
+    .export-buttons-container {
       padding: 16px 20px;
       border-top: 1px solid var(--gray-200);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .export-buttons {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
@@ -586,6 +592,21 @@
 
     .export-btn.markdown {
       background: var(--primary);
+      color: white;
+    }
+
+    .export-btn.txt {
+      background: var(--gray-700);
+      color: white;
+    }
+
+    .export-btn.json-compact {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+
+    .export-btn.png-markdown {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
       color: white;
     }
 
@@ -846,6 +867,25 @@
       text-decoration: underline;
     }
 
+    .setting-item select {
+      padding: 10px 14px;
+      border: 2px solid var(--gray-200);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: white;
+      cursor: pointer;
+    }
+
+    .setting-item select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .api-key-item {
+      transition: all 0.3s ease;
+    }
+
     .modal-footer {
       margin-top: 20px;
       padding-top: 20px;
@@ -1019,6 +1059,66 @@
       color: #888;
       font-size: 0.9rem;
       border-top: 1px solid #333;
+    }
+
+    /* Markdown 圖片匯出容器 */
+    #markdownImageContainer {
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+    }
+
+    .markdown-code-card {
+      width: 1000px;
+      background: #ffffff;
+      color: #1a202c;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .markdown-header {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      padding: 20px 30px;
+      color: white;
+    }
+
+    .markdown-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .markdown-title .name {
+      font-size: 28px;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    .markdown-title .platform {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .markdown-meta {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .markdown-body {
+      padding: 30px;
+      background: #ffffff;
+    }
+
+    .markdown-content {
+      color: #2d3748;
+      font-size: 14px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-wrap: break-word;
     }
 
     /* 匯出模式：隱藏不需要的元素 */
@@ -1717,22 +1817,38 @@
         </div>
 
         <!-- 匯出按鈕 -->
-        <div class="export-buttons">
-          <button class="export-btn json" onclick="exportFile('json')">
-            <span>📦</span> 匯出 JSON
-          </button>
-          <button class="export-btn yaml" onclick="exportFile('yaml')">
-            <span>📄</span> 匯出 YAML
-          </button>
-          <button class="export-btn markdown" onclick="exportFile('markdown')">
-            <span>📝</span> 匯出 Markdown
-          </button>
-          <button class="export-btn png-card" onclick="exportCharacterCardImage()">
-            <span>🖼️</span> 匯出角色卡圖片
-          </button>
-          <button class="export-btn png-yaml" onclick="exportYAMLImage()">
-            <span>🎨</span> 匯出 YAML 圖片
-          </button>
+        <div class="export-buttons-container">
+          <!-- 第一行：文字格式 -->
+          <div class="export-buttons">
+            <button class="export-btn txt" onclick="exportTextFile()">
+              <span>📄</span> 匯出角色卡
+            </button>
+            <button class="export-btn json" onclick="exportFile('json')">
+              <span>📦</span> 匯出 JSON
+            </button>
+            <button class="export-btn yaml" onclick="exportFile('yaml')">
+              <span>📋</span> 匯出 YAML
+            </button>
+            <button class="export-btn markdown" onclick="exportFile('markdown')">
+              <span>📝</span> 匯出 Markdown
+            </button>
+          </div>
+
+          <!-- 第二行：特殊格式 -->
+          <div class="export-buttons">
+            <button class="export-btn png-card" onclick="exportCharacterCardImage()">
+              <span>🖼️</span> 匯出角色卡圖片
+            </button>
+            <button class="export-btn json-compact" onclick="exportCompactJSON()">
+              <span>📦</span> 匯出縮行 JSON
+            </button>
+            <button class="export-btn png-yaml" onclick="exportYAMLImage()">
+              <span>🎨</span> 匯出 YAML 圖片
+            </button>
+            <button class="export-btn png-markdown" onclick="exportMarkdownImage()">
+              <span>🖼️</span> 匯出 Markdown 圖片
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1749,13 +1865,52 @@
         <button class="modal-close" onclick="App.ui.closeSettings()">✕</button>
       </div>
       <div class="modal-body">
+        <!-- AI 提供商選擇器 -->
         <div class="setting-item">
-          <label>🤖 Gemini API Key</label>
+          <label>🤖 AI 提供商</label>
+          <select id="aiProvider" onchange="App.settings.updateProviderUI()">
+            <option value="gemini">Google Gemini</option>
+            <option value="openai">OpenAI GPT</option>
+            <option value="claude">Anthropic Claude</option>
+            <option value="deepseek">DeepSeek</option>
+          </select>
+          <div class="hint">選擇您想使用的 AI 服務</div>
+        </div>
+
+        <!-- Gemini API Key -->
+        <div class="setting-item api-key-item" data-provider="gemini">
+          <label>🌟 Gemini API Key</label>
           <input type="text" id="geminiApiKey" placeholder="請輸入您的 Gemini API Key">
           <div class="hint">
-            用於 AI 一鍵創角功能。請先點擊下方連結申請您的 API Key，然後在此處貼上即可開始使用 AI 自動生成角色資料功能！
-            <br><br>
-            <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-weight: bold; color: #1a73e8;">👉 前往 Google AI Studio 申請 API Key</a>
+            用於 AI 一鍵創角功能。
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-weight: bold; color: #1a73e8;">👉 前往 Google AI Studio 申請</a>
+          </div>
+        </div>
+
+        <!-- OpenAI API Key -->
+        <div class="setting-item api-key-item" data-provider="openai" style="display: none;">
+          <label>🔥 OpenAI API Key</label>
+          <input type="text" id="openaiApiKey" placeholder="請輸入您的 OpenAI API Key">
+          <div class="hint">
+            <a href="https://platform.openai.com/api-keys" target="_blank" style="font-weight: bold; color: #1a73e8;">👉 前往 OpenAI Platform 申請</a>
+          </div>
+        </div>
+
+        <!-- Claude API Key -->
+        <div class="setting-item api-key-item" data-provider="claude" style="display: none;">
+          <label>💡 Claude API Key</label>
+          <input type="text" id="claudeApiKey" placeholder="請輸入您的 Claude API Key">
+          <div class="hint">
+            <a href="https://console.anthropic.com/settings/keys" target="_blank" style="font-weight: bold; color: #1a73e8;">👉 前往 Anthropic Console 申請</a>
+          </div>
+        </div>
+
+        <!-- DeepSeek API Key -->
+        <div class="setting-item api-key-item" data-provider="deepseek" style="display: none;">
+          <label>🔍 DeepSeek API Key</label>
+          <input type="text" id="deepseekApiKey" placeholder="請輸入您的 DeepSeek API Key">
+          <div class="hint">
+            <a href="https://platform.deepseek.com/api_keys" target="_blank" style="font-weight: bold; color: #1a73e8;">👉 前往 DeepSeek Platform 申請</a>
           </div>
         </div>
       </div>
@@ -1808,6 +1963,22 @@
       </div>
       <div class="yaml-footer">
         🤖 Generated by AI 角色卡創作工具
+      </div>
+    </div>
+  </div>
+
+  <!-- Markdown 圖片匯出容器 -->
+  <div id="markdownImageContainer">
+    <div class="markdown-code-card">
+      <div class="markdown-header">
+        <div class="markdown-title">
+          <h2 class="name">角色名稱</h2>
+          <div class="platform">平台</div>
+        </div>
+        <div class="markdown-meta">生成時間</div>
+      </div>
+      <div class="markdown-body">
+        <div class="markdown-content"></div>
       </div>
     </div>
   </div>
@@ -1865,28 +2036,76 @@
         GOOGLE_DRIVE_FOLDER_ID: '1s6pPlJic8s1Iv3cMtPJxbn4bsbgdR4aj',
 
         load() {
+          const aiProvider = localStorage.getItem('aiProvider') || 'gemini';
           const geminiApiKey = localStorage.getItem('geminiApiKey') || '';
+          const openaiApiKey = localStorage.getItem('openaiApiKey') || '';
+          const claudeApiKey = localStorage.getItem('claudeApiKey') || '';
+          const deepseekApiKey = localStorage.getItem('deepseekApiKey') || '';
 
+          document.getElementById('aiProvider').value = aiProvider;
           document.getElementById('geminiApiKey').value = geminiApiKey;
+          document.getElementById('openaiApiKey').value = openaiApiKey;
+          document.getElementById('claudeApiKey').value = claudeApiKey;
+          document.getElementById('deepseekApiKey').value = deepseekApiKey;
 
-          return { geminiApiKey };
+          this.updateProviderUI();
+
+          return {
+            aiProvider,
+            geminiApiKey,
+            openaiApiKey,
+            claudeApiKey,
+            deepseekApiKey
+          };
         },
 
         save() {
+          const aiProvider = document.getElementById('aiProvider').value;
           const geminiApiKey = document.getElementById('geminiApiKey').value.trim();
+          const openaiApiKey = document.getElementById('openaiApiKey').value.trim();
+          const claudeApiKey = document.getElementById('claudeApiKey').value.trim();
+          const deepseekApiKey = document.getElementById('deepseekApiKey').value.trim();
 
+          localStorage.setItem('aiProvider', aiProvider);
           localStorage.setItem('geminiApiKey', geminiApiKey);
+          localStorage.setItem('openaiApiKey', openaiApiKey);
+          localStorage.setItem('claudeApiKey', claudeApiKey);
+          localStorage.setItem('deepseekApiKey', deepseekApiKey);
 
           showToast('設定已儲存！', 'success');
           App.ui.closeSettings();
+
+          // 更新 UI 按鈕顯示狀態
+          App.updateUIButtonsVisibility();
         },
 
         get() {
           return {
+            aiProvider: localStorage.getItem('aiProvider') || 'gemini',
             geminiApiKey: localStorage.getItem('geminiApiKey') || '',
+            openaiApiKey: localStorage.getItem('openaiApiKey') || '',
+            claudeApiKey: localStorage.getItem('claudeApiKey') || '',
+            deepseekApiKey: localStorage.getItem('deepseekApiKey') || '',
             googleDriveFolderId: this.GOOGLE_DRIVE_FOLDER_ID
           };
+        },
+
+        /**
+         * 更新提供商 UI 顯示
+         */
+        updateProviderUI() {
+          const provider = document.getElementById('aiProvider').value;
+          const allItems = document.querySelectorAll('.api-key-item');
+
+          allItems.forEach(item => {
+            if (item.dataset.provider === provider) {
+              item.style.display = 'block';
+            } else {
+              item.style.display = 'none';
+            }
+          });
         }
+      },
       },
 
       // Google OAuth 認證
@@ -2838,12 +3057,32 @@
       // AI 生成模組
       ai: {
         /**
-         * AI 一鍵創角 - 使用 Gemini API 生成角色
+         * AI 一鍵創角 - 使用當前選擇的 AI 提供商生成角色
          */
         async generateCharacter() {
           const settings = App.settings.get();
-          if (!settings.geminiApiKey) {
-            showToast('請先在設定中配置 Gemini API Key！', 'warning');
+          const provider = settings.aiProvider;
+
+          // 檢查對應提供商的 API Key
+          let apiKey;
+          switch (provider) {
+            case 'gemini':
+              apiKey = settings.geminiApiKey;
+              break;
+            case 'openai':
+              apiKey = settings.openaiApiKey;
+              break;
+            case 'claude':
+              apiKey = settings.claudeApiKey;
+              break;
+            case 'deepseek':
+              apiKey = settings.deepseekApiKey;
+              break;
+          }
+
+          if (!apiKey || apiKey.trim() === '') {
+            const providerName = this.getProviderName(provider);
+            showToast(`請先在設定中配置 ${providerName} 的 API Key！`, 'warning');
             App.ui.openSettings();
             return;
           }
@@ -2863,10 +3102,12 @@
             return;
           }
 
-          showToast('AI 生成中，請稍候...', 'info');
+          const providerName = this.getProviderName(provider);
+          showToast(`使用 ${providerName} 生成中，請稍候...`, 'info');
 
           try {
-            const characterData = await this.callGeminiAPI(settings.geminiApiKey, prompt);
+            // 使用統一的 AI API 調用函數
+            const characterData = await this.callAIAPI(prompt);
 
             // 將生成的資料填入表單
             fillFormData(characterData);
@@ -2876,6 +3117,99 @@
           } catch (error) {
             console.error('AI 生成失敗:', error);
             showToast('AI 生成失敗：' + error.message, 'error');
+          }
+        },
+
+        /**
+         * 統一的 AI API 調用入口
+         * 根據用戶選擇的提供商調用對應的 API
+         */
+        async callAIAPI(userPrompt) {
+          const settings = App.settings.get();
+          const provider = settings.aiProvider;
+
+          // 根據提供商獲取對應的 API Key
+          let apiKey;
+          switch (provider) {
+            case 'gemini':
+              apiKey = settings.geminiApiKey;
+              break;
+            case 'openai':
+              apiKey = settings.openaiApiKey;
+              break;
+            case 'claude':
+              apiKey = settings.claudeApiKey;
+              break;
+            case 'deepseek':
+              apiKey = settings.deepseekApiKey;
+              break;
+            default:
+              throw new Error(`不支援的 AI 提供商: ${provider}`);
+          }
+
+          // 檢查 API Key 是否存在
+          if (!apiKey || apiKey.trim() === '') {
+            const providerName = this.getProviderName(provider);
+            throw new Error(`請先在設定中填寫 ${providerName} 的 API Key`);
+          }
+
+          // 調用對應提供商的 API
+          switch (provider) {
+            case 'gemini':
+              return await this.callGeminiAPI(apiKey, userPrompt);
+            case 'openai':
+              return await this.callOpenAIAPI(apiKey, userPrompt);
+            case 'claude':
+              return await this.callClaudeAPI(apiKey, userPrompt);
+            case 'deepseek':
+              return await this.callDeepSeekAPI(apiKey, userPrompt);
+            default:
+              throw new Error(`不支援的 AI 提供商: ${provider}`);
+          }
+        },
+
+        /**
+         * 獲取 AI 提供商的顯示名稱
+         */
+        getProviderName(provider) {
+          const names = {
+            'gemini': 'Google Gemini',
+            'openai': 'OpenAI GPT',
+            'claude': 'Anthropic Claude',
+            'deepseek': 'DeepSeek'
+          };
+          return names[provider] || provider;
+        },
+
+        /**
+         * 解析 AI 回應的 JSON 資料
+         * 處理可能的 markdown 代碼塊和常見格式錯誤
+         */
+        parseAIResponse(generatedText) {
+          // 嘗試解析 JSON（移除可能的 markdown 代碼塊）
+          let jsonText = generatedText.trim();
+
+          // 移除 markdown 代碼塊標記
+          if (jsonText.startsWith('```json')) {
+            jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+          } else if (jsonText.startsWith('```')) {
+            jsonText = jsonText.replace(/```\n?/g, '');
+          }
+
+          // 修復常見的 JSON 格式錯誤
+          jsonText = jsonText
+            .replace(/,\s*}/g, '}')  // 移除物件結尾的多餘逗號
+            .replace(/,\s*]/g, ']')  // 移除陣列結尾的多餘逗號
+            .trim();
+
+          try {
+            const characterData = JSON.parse(jsonText);
+            return characterData;
+          } catch (e) {
+            console.error('JSON 解析失敗:', e);
+            console.log('原始回應:', generatedText);
+            console.log('清理後的 JSON:', jsonText);
+            throw new Error('AI 回應格式錯誤，請重試');
           }
         },
 
@@ -2975,29 +3309,348 @@
 
           const generatedText = data.candidates[0].content.parts[0].text;
 
-          // 嘗試解析 JSON（移除可能的 markdown 代碼塊）
-          let jsonText = generatedText.trim();
-          if (jsonText.startsWith('```json')) {
-            jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-          } else if (jsonText.startsWith('```')) {
-            jsonText = jsonText.replace(/```\n?/g, '');
+          // 使用統一的解析函數
+          return this.parseAIResponse(generatedText);
+        },
+
+        /**
+         * 呼叫 OpenAI API 生成角色資料
+         */
+        async callOpenAIAPI(apiKey, userPrompt) {
+          const systemPrompt = `你是一個專業的角色設計助手。根據用戶提供的角色概念，請生成完整的角色卡資料。
+
+請以 JSON 格式回傳，包含以下欄位（所有欄位都使用繁體中文）：
+{
+  "name": "角色名稱",
+  "aliases": "別名1, 別名2",
+  "age": "年齡",
+  "gender": "性別（女性/男性/非二元/其他）",
+  "species": "種族/物種",
+  "occupation": "職業/身份",
+  "appearance": "整體外觀描述（2-3句話）",
+  "height": "身高",
+  "bodyType": "體型",
+  "hairColor": "髮色",
+  "hairStyle": "髮型",
+  "eyes": "眼睛顏色",
+  "clothing": "服裝風格",
+  "features": "特殊標記",
+  "personality": "性格摘要（2-3句話）",
+  "traits": "特質標籤（逗號分隔）",
+  "strengths": "優點（逗號分隔）",
+  "weaknesses": "缺點（逗號分隔）",
+  "likes": "喜好（逗號分隔）",
+  "dislikes": "厭惡（逗號分隔）",
+  "fears": "恐懼（逗號分隔）",
+  "goals": "目標（逗號分隔）",
+  "birthplace": "出生地",
+  "backstory": "背景故事（3-5句話）",
+  "keyEvents": "關鍵事件",
+  "catchphrases": "口頭禪（逗號分隔）",
+  "verbalTics": "語言習慣",
+  "emotionalExpression": "情緒表達方式",
+  "firstMessage": "第一則訊息（角色的自我介紹對話）",
+  "scenario": "初次相遇地點（1-2句話描述場景）",
+  "description": "給 AI 的完整角色描述（整合所有資訊，5-8句話）",
+  "systemPrompt": "系統提示詞（指導 AI 如何扮演這個角色）"
+}
+
+重要規則：
+1. 只回傳純 JSON，不要包含任何其他文字、註釋或 markdown 格式（如 \`\`\`json）
+2. 所有字段的值都必須是字符串類型，用雙引號包裹
+3. 確保所有引號、逗號、大括號正確匹配
+4. 不要在最後一個字段後加逗號
+5. JSON 必須能被 JSON.parse() 直接解析，不能有任何語法錯誤`;
+
+          const response = await fetch(
+            'https://api.openai.com/v1/chat/completions',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+              },
+              body: JSON.stringify({
+                model: 'gpt-4o',
+                messages: [
+                  {
+                    role: 'system',
+                    content: systemPrompt
+                  },
+                  {
+                    role: 'user',
+                    content: userPrompt
+                  }
+                ],
+                temperature: 0.9,
+                max_tokens: 4096
+              })
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || '無法連接到 OpenAI API');
           }
 
-          // 修復常見的 JSON 格式錯誤
-          jsonText = jsonText
-            .replace(/,\s*}/g, '}')  // 移除物件結尾的多餘逗號
-            .replace(/,\s*]/g, ']')  // 移除陣列結尾的多餘逗號
-            .trim();
+          const data = await response.json();
 
-          try {
-            const characterData = JSON.parse(jsonText);
-            return characterData;
-          } catch (e) {
-            console.error('JSON 解析失敗:', e);
-            console.log('原始回應:', generatedText);
-            console.log('清理後的 JSON:', jsonText);
-            throw new Error('AI 回應格式錯誤，請重試');
+          // 檢查回應結構
+          if (!data.choices || !data.choices[0]) {
+            console.error('API 回應結構錯誤:', data);
+            throw new Error('API 回應格式不正確');
           }
+
+          const generatedText = data.choices[0].message.content;
+
+          // 使用統一的解析函數
+          return this.parseAIResponse(generatedText);
+        },
+
+        /**
+         * 呼叫 Claude API 生成角色資料
+         */
+        async callClaudeAPI(apiKey, userPrompt) {
+          const systemPrompt = `你是一個專業的角色設計助手。根據用戶提供的角色概念，請生成完整的角色卡資料。
+
+請以 JSON 格式回傳，包含以下欄位（所有欄位都使用繁體中文）：
+{
+  "name": "角色名稱",
+  "aliases": "別名1, 別名2",
+  "age": "年齡",
+  "gender": "性別（女性/男性/非二元/其他）",
+  "species": "種族/物種",
+  "occupation": "職業/身份",
+  "appearance": "整體外觀描述（2-3句話）",
+  "height": "身高",
+  "bodyType": "體型",
+  "hairColor": "髮色",
+  "hairStyle": "髮型",
+  "eyes": "眼睛顏色",
+  "clothing": "服裝風格",
+  "features": "特殊標記",
+  "personality": "性格摘要（2-3句話）",
+  "traits": "特質標籤（逗號分隔）",
+  "strengths": "優點（逗號分隔）",
+  "weaknesses": "缺點（逗號分隔）",
+  "likes": "喜好（逗號分隔）",
+  "dislikes": "厭惡（逗號分隔）",
+  "fears": "恐懼（逗號分隔）",
+  "goals": "目標（逗號分隔）",
+  "birthplace": "出生地",
+  "backstory": "背景故事（3-5句話）",
+  "keyEvents": "關鍵事件",
+  "catchphrases": "口頭禪（逗號分隔）",
+  "verbalTics": "語言習慣",
+  "emotionalExpression": "情緒表達方式",
+  "firstMessage": "第一則訊息（角色的自我介紹對話）",
+  "scenario": "初次相遇地點（1-2句話描述場景）",
+  "description": "給 AI 的完整角色描述（整合所有資訊，5-8句話）",
+  "systemPrompt": "系統提示詞（指導 AI 如何扮演這個角色）"
+}
+
+重要規則：
+1. 只回傳純 JSON，不要包含任何其他文字、註釋或 markdown 格式（如 \`\`\`json）
+2. 所有字段的值都必須是字符串類型，用雙引號包裹
+3. 確保所有引號、逗號、大括號正確匹配
+4. 不要在最後一個字段後加逗號
+5. JSON 必須能被 JSON.parse() 直接解析，不能有任何語法錯誤`;
+
+          const response = await fetch(
+            'https://api.anthropic.com/v1/messages',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': apiKey,
+                'anthropic-version': '2023-06-01'
+              },
+              body: JSON.stringify({
+                model: 'claude-3-5-sonnet-20241022',
+                max_tokens: 4096,
+                temperature: 0.9,
+                system: systemPrompt,
+                messages: [
+                  {
+                    role: 'user',
+                    content: userPrompt
+                  }
+                ]
+              })
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || '無法連接到 Claude API');
+          }
+
+          const data = await response.json();
+
+          // 檢查回應結構
+          if (!data.content || !data.content[0]) {
+            console.error('API 回應結構錯誤:', data);
+            throw new Error('API 回應格式不正確');
+          }
+
+          const generatedText = data.content[0].text;
+
+          // 使用統一的解析函數
+          return this.parseAIResponse(generatedText);
+        },
+
+        /**
+         * 呼叫 DeepSeek API 生成角色資料
+         */
+        async callDeepSeekAPI(apiKey, userPrompt) {
+          const systemPrompt = `你是一個專業的角色設計助手。根據用戶提供的角色概念，請生成完整的角色卡資料。
+
+請以 JSON 格式回傳，包含以下欄位（所有欄位都使用繁體中文）：
+{
+  "name": "角色名稱",
+  "aliases": "別名1, 別名2",
+  "age": "年齡",
+  "gender": "性別（女性/男性/非二元/其他）",
+  "species": "種族/物種",
+  "occupation": "職業/身份",
+  "appearance": "整體外觀描述（2-3句話）",
+  "height": "身高",
+  "bodyType": "體型",
+  "hairColor": "髮色",
+  "hairStyle": "髮型",
+  "eyes": "眼睛顏色",
+  "clothing": "服裝風格",
+  "features": "特殊標記",
+  "personality": "性格摘要（2-3句話）",
+  "traits": "特質標籤（逗號分隔）",
+  "strengths": "優點（逗號分隔）",
+  "weaknesses": "缺點（逗號分隔）",
+  "likes": "喜好（逗號分隔）",
+  "dislikes": "厭惡（逗號分隔）",
+  "fears": "恐懼（逗號分隔）",
+  "goals": "目標（逗號分隔）",
+  "birthplace": "出生地",
+  "backstory": "背景故事（3-5句話）",
+  "keyEvents": "關鍵事件",
+  "catchphrases": "口頭禪（逗號分隔）",
+  "verbalTics": "語言習慣",
+  "emotionalExpression": "情緒表達方式",
+  "firstMessage": "第一則訊息（角色的自我介紹對話）",
+  "scenario": "初次相遇地點（1-2句話描述場景）",
+  "description": "給 AI 的完整角色描述（整合所有資訊，5-8句話）",
+  "systemPrompt": "系統提示詞（指導 AI 如何扮演這個角色）"
+}
+
+重要規則：
+1. 只回傳純 JSON，不要包含任何其他文字、註釋或 markdown 格式（如 \`\`\`json）
+2. 所有字段的值都必須是字符串類型，用雙引號包裹
+3. 確保所有引號、逗號、大括號正確匹配
+4. 不要在最後一個字段後加逗號
+5. JSON 必須能被 JSON.parse() 直接解析，不能有任何語法錯誤`;
+
+          const response = await fetch(
+            'https://api.deepseek.com/chat/completions',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+              },
+              body: JSON.stringify({
+                model: 'deepseek-chat',
+                messages: [
+                  {
+                    role: 'system',
+                    content: systemPrompt
+                  },
+                  {
+                    role: 'user',
+                    content: userPrompt
+                  }
+                ],
+                temperature: 0.9,
+                max_tokens: 4096
+              })
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || '無法連接到 DeepSeek API');
+          }
+
+          const data = await response.json();
+
+          // 檢查回應結構
+          if (!data.choices || !data.choices[0]) {
+            console.error('API 回應結構錯誤:', data);
+            throw new Error('API 回應格式不正確');
+          }
+
+          const generatedText = data.choices[0].message.content;
+
+          // 使用統一的解析函數
+          return this.parseAIResponse(generatedText);
+        }
+      },
+
+      /**
+       * 檢查當前 AI 提供商是否支援指定的格式
+       * @param {string} format - 格式類型 ('yaml', 'yaml-image', 'vision')
+       * @returns {boolean} - 是否支援
+       */
+      isPlatformSupported(format) {
+        const settings = this.settings.get();
+        const provider = settings.aiProvider;
+
+        // 平台支援矩陣
+        const supportMatrix = {
+          'gemini': {
+            'yaml': false,        // Gemini 不支援 YAML 格式
+            'yaml-image': false,  // Gemini 不支援 YAML 圖片
+            'vision': true        // Gemini 支援 Vision
+          },
+          'openai': {
+            'yaml': true,         // OpenAI 支援所有格式
+            'yaml-image': true,
+            'vision': true
+          },
+          'claude': {
+            'yaml': true,         // Claude 支援所有格式
+            'yaml-image': true,
+            'vision': true
+          },
+          'deepseek': {
+            'yaml': true,         // DeepSeek 支援 YAML
+            'yaml-image': true,   // DeepSeek 支援 YAML 圖片
+            'vision': false       // DeepSeek 不支援 Vision
+          }
+        };
+
+        return supportMatrix[provider]?.[format] ?? true;
+      },
+
+      /**
+       * 根據當前 AI 提供商更新 UI 按鈕的顯示狀態
+       * 隱藏不支援的功能按鈕
+       */
+      updateUIButtonsVisibility() {
+        // YAML 匯出按鈕
+        const yamlBtn = document.querySelector('.export-btn.yaml');
+        if (yamlBtn) {
+          yamlBtn.style.display = this.isPlatformSupported('yaml') ? '' : 'none';
+        }
+
+        // YAML 圖片匯出按鈕
+        const yamlImageBtn = document.querySelector('.export-btn.png-yaml');
+        if (yamlImageBtn) {
+          yamlImageBtn.style.display = this.isPlatformSupported('yaml-image') ? '' : 'none';
+        }
+
+        // 圖片導入按鈕（Vision 功能）
+        const importImageBtn = document.querySelector('button[onclick*="importFromImage"]');
+        if (importImageBtn) {
+          importImageBtn.style.display = this.isPlatformSupported('vision') ? '' : 'none';
         }
       }
     };
@@ -3842,6 +4495,14 @@
         return;
       }
 
+      // 檢查當前提供商是否支援該格式
+      if (format === 'yaml' && !App.isPlatformSupported('yaml')) {
+        const settings = App.settings.get();
+        const providerName = App.ai.getProviderName(settings.aiProvider);
+        showToast(`${providerName} 不支援 YAML 格式匯出`, 'warning');
+        return;
+      }
+
       const name = data.name || 'character';
       let content, mimeType, extension;
 
@@ -3876,6 +4537,96 @@
       showToast(`已匯出 ${format.toUpperCase()} 檔案！`, 'success');
     }
 
+    /**
+     * 匯出純文字角色卡
+     */
+    function exportTextFile() {
+      const data = collectFormData();
+
+      if (!App.validator.validate(data)) {
+        return;
+      }
+
+      // 構建純文字內容
+      let content = '';
+
+      // 基本資訊
+      if (data.name) content += `姓名: ${data.name}\n`;
+      if (data.age) content += `年齡: ${data.age}\n`;
+      if (data.gender) content += `性別: ${data.gender}\n`;
+      if (data.species) content += `種族/物種: ${data.species}\n`;
+      if (data.occupation) content += `職業/身分: ${data.occupation}\n`;
+
+      // 外觀
+      if (data.appearance || data.height || data.hairColor) {
+        content += `\n--- 外觀 ---\n`;
+        if (data.appearance) content += `${data.appearance}\n`;
+        if (data.height) content += `身高: ${data.height}\n`;
+        if (data.hairColor) content += `髮色: ${data.hairColor}\n`;
+        if (data.hairStyle) content += `髮型: ${data.hairStyle}\n`;
+      }
+
+      // 性格
+      if (data.personality) {
+        content += `\n--- 性格 ---\n${data.personality}\n`;
+      }
+
+      // 背景故事
+      if (data.backstory) {
+        content += `\n--- 背景故事 ---\n${data.backstory}\n`;
+      }
+
+      // 對話範例
+      if (data.firstMessage) {
+        content += `\n--- 第一則訊息 ---\n${data.firstMessage}\n`;
+      }
+
+      // 下載
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${data.name || 'character'}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('已匯出純文字角色卡！', 'success');
+    }
+
+    /**
+     * 匯出壓縮 JSON（單行無縮排）
+     */
+    function exportCompactJSON() {
+      const data = collectFormData();
+
+      if (!App.validator.validate(data)) {
+        return;
+      }
+
+      const name = data.name || 'character';
+
+      // 轉換為平台格式並移除空值
+      let jsonData = convertToJSON(data, currentPlatform);
+
+      // 壓縮 JSON：無縮排、無空格
+      const content = JSON.stringify(JSON.parse(jsonData));
+
+      // 下載
+      const blob = new Blob([content], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${name}_${currentPlatform}_compact.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('已匯出縮行 JSON 檔案！', 'success');
+    }
+
     // ===== PNG 圖片匯出 =====
 
     /**
@@ -3886,6 +4637,14 @@
 
       // 驗證表單
       if (!App.validator.validate(data)) {
+        return;
+      }
+
+      // 檢查當前提供商是否支援 YAML 圖片格式
+      if (!App.isPlatformSupported('yaml-image')) {
+        const settings = App.settings.get();
+        const providerName = App.ai.getProviderName(settings.aiProvider);
+        showToast(`${providerName} 不支援 YAML 圖片格式匯出`, 'warning');
         return;
       }
 
@@ -4017,6 +4776,74 @@
       }
     }
 
+    /**
+     * 匯出 Markdown 圖片
+     */
+    async function exportMarkdownImage() {
+      const data = collectFormData();
+
+      if (!App.validator.validate(data)) {
+        return;
+      }
+
+      showToast('正在生成 Markdown 圖片，請稍候...', 'info');
+
+      try {
+        // 1. 生成 Markdown 內容
+        const markdownContent = convertToMarkdown(data, currentPlatform);
+
+        // 2. 填入資料到隱藏容器
+        const container = document.getElementById('markdownImageContainer');
+        const card = container.querySelector('.markdown-code-card');
+
+        container.querySelector('.name').textContent = data.name || '未命名角色';
+        container.querySelector('.platform').textContent = getPlatformName(currentPlatform);
+        container.querySelector('.markdown-meta').textContent =
+          `生成時間：${new Date().toLocaleString('zh-TW')}`;
+        container.querySelector('.markdown-content').innerHTML =
+          markdownContent.replace(/\n/g, '<br>');
+
+        // 3. 暫時顯示容器
+        container.style.position = 'fixed';
+        container.style.top = '0';
+        container.style.left = '0';
+        container.style.zIndex = '-1';
+
+        // 4. 等待字體和樣式載入
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // 5. 使用 html2canvas 截圖
+        const canvas = await html2canvas(card, {
+          backgroundColor: '#ffffff',
+          scale: 2,
+          logging: false,
+          windowWidth: card.scrollWidth,
+          windowHeight: card.scrollHeight
+        });
+
+        // 6. 轉換為 PNG 並下載
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${data.name || 'character'}_markdown_${currentPlatform}.png`;
+          a.click();
+          URL.revokeObjectURL(url);
+
+          showToast('Markdown 圖片已匯出！', 'success');
+        }, 'image/png');
+
+        // 7. 隱藏容器
+        container.style.position = 'fixed';
+        container.style.top = '-9999px';
+        container.style.left = '-9999px';
+
+      } catch (error) {
+        console.error('Markdown 圖片匯出失敗：', error);
+        showToast('圖片匯出失敗，請稍後再試', 'error');
+      }
+    }
+
     // ===== 檔案匯入 =====
 
     /**
@@ -4136,6 +4963,14 @@
      * 從圖片匯入（使用 Gemini Vision API）
      */
     async function importFromImage(file) {
+      // 檢查當前提供商是否支援 Vision
+      if (!App.isPlatformSupported('vision')) {
+        const settings = App.settings.get();
+        const providerName = App.ai.getProviderName(settings.aiProvider);
+        showToast(`${providerName} 不支援圖片導入功能（需要 Vision API）`, 'warning');
+        return;
+      }
+
       showToast('正在使用 AI 讀取圖片...', 'info');
 
       try {
@@ -4143,9 +4978,29 @@
         const base64Image = await fileToBase64(file);
         const base64Data = base64Image.split(',')[1]; // 移除 data:image/...;base64, 前綴
 
-        // 2. 獲取 API Key
+        // 2. 獲取設定和 API Key
         const settings = App.settings.get();
-        const apiKey = settings.geminiApiKey;
+        const provider = settings.aiProvider;
+
+        let apiKey;
+        switch (provider) {
+          case 'gemini':
+            apiKey = settings.geminiApiKey;
+            break;
+          case 'openai':
+            apiKey = settings.openaiApiKey;
+            break;
+          case 'claude':
+            apiKey = settings.claudeApiKey;
+            break;
+          default:
+            throw new Error(`不支援的 AI 提供商: ${provider}`);
+        }
+
+        if (!apiKey || apiKey.trim() === '') {
+          const providerName = App.ai.getProviderName(provider);
+          throw new Error(`請先在設定中配置 ${providerName} 的 API Key`);
+        }
 
         // 3. 準備 AI 提示詞
         const prompt = `請分析這張角色卡圖片，提取所有角色資訊，並以 JSON 格式回傳。
@@ -4192,74 +5047,158 @@
 3. 如果圖片中沒有某個欄位，請忽略該欄位（不要回傳空字符串）
 4. JSON 必須能被 JSON.parse() 直接解析`;
 
-        // 4. 調用 Gemini Vision API
-        const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-goog-api-key': apiKey
-            },
-            body: JSON.stringify({
-              contents: [{
-                parts: [
-                  { text: prompt },
-                  {
-                    inline_data: {
-                      mime_type: file.type,
-                      data: base64Data
+        // 4. 根據提供商調用對應的 Vision API
+        let generatedText;
+
+        if (provider === 'gemini') {
+          // Gemini Vision API
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': apiKey
+              },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [
+                    { text: prompt },
+                    {
+                      inline_data: {
+                        mime_type: file.type,
+                        data: base64Data
+                      }
                     }
+                  ]
+                }],
+                generationConfig: {
+                  temperature: 0.4,
+                  topK: 32,
+                  topP: 1,
+                  maxOutputTokens: 8192,
+                }
+              })
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || '無法連接到 Gemini API');
+          }
+
+          const data = await response.json();
+
+          if (!data.candidates || !data.candidates[0]) {
+            console.error('API 回應結構錯誤:', data);
+            throw new Error(data.error?.message || 'API 回應格式不正確');
+          }
+
+          generatedText = data.candidates[0].content.parts[0].text;
+
+        } else if (provider === 'openai') {
+          // OpenAI Vision API (GPT-4 Vision)
+          const response = await fetch(
+            'https://api.openai.com/v1/chat/completions',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+              },
+              body: JSON.stringify({
+                model: 'gpt-4o',
+                messages: [
+                  {
+                    role: 'user',
+                    content: [
+                      { type: 'text', text: prompt },
+                      {
+                        type: 'image_url',
+                        image_url: {
+                          url: `data:${file.type};base64,${base64Data}`
+                        }
+                      }
+                    ]
+                  }
+                ],
+                max_tokens: 4096,
+                temperature: 0.4
+              })
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || '無法連接到 OpenAI API');
+          }
+
+          const data = await response.json();
+
+          if (!data.choices || !data.choices[0]) {
+            console.error('API 回應結構錯誤:', data);
+            throw new Error('API 回應格式不正確');
+          }
+
+          generatedText = data.choices[0].message.content;
+
+        } else if (provider === 'claude') {
+          // Claude Vision API
+          const response = await fetch(
+            'https://api.anthropic.com/v1/messages',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': apiKey,
+                'anthropic-version': '2023-06-01'
+              },
+              body: JSON.stringify({
+                model: 'claude-3-5-sonnet-20241022',
+                max_tokens: 4096,
+                temperature: 0.4,
+                messages: [
+                  {
+                    role: 'user',
+                    content: [
+                      { type: 'text', text: prompt },
+                      {
+                        type: 'image',
+                        source: {
+                          type: 'base64',
+                          media_type: file.type,
+                          data: base64Data
+                        }
+                      }
+                    ]
                   }
                 ]
-              }],
-              generationConfig: {
-                temperature: 0.4,
-                topK: 32,
-                topP: 1,
-                maxOutputTokens: 8192,
-              }
-            })
+              })
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || '無法連接到 Claude API');
           }
-        );
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error?.message || '無法連接到 Gemini API');
+          const data = await response.json();
+
+          if (!data.content || !data.content[0]) {
+            console.error('API 回應結構錯誤:', data);
+            throw new Error('API 回應格式不正確');
+          }
+
+          generatedText = data.content[0].text;
         }
 
-        const data = await response.json();
-
-        // 檢查回應結構
-        if (!data.candidates || !data.candidates[0]) {
-          console.error('API 回應結構錯誤:', data);
-          throw new Error(data.error?.message || 'API 回應格式不正確');
-        }
-
-        const generatedText = data.candidates[0].content.parts[0].text;
-
-        // 5. 解析 JSON
-        let jsonText = generatedText.trim();
-        if (jsonText.startsWith('```json')) {
-          jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-        } else if (jsonText.startsWith('```')) {
-          jsonText = jsonText.replace(/```\n?/g, '');
-        }
-
-        // 修復常見的 JSON 格式錯誤
-        jsonText = jsonText
-          .replace(/,\s*}/g, '}')
-          .replace(/,\s*]/g, ']')
-          .trim();
-
+        // 5. 使用統一的解析函數解析 JSON
         try {
-          const characterData = JSON.parse(jsonText);
+          const characterData = App.ai.parseAIResponse(generatedText);
           fillFormData(characterData);
           showToast('圖片匯入成功！', 'success');
         } catch (e) {
           console.error('JSON 解析失敗:', e);
-          console.log('原始回應:', generatedText);
-          console.log('清理後的 JSON:', jsonText);
           throw new Error('AI 回應格式錯誤，請重試');
         }
 
@@ -4462,6 +5401,9 @@
 
       // 載入設定
       App.settings.get();
+
+      // 根據當前 AI 提供商更新 UI 按鈕顯示狀態
+      App.updateUIButtonsVisibility();
 
       // 初始化動態欄位
       App.dynamicFields.init();
