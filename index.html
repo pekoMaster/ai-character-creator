@@ -3647,11 +3647,8 @@
         const isYamlImageSupported = this.isPlatformSupported('yaml-image');
         const isVisionSupported = this.isPlatformSupported('vision');
 
-        // YAML 預覽選項卡
-        const yamlTab = document.querySelector('.preview-tab[onclick*="yaml"]');
-        if (yamlTab) {
-          yamlTab.style.display = isYamlSupported ? '' : 'none';
-        }
+        // 注意：預覽選項卡永遠顯示所有格式，不受平台限制
+        // 只有匯出按鈕才會根據平台支援狀態顯示/隱藏
 
         // YAML 匯出按鈕
         const yamlBtn = document.querySelector('.export-btn.yaml');
@@ -3669,11 +3666,6 @@
         const importImageBtn = document.querySelector('button[onclick*="importFromImage"]');
         if (importImageBtn) {
           importImageBtn.style.display = isVisionSupported ? '' : 'none';
-        }
-
-        // 如果當前預覽選項卡是 YAML 但平台不支援，自動切換到 JSON
-        if (!isYamlSupported && this.state.currentPreviewTab === 'yaml') {
-          switchPreviewTab('json');
         }
       }
     };
