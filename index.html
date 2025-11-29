@@ -1358,10 +1358,9 @@
         </button>
 
         <!-- 匯入按鈕 -->
-        <button class="icon-btn" onclick="document.getElementById('importFile').click()" title="匯入檔案">
+        <button class="icon-btn" onclick="App.ui.openImport()" title="匯入檔案">
           📥 匯入
         </button>
-        <input type="file" id="importFile" accept=".json,.yaml,.yml,.md,.png,.jpg,.jpeg,.webp" style="display: none;" onchange="handleFileImport(event)">
 
         <!-- 用戶資訊區（登入後顯示）-->
         <div class="user-info" id="userInfo" style="display: none;">
@@ -1990,6 +1989,47 @@
     </div>
   </div>
 
+  <!-- 匯入角色卡彈窗 -->
+  <div class="modal" id="importModal">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2>📥 匯入角色卡</h2>
+        <button class="modal-close" onclick="App.ui.closeImport()">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- 檔案選擇區 -->
+        <div class="setting-item">
+          <label>📄 選擇檔案</label>
+          <input type="file" id="importFileInput" accept=".json,.yaml,.yml,.txt" style="display: block; width: 100%; padding: 10px; border: 2px dashed #ccc; border-radius: 8px; cursor: pointer;">
+          <div class="hint" style="color: #666; margin-top: 8px;">
+            ※僅接受符合本網站所建立之角色卡格式
+          </div>
+        </div>
+
+        <!-- AI 判讀選項 -->
+        <div class="setting-item" style="margin-top: 20px;">
+          <label style="display: flex; align-items: center; cursor: pointer;">
+            <input type="checkbox" id="useAIImport" style="width: 18px; height: 18px; margin-right: 10px; cursor: pointer;">
+            <span style="font-weight: bold;">🤖 使用 AI 判讀</span>
+          </label>
+          <div class="hint" style="color: #666; margin-top: 8px;">
+            ※可套入任何格式的文字檔案提供判讀給這個AI判讀的選項
+          </div>
+        </div>
+
+        <!-- 預覽區（顯示檔案資訊）-->
+        <div id="importPreview" style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px; display: none;">
+          <div style="font-weight: bold; margin-bottom: 8px;">📋 檔案資訊</div>
+          <div id="importFileInfo" style="color: #666; font-size: 14px;"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn secondary" onclick="App.ui.closeImport()">取消</button>
+        <button class="btn primary" onclick="App.import.execute()">開始匯入</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 雲端角色卡 Modal -->
   <div class="modal" id="cloudModal">
     <div class="modal-content" style="max-width: 700px;">
@@ -2368,6 +2408,45 @@
 
         closeSettings() {
           document.getElementById('settingsModal').classList.remove('show');
+        },
+
+        openImport() {
+          // 檢查是否有設定 AI API Key
+          const settings = App.settings.get();
+          const hasApiKey = settings.geminiApiKey || settings.openaiApiKey || settings.claudeApiKey || settings.deepseekApiKey;
+
+          const useAICheckbox = document.getElementById('useAIImport');
+          const importFileInput = document.getElementById('importFileInput');
+
+          if (!hasApiKey) {
+            // 沒有 API Key，禁用 AI 判讀選項
+            useAICheckbox.checked = false;
+            useAICheckbox.disabled = true;
+            // 更新提示文字
+            const hint = useAICheckbox.parentElement.nextElementSibling;
+            hint.innerHTML = '<span style="color: #e53935;">⚠️ 需要先設定 AI API Key 才能使用此功能</span>';
+            // 限制只能接受標準格式
+            importFileInput.accept = '.json,.yaml,.yml';
+          } else {
+            // 有 API Key，啟用 AI 判讀選項
+            useAICheckbox.disabled = false;
+            // 恢復提示文字
+            const hint = useAICheckbox.parentElement.nextElementSibling;
+            hint.innerHTML = '※可套入任何格式的文字檔案提供判讀給這個AI判讀的選項';
+            // 可以接受所有格式
+            importFileInput.accept = '.json,.yaml,.yml,.txt,.md';
+          }
+
+          // 重置檔案選擇
+          importFileInput.value = '';
+          document.getElementById('importPreview').style.display = 'none';
+
+          // 顯示彈窗
+          document.getElementById('importModal').classList.add('show');
+        },
+
+        closeImport() {
+          document.getElementById('importModal').classList.remove('show');
         },
 
         async openCloudManager() {
@@ -2829,6 +2908,111 @@
           });
 
           updatePreview();
+        }
+      },
+
+      // 匯入功能
+      import: {
+        async execute() {
+          const fileInput = document.getElementById('importFileInput');
+          const useAI = document.getElementById('useAIImport').checked;
+          const file = fileInput.files[0];
+
+          if (!file) {
+            showToast('請選擇要匯入的檔案', 'warning');
+            return;
+          }
+
+          try {
+            showToast('正在處理檔案...', 'info');
+
+            if (useAI) {
+              // 使用 AI 判讀
+              await this.importWithAI(file);
+            } else {
+              // 標準格式匯入
+              await this.importStandard(file);
+            }
+
+            App.ui.closeImport();
+            showToast('匯入成功！', 'success');
+          } catch (error) {
+            console.error('匯入失敗：', error);
+            showToast('匯入失敗：' + error.message, 'error');
+          }
+        },
+
+        async importStandard(file) {
+          const extension = file.name.split('.').pop().toLowerCase();
+          const text = await file.text();
+          let data = null;
+
+          // 根據檔案類型解析
+          if (extension === 'json') {
+            data = await importFromJSON(text);
+          } else if (extension === 'yaml' || extension === 'yml') {
+            data = await importFromYAML(text);
+          } else {
+            throw new Error('不支援的檔案格式，請選擇 JSON 或 YAML 檔案');
+          }
+
+          if (data) {
+            fillFormData(data);
+          } else {
+            throw new Error('無法解析檔案內容');
+          }
+        },
+
+        async importWithAI(file) {
+          const text = await file.text();
+
+          // 檢查文字內容
+          if (!text || text.trim().length === 0) {
+            throw new Error('檔案內容為空');
+          }
+
+          // 準備 AI 提示詞
+          const prompt = `請分析以下角色卡內容，並將其轉換為標準的 JSON 格式。
+請盡可能提取所有角色資訊，包括：名稱、別名、年齡、性別、種族、職業、性格、特質、外觀、背景故事、技能、屬性等。
+
+請以以下 JSON 格式回應（只回應 JSON，不要有其他文字）：
+{
+  "name": "角色名稱",
+  "aliases": "別名",
+  "age": "年齡",
+  "gender": "性別",
+  "species": "種族",
+  "occupation": "職業",
+  "personality": "性格摘要",
+  "traits": "特質標籤（逗號分隔）",
+  "appearance": "外觀描述",
+  "backstory": "背景故事",
+  "firstMessage": "第一則訊息",
+  "tags": "標籤（逗號分隔）"
+}
+
+角色卡內容：
+${text}`;
+
+          showToast('AI 正在判讀中，請稍候...', 'info');
+
+          // 調用 AI API
+          const response = await App.callAIAPI(prompt);
+
+          // 解析 AI 回應
+          let aiResponse = response.trim();
+
+          // 移除可能的 markdown 程式碼塊標記
+          aiResponse = aiResponse.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '');
+
+          // 解析 JSON
+          const data = JSON.parse(aiResponse);
+
+          if (data && data.name) {
+            fillFormData(data);
+          } else {
+            throw new Error('AI 無法識別角色資訊');
+          }
         }
       },
 
