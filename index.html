@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI 角色卡創作工具</title>
-  <!-- Version: 2025-01-29-fix-ai-import-v2 -->
+  <!-- Version: 2025-01-29-improve-ai-appearance-extraction -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
   <!-- 外部資源 CDN -->
@@ -2976,22 +2976,54 @@
 
           // 準備 AI 提示詞
           const prompt = `請分析以下角色卡內容，並將其轉換為標準的 JSON 格式。
-請盡可能提取所有角色資訊，包括：名稱、別名、年齡、性別、種族、職業、性格、特質、外觀、背景故事、技能、屬性等。
+請盡可能提取所有角色資訊，特別注意外觀細節的完整提取。
 
 請以以下 JSON 格式回應（只回應 JSON，不要有其他文字）：
 {
   "name": "角色名稱",
-  "aliases": "別名",
-  "age": "年齡",
+  "aliases": "別名（逗號分隔，如有多個）",
+  "age": "年齡（數字或描述）",
   "gender": "性別",
   "species": "種族",
   "occupation": "職業",
+
+  "appearance": "整體外觀概述（2-3句話的總結性描述）",
+  "height": "身高（如：165cm, 160, 高挑等）",
+  "bodyType": "體型描述（包含視覺比喻，如：纖細, 陶瓷人偶般, 肌肉發達等）",
+  "hairColor": "髮色（詳細描述顏色、漸變、特殊效果，如：亞麻色漸變為灰白，髮梢深紅）",
+  "hairStyle": "髮型（長度、樣式、質地、特殊效果，如：長髮及腰、柔順、微微漂浮）",
+  "eyes": "眼睛描述（顏色、形狀、特徵、發光效果、眼神表現等）",
+  "clothing": "服裝風格（詳細描述服裝類型、狀態、特殊效果）",
+  "features": "特殊標記（疤痕、刺青、配件、光環、翅膀、尾巴等所有特殊外觀特徵，逗號分隔）",
+
   "personality": "性格摘要",
   "traits": "特質標籤（逗號分隔）",
-  "appearance": "外觀描述",
   "backstory": "背景故事",
-  "firstMessage": "第一則訊息",
+  "firstMessage": "第一則訊息（角色的自我介紹對話）",
   "tags": "標籤（逗號分隔）"
+}
+
+重要提取規則：
+1. 外觀欄位務必詳細提取，不要遺漏任何視覺細節
+2. 如果角色卡中有結構化的外觀資訊（如 Hair, Eyes, Outfit 等），請完整提取到對應欄位
+3. hairColor 和 hairStyle 應分開：顏色放 hairColor，長度樣式放 hairStyle
+4. features 欄位應包含所有特殊標記：光環、配飾、刺青、疤痕、翅膀、尾巴等
+5. 如果某些外觀資訊嵌套在 JSON 結構中，請深入提取（如 Halo.Color, Outfit.Baseline）
+6. 保留動態效果描述（如"漂浮"、"發光"、"崩解重組"等）
+7. 如果資訊不存在，該欄位可填空字串 ""
+
+提取範例（參考）：
+如果角色卡包含以下資訊：
+- Hair: "原本柔順的亞麻色長髮呈現出一種病態的灰白化，髮梢如同浸泡在墨水中般呈現深紅的侵蝕色，且不受重力束縛地微微漂浮。"
+- Eyes: "原本緊閉的雙眼已強行睜開，瞳孔呈現破碎的琉璃狀，散發著不詳的紅光。"
+- Halo: { Color: "混沌的黑紅色", Structure: "破碎並被強行黏合，環繞著GEASS飛鳥紋樣" }
+
+應提取為：
+{
+  "hairColor": "原本亞麻色，現呈病態灰白化，髮梢深紅侵蝕色",
+  "hairStyle": "長髮，柔順，不受重力束縛地微微漂浮",
+  "eyes": "破碎的琉璃狀瞳孔，散發不詳紅光，原本緊閉現已強行睜開",
+  "features": "混沌黑紅色光環（破碎後強行黏合，環繞GEASS飛鳥紋樣）"
 }
 
 角色卡內容：
