@@ -2924,18 +2924,20 @@
             return;
           }
 
-          try {
-            showToast('正在處理檔案...', 'info');
+          // 立即關閉彈窗
+          App.ui.closeImport();
 
+          try {
             if (useAI) {
               // 使用 AI 判讀
+              showToast('AI 正在判讀中，請稍候...', 'info');
               await this.importWithAI(file);
             } else {
               // 標準格式匯入
+              showToast('正在處理檔案...', 'info');
               await this.importStandard(file);
             }
 
-            App.ui.closeImport();
             showToast('匯入成功！', 'success');
           } catch (error) {
             console.error('匯入失敗：', error);
@@ -2995,20 +2997,10 @@
 角色卡內容：
 ${text}`;
 
-          showToast('AI 正在判讀中，請稍候...', 'info');
+          // 調用 AI API（返回的已經是解析好的 JSON 物件）
+          const data = await App.ai.callAIAPI(prompt);
 
-          // 調用 AI API
-          const response = await App.ai.callAIAPI(prompt);
-
-          // 解析 AI 回應
-          let aiResponse = response.trim();
-
-          // 移除可能的 markdown 程式碼塊標記
-          aiResponse = aiResponse.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '');
-
-          // 解析 JSON
-          const data = JSON.parse(aiResponse);
-
+          // 驗證資料
           if (data && data.name) {
             fillFormData(data);
           } else {
