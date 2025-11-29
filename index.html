@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI 角色卡創作工具</title>
+  <!-- Version: 2025-01-29-fix-ai-import-v2 -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
   <!-- 外部資源 CDN -->
@@ -2997,7 +2998,7 @@ ${text}`;
           showToast('AI 正在判讀中，請稍候...', 'info');
 
           // 調用 AI API
-          const response = await App.callAIAPI(prompt);
+          const response = await App.ai.callAIAPI(prompt);
 
           // 解析 AI 回應
           let aiResponse = response.trim();
