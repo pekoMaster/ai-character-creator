@@ -12,6 +12,9 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
 
+  <!-- 配置文件 -->
+  <script src="config.js"></script>
+
   <style>
     /* ===== CSS 變數定義 ===== */
     :root {
@@ -2033,7 +2036,7 @@
       // 設定管理
       settings: {
         // 固定的 Google Drive 主資料夾 ID（後台設定，用戶不可見）
-        GOOGLE_DRIVE_FOLDER_ID: '1s6pPlJic8s1Iv3cMtPJxbn4bsbgdR4aj',
+        GOOGLE_DRIVE_FOLDER_ID: CONFIG.GOOGLE_DRIVE_FOLDER_ID,
 
         load() {
           const aiProvider = localStorage.getItem('aiProvider') || 'gemini';
@@ -2106,13 +2109,12 @@
           });
         }
       },
-      },
 
       // Google OAuth 認證
       auth: {
         client: null,
         // 固定的 Google OAuth Client ID
-        GOOGLE_CLIENT_ID: '692507778051-t4mpeu79rbfcel1ds2hoi0n0qhg32224.apps.googleusercontent.com',
+        GOOGLE_CLIENT_ID: CONFIG.GOOGLE_CLIENT_ID,
 
         init() {
           // 初始化 Google Identity Services
