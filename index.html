@@ -3665,25 +3665,38 @@
         const isYamlImageSupported = this.isPlatformSupported('yaml-image');
         const isVisionSupported = this.isPlatformSupported('vision');
 
+        console.log('更新 UI 按鈕顯示狀態:', {
+          provider: this.settings.get().aiProvider,
+          yamlSupported: isYamlSupported,
+          yamlImageSupported: isYamlImageSupported,
+          visionSupported: isVisionSupported
+        });
+
         // 注意：預覽選項卡永遠顯示所有格式，不受平台限制
         // 只有匯出按鈕才會根據平台支援狀態顯示/隱藏
 
         // YAML 匯出按鈕
         const yamlBtn = document.querySelector('.export-btn.yaml');
         if (yamlBtn) {
-          yamlBtn.style.display = isYamlSupported ? '' : 'none';
+          yamlBtn.style.display = isYamlSupported ? 'flex' : 'none';
+          console.log('YAML 匯出按鈕:', yamlBtn, '顯示狀態:', yamlBtn.style.display);
+        } else {
+          console.warn('找不到 YAML 匯出按鈕 (.export-btn.yaml)');
         }
 
         // YAML 圖片匯出按鈕
         const yamlImageBtn = document.querySelector('.export-btn.png-yaml');
         if (yamlImageBtn) {
-          yamlImageBtn.style.display = isYamlImageSupported ? '' : 'none';
+          yamlImageBtn.style.display = isYamlImageSupported ? 'flex' : 'none';
+          console.log('YAML 圖片匯出按鈕:', yamlImageBtn, '顯示狀態:', yamlImageBtn.style.display);
+        } else {
+          console.warn('找不到 YAML 圖片匯出按鈕 (.export-btn.png-yaml)');
         }
 
         // 圖片導入按鈕（Vision 功能）
         const importImageBtn = document.querySelector('button[onclick*="importFromImage"]');
         if (importImageBtn) {
-          importImageBtn.style.display = isVisionSupported ? '' : 'none';
+          importImageBtn.style.display = isVisionSupported ? 'inline-flex' : 'none';
         }
       }
     };
