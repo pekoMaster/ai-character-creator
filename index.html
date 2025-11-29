@@ -3659,14 +3659,29 @@
       /**
        * 根據當前 AI 提供商更新 UI 按鈕的顯示狀態
        * 隱藏不支援的功能按鈕
+       * @param {string} provider - 可選的提供商名稱，如果不提供則從當前選擇或 localStorage 讀取
        */
-      updateUIButtonsVisibility() {
-        const isYamlSupported = this.isPlatformSupported('yaml');
-        const isYamlImageSupported = this.isPlatformSupported('yaml-image');
-        const isVisionSupported = this.isPlatformSupported('vision');
+      updateUIButtonsVisibility(provider) {
+        // 優先使用參數，否則從下拉選單讀取，最後才從 localStorage 讀取
+        if (!provider) {
+          const providerSelect = document.getElementById('aiProvider');
+          provider = providerSelect ? providerSelect.value : this.settings.get().aiProvider;
+        }
+
+        // 直接使用傳入或讀取的 provider 檢查支援狀態
+        const supportMatrix = {
+          'gemini': { 'yaml': false, 'yaml-image': false, 'vision': true },
+          'openai': { 'yaml': true, 'yaml-image': true, 'vision': true },
+          'claude': { 'yaml': true, 'yaml-image': true, 'vision': true },
+          'deepseek': { 'yaml': true, 'yaml-image': true, 'vision': false }
+        };
+
+        const isYamlSupported = supportMatrix[provider]?.['yaml'] ?? true;
+        const isYamlImageSupported = supportMatrix[provider]?.['yaml-image'] ?? true;
+        const isVisionSupported = supportMatrix[provider]?.['vision'] ?? true;
 
         console.log('更新 UI 按鈕顯示狀態:', {
-          provider: this.settings.get().aiProvider,
+          provider: provider,
           yamlSupported: isYamlSupported,
           yamlImageSupported: isYamlImageSupported,
           visionSupported: isVisionSupported
