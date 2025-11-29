@@ -1,6 +1,6 @@
 # 環境變數和配置文件
 .env
-config.js
+# config.js - 不再排除，因為 OAuth Client ID 需要公開用於網頁
 
 # IDE 配置
 .vscode/
