@@ -1877,7 +1877,7 @@
         <!-- AI 提供商選擇器 -->
         <div class="setting-item">
           <label>🤖 AI 提供商</label>
-          <select id="aiProvider" onchange="App.settings.updateProviderUI()">
+          <select id="aiProvider" onchange="App.settings.updateProviderUI(); App.updateUIButtonsVisibility();">
             <option value="gemini">Google Gemini</option>
             <option value="openai">OpenAI GPT</option>
             <option value="claude">Anthropic Claude</option>
@@ -3643,22 +3643,37 @@
        * 隱藏不支援的功能按鈕
        */
       updateUIButtonsVisibility() {
+        const isYamlSupported = this.isPlatformSupported('yaml');
+        const isYamlImageSupported = this.isPlatformSupported('yaml-image');
+        const isVisionSupported = this.isPlatformSupported('vision');
+
+        // YAML 預覽選項卡
+        const yamlTab = document.querySelector('.preview-tab[onclick*="yaml"]');
+        if (yamlTab) {
+          yamlTab.style.display = isYamlSupported ? '' : 'none';
+        }
+
         // YAML 匯出按鈕
         const yamlBtn = document.querySelector('.export-btn.yaml');
         if (yamlBtn) {
-          yamlBtn.style.display = this.isPlatformSupported('yaml') ? '' : 'none';
+          yamlBtn.style.display = isYamlSupported ? '' : 'none';
         }
 
         // YAML 圖片匯出按鈕
         const yamlImageBtn = document.querySelector('.export-btn.png-yaml');
         if (yamlImageBtn) {
-          yamlImageBtn.style.display = this.isPlatformSupported('yaml-image') ? '' : 'none';
+          yamlImageBtn.style.display = isYamlImageSupported ? '' : 'none';
         }
 
         // 圖片導入按鈕（Vision 功能）
         const importImageBtn = document.querySelector('button[onclick*="importFromImage"]');
         if (importImageBtn) {
-          importImageBtn.style.display = this.isPlatformSupported('vision') ? '' : 'none';
+          importImageBtn.style.display = isVisionSupported ? '' : 'none';
+        }
+
+        // 如果當前預覽選項卡是 YAML 但平台不支援，自動切換到 JSON
+        if (!isYamlSupported && this.state.currentPreviewTab === 'yaml') {
+          switchPreviewTab('json');
         }
       }
     };
