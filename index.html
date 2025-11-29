@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI 角色卡創作工具</title>
-  <!-- Version: 2025-01-29-improve-ai-appearance-extraction -->
+  <!-- Version: 2025-01-29-fix-json-truncation -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
   <!-- 外部資源 CDN -->
@@ -3506,6 +3506,14 @@ ${text}`;
             console.error('JSON 解析失敗:', e);
             console.log('原始回應:', generatedText);
             console.log('清理後的 JSON:', jsonText);
+
+            // 檢查是否是因為回應被截斷
+            if (e.message.includes('Unterminated string') ||
+                e.message.includes('Unexpected end') ||
+                !jsonText.endsWith('}')) {
+              throw new Error('AI 回應內容過長被截斷，請簡化角色卡內容或稍後重試');
+            }
+
             throw new Error('AI 回應格式錯誤，請重試');
           }
         },
@@ -3585,7 +3593,7 @@ ${text}`;
                   temperature: 0.9,
                   topK: 40,
                   topP: 0.95,
-                  maxOutputTokens: 8192,
+                  maxOutputTokens: 32768,  // 增加輸出限制以處理複雜角色卡
                 }
               })
             }
