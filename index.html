@@ -1566,7 +1566,7 @@
 
         <!-- 背景故事 -->
         <div class="form-section">
-          <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-header full-mode-only" onclick="toggleSection(this)">
             <h3><span class="icon">📖</span> 背景故事</h3>
             <span class="section-toggle">▼</span>
           </div>
@@ -1602,7 +1602,7 @@
 
         <!-- 戰鬥與生活技能 -->
         <div class="form-section">
-          <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-header full-mode-only" onclick="toggleSection(this)">
             <h3><span class="icon">⚔️</span> 戰鬥與生活技能</h3>
             <span class="section-toggle">▼</span>
           </div>
@@ -1634,7 +1634,7 @@
 
         <!-- 自訂屬性 -->
         <div class="form-section">
-          <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-header full-mode-only" onclick="toggleSection(this)">
             <h3><span class="icon">📊</span> 自訂屬性</h3>
             <span class="section-toggle">▼</span>
           </div>
@@ -1655,7 +1655,7 @@
 
         <!-- 對話風格 -->
         <div class="form-section">
-          <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-header full-mode-only" onclick="toggleSection(this)">
             <h3><span class="icon">🗣️</span> 對話風格</h3>
             <span class="section-toggle">▼</span>
           </div>
@@ -1758,6 +1758,7 @@
               <button class="preview-tab" onclick="switchPreviewTab('json')">JSON</button>
               <button class="preview-tab" onclick="switchPreviewTab('yaml')">YAML</button>
               <button class="preview-tab" onclick="switchPreviewTab('markdown')">Markdown</button>
+              <button class="preview-tab" onclick="switchPreviewTab('txt')">TXT</button>
             </div>
             <button class="icon-btn" id="copyPreviewBtn" onclick="copyPreviewContent()" title="複製內容" style="display: none;">
               📋
@@ -1817,6 +1818,11 @@
           <div class="code-preview" id="previewMarkdown">
             <pre id="markdownCode"></pre>
           </div>
+
+          <!-- TXT 預覽 -->
+          <div class="code-preview" id="previewTXT">
+            <pre id="txtCode"></pre>
+          </div>
         </div>
 
         <!-- 匯出按鈕 -->
@@ -1824,7 +1830,7 @@
           <!-- 第一行：文字格式 -->
           <div class="export-buttons">
             <button class="export-btn txt" onclick="exportTextFile()">
-              <span>📄</span> 匯出角色卡
+              <span>📄</span> 匯出 TXT
             </button>
             <button class="export-btn json" onclick="exportFile('json')">
               <span>📦</span> 匯出 JSON
@@ -3705,7 +3711,7 @@
       App.state.currentPreviewTab = tab; // 同步到 App 狀態
 
       document.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
-      document.querySelector(`.preview-tab:nth-child(${['card', 'json', 'yaml', 'markdown'].indexOf(tab) + 1})`).classList.add('active');
+      document.querySelector(`.preview-tab:nth-child(${['card', 'json', 'yaml', 'markdown', 'txt'].indexOf(tab) + 1})`).classList.add('active');
 
       document.querySelectorAll('.character-preview, .code-preview').forEach(p => p.classList.remove('active'));
 
@@ -3722,6 +3728,9 @@
         copyBtn.style.display = 'flex';
       } else if (tab === 'markdown') {
         document.getElementById('previewMarkdown').classList.add('active');
+        copyBtn.style.display = 'flex';
+      } else if (tab === 'txt') {
+        document.getElementById('previewTXT').classList.add('active');
         copyBtn.style.display = 'flex';
       }
 
@@ -3897,6 +3906,10 @@
       // Markdown
       const mdOutput = convertToMarkdown(data, currentPlatform);
       document.getElementById('markdownCode').textContent = mdOutput;
+
+      // TXT
+      const txtOutput = convertToTXT(data, currentPlatform);
+      document.getElementById('txtCode').textContent = txtOutput;
     }
 
     // ===== 格式轉換函數（前端版本） =====
@@ -4107,6 +4120,113 @@
       md += `---\n*由 AI 角色卡創作工具生成*\n`;
       
       return md;
+    }
+
+    /**
+     * 轉換為 TXT 格式（大標加小標的簡單格式）
+     */
+    function convertToTXT(data, platform) {
+      let txt = '';
+
+      // 基本資訊
+      txt += '基本資訊 :\n';
+      if (data.name) txt += ` -名稱 : ${data.name}\n`;
+      if (data.aliases) txt += ` -別名 : ${data.aliases}\n`;
+      if (data.age) txt += ` -年齡 : ${data.age}\n`;
+      if (data.gender) txt += ` -性別 : ${data.gender}\n`;
+      if (data.species) txt += ` -種族 : ${data.species}\n`;
+      if (data.occupation) txt += ` -職業 : ${data.occupation}\n`;
+      txt += '\n';
+
+      // 外觀描述
+      if (data.appearance || data.height || data.bodyType || data.hairColor || data.hairStyle || data.eyes || data.clothing || data.features) {
+        txt += '外觀描述 :\n';
+        if (data.appearance) txt += ` -整體外觀 : ${data.appearance}\n`;
+        if (data.height) txt += ` -身高 : ${data.height}\n`;
+        if (data.bodyType) txt += ` -體型 : ${data.bodyType}\n`;
+        if (data.hairColor) txt += ` -髮色 : ${data.hairColor}\n`;
+        if (data.hairStyle) txt += ` -髮型 : ${data.hairStyle}\n`;
+        if (data.eyes) txt += ` -眼睛 : ${data.eyes}\n`;
+        if (data.clothing) txt += ` -服裝風格 : ${data.clothing}\n`;
+        if (data.features) txt += ` -特殊標記 : ${data.features}\n`;
+        txt += '\n';
+      }
+
+      // 性格特質
+      if (data.personality || data.traits || data.strengths || data.weaknesses || data.likes || data.dislikes || data.fears || data.goals) {
+        txt += '性格特質 :\n';
+        if (data.personality) txt += ` -性格摘要 : ${data.personality}\n`;
+        if (data.traits) txt += ` -特質標籤 : ${data.traits}\n`;
+        if (data.strengths) txt += ` -優點 : ${data.strengths}\n`;
+        if (data.weaknesses) txt += ` -缺點 : ${data.weaknesses}\n`;
+        if (data.likes) txt += ` -喜好 : ${data.likes}\n`;
+        if (data.dislikes) txt += ` -厭惡 : ${data.dislikes}\n`;
+        if (data.fears) txt += ` -恐懼 : ${data.fears}\n`;
+        if (data.goals) txt += ` -目標 : ${data.goals}\n`;
+        txt += '\n';
+      }
+
+      // 技能
+      if (Array.isArray(data.combatSkills) && data.combatSkills.length > 0 ||
+          Array.isArray(data.lifeSkills) && data.lifeSkills.length > 0) {
+        txt += '技能 :\n';
+        if (Array.isArray(data.combatSkills) && data.combatSkills.length > 0) {
+          txt += ` -戰鬥技能 : ${data.combatSkills.map(item => item.skill + (item.level ? `(${item.level})` : '')).join(', ')}\n`;
+        }
+        if (Array.isArray(data.lifeSkills) && data.lifeSkills.length > 0) {
+          txt += ` -生活技能 : ${data.lifeSkills.map(item => item.skill + (item.level ? `(${item.level})` : '')).join(', ')}\n`;
+        }
+        txt += '\n';
+      }
+
+      // 自訂屬性
+      if (Array.isArray(data.customAttributes) && data.customAttributes.length > 0) {
+        txt += '自訂屬性 :\n';
+        data.customAttributes.forEach(item => {
+          if (item.attribute && item.value) {
+            txt += ` -${item.attribute} : ${item.value}\n`;
+          }
+        });
+        txt += '\n';
+      }
+
+      // 背景故事
+      if (data.backstory || data.birthplace || data.keyEvents) {
+        txt += '背景故事 :\n';
+        if (data.birthplace) txt += ` -出生地 : ${data.birthplace}\n`;
+        if (data.backstory) txt += ` -背景 : ${data.backstory}\n`;
+        if (data.keyEvents) txt += ` -重要事件 : ${data.keyEvents}\n`;
+        txt += '\n';
+      }
+
+      // 對話風格
+      if (data.catchphrases || data.verbalTics || data.emotionalExpression) {
+        txt += '對話風格 :\n';
+        if (data.catchphrases) txt += ` -口頭禪 : ${data.catchphrases}\n`;
+        if (data.verbalTics) txt += ` -語言習慣 : ${data.verbalTics}\n`;
+        if (data.emotionalExpression) txt += ` -情緒表達 : ${data.emotionalExpression}\n`;
+        txt += '\n';
+      }
+
+      // AI 核心設定
+      txt += 'AI 核心設定 :\n';
+      if (data.description) txt += ` -角色描述 : ${data.description}\n`;
+      if (data.systemPrompt) txt += ` -系統提示 : ${data.systemPrompt}\n`;
+      if (data.firstMessage) txt += ` -第一則訊息 : ${data.firstMessage}\n`;
+      if (data.exampleDialogues) txt += ` -範例對話 : ${data.exampleDialogues}\n`;
+      if (data.scenario) txt += ` -初次相遇地點 : ${data.scenario}\n`;
+      txt += '\n';
+
+      // 元資料
+      if (data.tags || data.worldLore || data.creator || data.version) {
+        txt += '元資料 :\n';
+        if (data.tags) txt += ` -標籤 : ${data.tags}\n`;
+        if (data.worldLore) txt += ` -世界設定 : ${data.worldLore}\n`;
+        if (data.creator) txt += ` -創作者 : ${data.creator}\n`;
+        if (data.version) txt += ` -版本 : ${data.version}\n`;
+      }
+
+      return txt;
     }
 
     /**
