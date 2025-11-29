@@ -3646,8 +3646,8 @@
         // 平台支援矩陣
         const supportMatrix = {
           'gemini': {
-            'yaml': false,        // Gemini 不支援 YAML 格式
-            'yaml-image': false,  // Gemini 不支援 YAML 圖片
+            'yaml': true,         // Gemini 支援 YAML 格式
+            'yaml-image': true,   // Gemini 支援 YAML 圖片
             'vision': true        // Gemini 支援 Vision
           },
           'openai': {
@@ -3684,7 +3684,7 @@
 
         // 直接使用傳入或讀取的 provider 檢查支援狀態
         const supportMatrix = {
-          'gemini': { 'yaml': false, 'yaml-image': false, 'vision': true },
+          'gemini': { 'yaml': true, 'yaml-image': true, 'vision': true },
           'openai': { 'yaml': true, 'yaml-image': true, 'vision': true },
           'claude': { 'yaml': true, 'yaml-image': true, 'vision': true },
           'deepseek': { 'yaml': true, 'yaml-image': true, 'vision': false }
@@ -5615,8 +5615,8 @@
         });
       }
 
-      // 載入設定
-      App.settings.get();
+      // 載入設定並更新 UI
+      App.settings.load();
 
       // 根據當前 AI 提供商更新 UI 按鈕顯示狀態
       App.updateUIButtonsVisibility();
