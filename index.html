@@ -339,6 +339,15 @@
       display: flex;
     }
 
+    /* 簡潔版專用（完整版隱藏） */
+    .simple-mode-only {
+      display: flex;
+    }
+
+    .full-mode .simple-mode-only {
+      display: none;
+    }
+
     /* ===== 預覽區域 ===== */
     .preview-panel {
       background: white;
@@ -1711,7 +1720,7 @@
               <label>第一則訊息 <span class="hint">(對話開始時角色說的話，Character.AI 必填)</span></label>
               <textarea id="firstMessage" class="large" placeholder="*她抬起頭，從書本中望向你* 「啊，有客人嗎？歡迎來到圖書館。」" oninput="updatePreview()"></textarea>
             </div>
-            <div class="form-field full-width full-mode-only">
+            <div class="form-field full-width simple-mode-only">
               <label>範例對話</label>
               <textarea id="exampleDialogues" class="large" placeholder="展示角色如何回應的範例對話..." oninput="updatePreview()"></textarea>
             </div>
@@ -1799,6 +1808,11 @@
               <div class="preview-section" id="previewBackstorySection" style="display: none;">
                 <div class="preview-section-title">📖 背景</div>
                 <div class="preview-section-content" id="previewBackstory"></div>
+              </div>
+
+              <div class="preview-section" id="previewRelationshipsSection" style="display: none;">
+                <div class="preview-section-title">👥 人際關係</div>
+                <div class="preview-section-content" id="previewRelationships"></div>
               </div>
 
               <div class="preview-section" id="previewFirstMessageSection" style="display: none;">
@@ -3935,6 +3949,22 @@
         backstorySection.style.display = 'none';
       }
 
+      // 人際關係（完整版限定）
+      const relationshipsSection = document.getElementById('previewRelationshipsSection');
+      const relationshipsContent = document.getElementById('previewRelationships');
+      if (Array.isArray(data.relationships) && data.relationships.length > 0 && isFullMode) {
+        relationshipsSection.style.display = 'block';
+        let relationshipsHTML = '';
+        data.relationships.forEach(item => {
+          if (item.name && item.description) {
+            relationshipsHTML += `<div style="margin-bottom: 8px;"><strong>${item.name}</strong>：${item.description}</div>`;
+          }
+        });
+        relationshipsContent.innerHTML = relationshipsHTML;
+      } else {
+        relationshipsSection.style.display = 'none';
+      }
+
       // 第一則訊息
       const firstMessageSection = document.getElementById('previewFirstMessageSection');
       const firstMessageContent = document.getElementById('previewFirstMessage');
@@ -4258,6 +4288,17 @@
         if (data.catchphrases) txt += ` -口頭禪 : ${data.catchphrases}\n`;
         if (data.verbalTics) txt += ` -語言習慣 : ${data.verbalTics}\n`;
         if (data.emotionalExpression) txt += ` -情緒表達 : ${data.emotionalExpression}\n`;
+        txt += '\n';
+      }
+
+      // 人際關係
+      if (Array.isArray(data.relationships) && data.relationships.length > 0) {
+        txt += '人際關係 :\n';
+        data.relationships.forEach(item => {
+          if (item.name && item.description) {
+            txt += ` -${item.name} : ${item.description}\n`;
+          }
+        });
         txt += '\n';
       }
 
