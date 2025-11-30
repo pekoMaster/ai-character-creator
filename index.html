@@ -3364,6 +3364,188 @@ ${text}`;
           } else {
             throw new Error('AI 無法識別角色資訊');
           }
+        },
+
+        /**
+         * 區塊式 AI 補充
+         * @param {string} sectionKey - 區塊識別鍵 (skills, speech, background, personality)
+         */
+        async fillSectionWithAI(sectionKey) {
+          // 檢查是否有暫存的原始檔案
+          if (!this.lastImportedText) {
+            showToast('請先使用 AI 匯入功能載入角色卡', 'warning');
+            return;
+          }
+
+          // 檢查 AI API Key
+          if (!App.state.geminiApiKey) {
+            showToast('請先在設定中配置 AI API Key', 'warning');
+            return;
+          }
+
+          // 定義區塊欄位映射
+          const sectionFields = {
+            skills: {
+              name: '戰鬥與生活技能',
+              fields: ['combatSkills', 'lifeSkills'],
+              prompt: `請從以下角色卡中提取**戰鬥技能**和**生活技能**資訊。
+
+【只需提取以下欄位】：
+{
+  "combatSkills": "戰鬥相關技能（招式、武器、特殊能力，逗號分隔）",
+  "lifeSkills": "日常生活技能（烹飪、折紙、感知等，逗號分隔）"
+}
+
+【提取重點】：
+- combatSkills：提取所有戰鬥招式名稱、武器使用、特殊戰鬥能力
+- lifeSkills：提取日常生活相關的非戰鬥技能
+
+【格式要求】：
+- 只回應 JSON，不要有其他文字
+- 使用 camelCase 命名
+- 如果沒有相關資訊，填空字串 ""
+
+角色卡內容：
+`
+            },
+            speech: {
+              name: '對話風格',
+              fields: ['catchphrases', 'verbalTics', 'emotionalExpression', 'speechStyle'],
+              prompt: `請從以下角色卡中提取**對話風格**相關資訊。
+
+【只需提取以下欄位】：
+{
+  "catchphrases": "口頭禪（角色常說的話，逗號分隔）",
+  "verbalTics": "語言習慣（如：句尾加「呢」、使用敬語）",
+  "emotionalExpression": "情緒表達方式（開心/生氣/害羞時的反應）",
+  "speechStyle": "整體語言風格（如：豪放直率、溫柔體貼）"
+}
+
+【提取重點】：
+- catchphrases：角色的招牌台詞或常說的話
+- verbalTics：具體的語言習慣（句尾、稱呼、口吃等）
+- emotionalExpression：不同情緒下的表達方式
+- speechStyle：整體說話風格的形容
+
+【格式要求】：
+- 只回應 JSON，不要有其他文字
+- 使用 camelCase 命名
+- 如果沒有相關資訊，填空字串 ""
+
+角色卡內容：
+`
+            },
+            background: {
+              name: '背景故事',
+              fields: ['birthplace', 'backstory', 'keyEvents', 'relationships'],
+              prompt: `請從以下角色卡中提取**背景故事**相關資訊。
+
+【只需提取以下欄位】：
+{
+  "birthplace": "出生地",
+  "backstory": "背景故事（過去經歷、成長歷程）",
+  "keyEvents": "關鍵事件（形塑角色的重要經歷，逗號分隔）",
+  "relationships": "人際關係（格式：人物名-關係類型，逗號分隔）"
+}
+
+【提取重點】：
+- birthplace：角色的出生地或來源地
+- backstory：完整的背景故事描述
+- keyEvents：重要的人生事件
+- relationships：重要人物關係（如：露西-姐姐, 約翰-導師）
+
+【格式要求】：
+- 只回應 JSON，不要有其他文字
+- 使用 camelCase 命名
+- 如果沒有相關資訊，填空字串 ""
+
+角色卡內容：
+`
+            },
+            personality: {
+              name: '性格特質',
+              fields: ['personality', 'traits', 'strengths', 'weaknesses', 'likes', 'dislikes', 'fears', 'goals'],
+              prompt: `請從以下角色卡中提取**性格特質**相關資訊。
+
+【只需提取以下欄位】：
+{
+  "personality": "性格摘要（核心性格描述）",
+  "traits": "特質標籤（逗號分隔，如：內向, 善良）",
+  "strengths": "優點（抽象優點，如：聰明, 有耐心）",
+  "weaknesses": "缺點（逗號分隔）",
+  "likes": "喜好（逗號分隔）",
+  "dislikes": "厭惡（逗號分隔）",
+  "fears": "恐懼（逗號分隔）",
+  "goals": "目標（逗號分隔）"
+}
+
+【提取重點】：
+- personality：整體性格的摘要描述
+- traits：性格標籤（如：內向、善良、固執）
+- strengths：抽象的優點（不要包含具體技能名稱）
+- 其他欄位：完整提取所有相關資訊
+
+【格式要求】：
+- 只回應 JSON，不要有其他文字
+- 使用 camelCase 命名
+- 如果沒有相關資訊，填空字串 ""
+
+角色卡內容：
+`
+            }
+          };
+
+          const section = sectionFields[sectionKey];
+          if (!section) {
+            console.error('未知的區塊:', sectionKey);
+            return;
+          }
+
+          try {
+            // 開始 loading（只鎖定該區塊的欄位）
+            showToast(`AI 正在補充${section.name}...`, 'info');
+
+            // 鎖定該區塊的欄位
+            section.fields.forEach(fieldId => {
+              const field = document.getElementById(fieldId);
+              if (field) {
+                field.disabled = true;
+                field.style.opacity = '0.6';
+              }
+            });
+
+            // 調用 AI API
+            const fullPrompt = section.prompt + this.lastImportedText;
+            const data = await App.ai.callAIAPI(fullPrompt);
+
+            // 正規化結果
+            const normalizedData = this.normalizeAIResponse(data);
+
+            // 填入對應欄位
+            section.fields.forEach(fieldId => {
+              const field = document.getElementById(fieldId);
+              if (field && normalizedData[fieldId]) {
+                field.value = normalizedData[fieldId];
+                // 觸發 input 事件以更新預覽
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+              }
+            });
+
+            showToast(`${section.name}補充完成！`, 'success');
+
+          } catch (error) {
+            console.error('AI 補充失敗：', error);
+            showToast(`補充失敗：${error.message}`, 'error');
+          } finally {
+            // 解鎖欄位
+            section.fields.forEach(fieldId => {
+              const field = document.getElementById(fieldId);
+              if (field) {
+                field.disabled = false;
+                field.style.opacity = '1';
+              }
+            });
+          }
         }
       },
 
