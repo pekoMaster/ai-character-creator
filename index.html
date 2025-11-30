@@ -3377,12 +3377,6 @@ ${text}`;
             return;
           }
 
-          // 檢查 AI API Key
-          if (!App.state.geminiApiKey) {
-            showToast('請先在設定中配置 AI API Key', 'warning');
-            return;
-          }
-
           // 定義區塊欄位映射
           const sectionFields = {
             skills: {
