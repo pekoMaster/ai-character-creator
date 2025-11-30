@@ -1427,6 +1427,9 @@
         <div class="form-section">
           <div class="section-header" onclick="toggleSection(this)">
             <h3><span class="icon">📋</span> 基本資訊</h3>
+            <button class="ai-fill-btn" onclick="event.stopPropagation(); App.import.fillSectionWithAI('basicInfo')" title="AI 補充基本資訊">
+              🤖 AI補充
+            </button>
             <span class="section-toggle">▼</span>
           </div>
           <div class="section-content">
@@ -1491,6 +1494,9 @@
         <div class="form-section">
           <div class="section-header" onclick="toggleSection(this)">
             <h3><span class="icon">👤</span> 外觀描述</h3>
+            <button class="ai-fill-btn" onclick="event.stopPropagation(); App.import.fillSectionWithAI('appearance')" title="AI 補充外觀描述">
+              🤖 AI補充
+            </button>
             <span class="section-toggle">▼</span>
           </div>
           <div class="section-content">
@@ -1792,6 +1798,9 @@
         <div class="form-section">
           <div class="section-header" onclick="toggleSection(this)">
             <h3><span class="icon">🤖</span> AI 核心設定</h3>
+            <button class="ai-fill-btn" onclick="event.stopPropagation(); App.import.fillSectionWithAI('aiSettings')" title="AI 補充核心設定">
+              🤖 AI補充
+            </button>
             <span class="section-toggle">▼</span>
           </div>
           <div class="section-content">
@@ -1822,6 +1831,9 @@
         <div class="form-section">
           <div class="section-header" onclick="toggleSection(this)">
             <h3><span class="icon">📎</span> 元資料</h3>
+            <button class="ai-fill-btn" onclick="event.stopPropagation(); App.import.fillSectionWithAI('metadata')" title="AI 補充元資料">
+              🤖 AI補充
+            </button>
             <span class="section-toggle">▼</span>
           </div>
           <div class="section-content">
@@ -3367,6 +3379,76 @@ ${text}`;
         },
 
         /**
+         * 填入動態欄位（如 combatSkills, lifeSkills, relationships 等）
+         * @param {string} fieldType - 動態欄位類型
+         * @param {string} data - 逗號分隔的資料字串
+         */
+        fillDynamicField(fieldType, data) {
+          if (!data || typeof data !== 'string') {
+            console.log(`${fieldType} 無資料或資料格式錯誤`);
+            return;
+          }
+
+          // 將逗號分隔的字串拆分成陣列
+          const items = data.split(',').map(item => item.trim()).filter(item => item);
+          if (items.length === 0) {
+            console.log(`${fieldType} 無有效資料`);
+            return;
+          }
+
+          console.log(`開始填入 ${fieldType}，共 ${items.length} 個項目:`, items);
+
+          // 取得容器
+          const container = document.getElementById(`${fieldType}Container`);
+          if (!container) {
+            console.error(`找不到容器: ${fieldType}Container`);
+            return;
+          }
+
+          // 清空現有的動態欄位（除了第一個）
+          const existingRows = container.querySelectorAll('.dynamic-field-row');
+          existingRows.forEach((row, index) => {
+            if (index > 0) row.remove();
+          });
+
+          // 為每個項目新增動態欄位
+          items.forEach((item, index) => {
+            // 如果是第一個項目，使用現有的第一行；否則新增一行
+            if (index > 0) {
+              App.dynamicFields.add(fieldType, true);
+            }
+
+            // 根據欄位類型填入對應的子欄位
+            if (fieldType === 'relationships') {
+              // 處理人際關係：格式為 "人物名-關係類型"
+              const parts = item.split('-').map(p => p.trim());
+              const nameField = document.getElementById(`${fieldType}_${index}_name`);
+              const descField = document.getElementById(`${fieldType}_${index}_description`);
+
+              if (nameField) {
+                nameField.value = parts[0] || item;
+              }
+              if (descField && parts.length > 1) {
+                descField.value = parts[1];
+              }
+              console.log(`已填入 ${fieldType}_${index}: ${parts[0]} - ${parts[1] || ''}`);
+            } else {
+              // 處理技能類：combatSkills, lifeSkills 等
+              const skillField = document.getElementById(`${fieldType}_${index}_skill`);
+              if (skillField) {
+                skillField.value = item;
+                console.log(`已填入 ${fieldType}_${index}_skill: ${item}`);
+              } else {
+                console.warn(`找不到欄位: ${fieldType}_${index}_skill`);
+              }
+            }
+          });
+
+          // 觸發預覽更新
+          updatePreview();
+        },
+
+        /**
          * 區塊式 AI 補充
          * @param {string} sectionKey - 區塊識別鍵 (skills, speech, background, personality)
          */
@@ -3486,6 +3568,120 @@ ${text}`;
 
 角色卡內容：
 `
+            },
+            basicInfo: {
+              name: '基本資訊',
+              fields: ['name', 'aliases', 'age', 'gender', 'species', 'occupation'],
+              prompt: `請從以下角色卡中提取**基本資訊**。
+
+【只需提取以下欄位】：
+{
+  "name": "角色名稱",
+  "aliases": "別名/暱稱（逗號分隔）",
+  "age": "年齡（如：23 歲）",
+  "gender": "性別（女性/男性/非二元/其他）",
+  "species": "種族/物種",
+  "occupation": "職業/身份"
+}
+
+【提取重點】：
+- name：角色的正式名稱
+- aliases：所有別名、暱稱、稱號
+- age：具體年齡或年齡描述
+- gender：性別認同
+- species：種族、物種類型
+- occupation：職業、身份、社會角色
+
+【格式要求】：
+- 只回應 JSON，不要有其他文字
+- 使用 camelCase 命名
+- 如果沒有相關資訊，填空字串 ""
+
+角色卡內容：
+`
+            },
+            appearance: {
+              name: '外觀描述',
+              fields: ['appearance', 'height', 'bodyType', 'hairColor', 'hairStyle', 'eyes', 'clothing', 'features'],
+              prompt: `請從以下角色卡中提取**外觀描述**相關資訊。
+
+【只需提取以下欄位】：
+{
+  "appearance": "整體外觀概述",
+  "height": "身高（如：165cm）",
+  "bodyType": "體型（如：纖細、健壯）",
+  "hairColor": "髮色",
+  "hairStyle": "髮型",
+  "eyes": "眼睛顏色/特徵",
+  "clothing": "服裝風格",
+  "features": "特殊標記（疤痕、刺青、配件等）"
+}
+
+【提取重點】：
+- appearance：整體外觀的綜合描述
+- height, bodyType：體格特徵
+- hairColor, hairStyle, eyes：五官特徵
+- clothing：服裝風格與特點
+- features：獨特的外觀標記
+
+【格式要求】：
+- 只回應 JSON，不要有其他文字
+- 使用 camelCase 命名
+- 如果沒有相關資訊，填空字串 ""
+
+角色卡內容：
+`
+            },
+            aiSettings: {
+              name: 'AI核心設定',
+              fields: ['description', 'systemPrompt', 'firstMessage', 'scenario'],
+              prompt: `請從以下角色卡中提取**AI核心設定**相關資訊。
+
+【只需提取以下欄位】：
+{
+  "description": "角色完整描述（整合所有資訊的綜合描述）",
+  "systemPrompt": "系統提示（給AI的指令，如何扮演角色）",
+  "firstMessage": "第一則訊息（對話開始時角色說的話）",
+  "scenario": "初次相遇地點/情境"
+}
+
+【提取重點】：
+- description：完整整合的角色描述，供AI理解角色全貌
+- systemPrompt：角色扮演指令（如：你是{{char}}，請以第一人稱回應...）
+- firstMessage：開場白或初次見面的對話
+- scenario：相遇的場景或情境設定
+
+【格式要求】：
+- 只回應 JSON，不要有其他文字
+- 使用 camelCase 命名
+- description 應整合性格、背景、外觀等所有資訊
+- 如果沒有相關資訊，填空字串 ""
+
+角色卡內容：
+`
+            },
+            metadata: {
+              name: '元資料',
+              fields: ['tags', 'worldLore'],
+              prompt: `請從以下角色卡中提取**元資料**相關資訊。
+
+【只需提取以下欄位】：
+{
+  "tags": "標籤（逗號分隔，用於分類）",
+  "worldLore": "世界觀設定"
+}
+
+【提取重點】：
+- tags：角色的分類標籤（如：奇幻, 劍士, 神秘, 強大）
+- worldLore：角色所處的世界背景、設定、規則
+
+【格式要求】：
+- 只回應 JSON，不要有其他文字
+- 使用 camelCase 命名
+- 如果沒有相關資訊，填空字串 ""
+
+角色卡內容：
+`
             }
           };
 
@@ -3496,7 +3692,8 @@ ${text}`;
           }
 
           try {
-            // 開始 loading（只鎖定該區塊的欄位）
+            // 開始全螢幕 loading
+            this.setLoading(true);
             showToast(`AI 正在補充${section.name}...`, 'info');
 
             // 鎖定該區塊的欄位
@@ -3515,13 +3712,22 @@ ${text}`;
             // 正規化結果
             const normalizedData = this.normalizeAIResponse(data);
 
-            // 填入對應欄位
+            // 填入對應欄位（處理動態欄位和普通欄位）
             section.fields.forEach(fieldId => {
-              const field = document.getElementById(fieldId);
-              if (field && normalizedData[fieldId]) {
-                field.value = normalizedData[fieldId];
-                // 觸發 input 事件以更新預覽
-                field.dispatchEvent(new Event('input', { bubbles: true }));
+              // 檢查是否為動態欄位
+              const dynamicFieldTypes = ['combatSkills', 'lifeSkills', 'speechStyle', 'relationships', 'customAttributes'];
+
+              if (dynamicFieldTypes.includes(fieldId)) {
+                // 處理動態欄位
+                this.fillDynamicField(fieldId, normalizedData[fieldId]);
+              } else {
+                // 處理普通欄位
+                const field = document.getElementById(fieldId);
+                if (field && normalizedData[fieldId]) {
+                  field.value = normalizedData[fieldId];
+                  // 觸發 input 事件以更新預覽
+                  field.dispatchEvent(new Event('input', { bubbles: true }));
+                }
               }
             });
 
@@ -3531,6 +3737,9 @@ ${text}`;
             console.error('AI 補充失敗：', error);
             showToast(`補充失敗：${error.message}`, 'error');
           } finally {
+            // 關閉全螢幕 loading
+            this.setLoading(false);
+
             // 解鎖欄位
             section.fields.forEach(fieldId => {
               const field = document.getElementById(fieldId);
