@@ -1895,6 +1895,216 @@
       box-shadow: none;
     }
 
+    /* 📥 讓AI讀取匯入檔 按鈕 - 紅色系 */
+    .ai-import-btn {
+      padding: 6px 14px;
+      font-size: 0.875rem;
+      background: linear-gradient(135deg, #e63946 0%, #a4161a 100%);
+      color: var(--text-inverse);
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-md);
+      margin-right: var(--spacing-sm);
+    }
+
+    .ai-import-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      background: linear-gradient(135deg, #f44e5c 0%, #b71c23 100%);
+    }
+
+    .ai-import-btn:active {
+      transform: translateY(0);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .ai-import-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .ai-import-btn:active::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .ai-import-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* 🎨 讓AI生成 按鈕 - 紫藍色系 */
+    .ai-generate-btn {
+      padding: 6px 14px;
+      font-size: 0.875rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: var(--text-inverse);
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-md);
+      margin-left: var(--spacing-xs);
+    }
+
+    .ai-generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      background: linear-gradient(135deg, #7b93f7 0%, #8a5cb8 100%);
+    }
+
+    .ai-generate-btn:active {
+      transform: translateY(0);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .ai-generate-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .ai-generate-btn:active::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .ai-generate-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* 💬 確認對話框 */
+    .confirm-dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .confirm-dialog-box {
+      background: var(--bg-primary);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: var(--shadow-2xl);
+      animation: slideUp 0.3s ease-out;
+    }
+
+    .confirm-dialog-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .confirm-dialog-message {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .confirm-dialog-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .confirm-option-btn {
+      padding: 16px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+
+    .confirm-option-btn:hover {
+      border-color: var(--primary-color);
+      background: var(--bg-tertiary);
+      transform: translateX(4px);
+    }
+
+    .option-label {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .option-description {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .confirm-cancel-btn {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .confirm-cancel-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     /* 🎲 骰子按鈕增強 */
     .dice-btn {
       transition: all var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
@@ -2147,8 +2357,12 @@
         <div class="form-section">
           <div class="section-header" onclick="toggleSection(this)">
             <h3><span class="icon">📋</span> 基本資訊</h3>
-            <button class="ai-fill-btn" onclick="event.stopPropagation(); App.import.fillSectionWithAI('basicInfo')" title="AI 補充基本資訊">
-              🤖 AI補充
+            <button class="ai-import-btn"
+                    onclick="event.stopPropagation(); App.import.fillSectionWithAI('basicInfo')"
+                    title="從匯入檔案中讀取資料填充此區塊"
+                    id="aiImportBtn-basicInfo"
+                    style="display: none;">
+              📥 讓AI讀取匯入檔
             </button>
             <span class="section-toggle">▼</span>
           </div>
@@ -2214,8 +2428,12 @@
         <div class="form-section">
           <div class="section-header" onclick="toggleSection(this)">
             <h3><span class="icon">👤</span> 外觀描述</h3>
-            <button class="ai-fill-btn" onclick="event.stopPropagation(); App.import.fillSectionWithAI('appearance')" title="AI 補充外觀描述">
-              🤖 AI補充
+            <button class="ai-import-btn"
+                    onclick="event.stopPropagation(); App.import.fillSectionWithAI('appearance')"
+                    title="從匯入檔案中讀取資料填充此區塊"
+                    id="aiImportBtn-appearance"
+                    style="display: none;">
+              📥 讓AI讀取匯入檔
             </button>
             <span class="section-toggle">▼</span>
           </div>
@@ -2285,8 +2503,12 @@
         <div class="form-section">
           <div class="section-header" onclick="toggleSection(this)">
             <h3><span class="icon">💭</span> 性格特質</h3>
-            <button class="ai-fill-btn" onclick="event.stopPropagation(); App.import.fillSectionWithAI('personality')" title="AI 補充性格資訊">
-              🤖 AI補充
+            <button class="ai-import-btn"
+                    onclick="event.stopPropagation(); App.import.fillSectionWithAI('personality')"
+                    title="從匯入檔案中讀取資料填充此區塊"
+                    id="aiImportBtn-personality"
+                    style="display: none;">
+              📥 讓AI讀取匯入檔
             </button>
             <span class="section-toggle">▼</span>
           </div>
@@ -2388,8 +2610,12 @@
         <div class="form-section">
           <div class="section-header full-mode-only" onclick="toggleSection(this)">
             <h3><span class="icon">📖</span> 背景故事</h3>
-            <button class="ai-fill-btn" onclick="event.stopPropagation(); App.import.fillSectionWithAI('background')" title="AI 補充背景故事">
-              🤖 AI補充
+            <button class="ai-import-btn"
+                    onclick="event.stopPropagation(); App.import.fillSectionWithAI('background')"
+                    title="從匯入檔案中讀取資料填充此區塊"
+                    id="aiImportBtn-background"
+                    style="display: none;">
+              📥 讓AI讀取匯入檔
             </button>
             <span class="section-toggle">▼</span>
           </div>
@@ -2427,8 +2653,12 @@
         <div class="form-section">
           <div class="section-header full-mode-only" onclick="toggleSection(this)">
             <h3><span class="icon">⚔️</span> 戰鬥與生活技能</h3>
-            <button class="ai-fill-btn" onclick="event.stopPropagation(); App.import.fillSectionWithAI('skills')" title="AI 補充技能資訊">
-              🤖 AI補充
+            <button class="ai-import-btn"
+                    onclick="event.stopPropagation(); App.import.fillSectionWithAI('skills')"
+                    title="從匯入檔案中讀取資料填充此區塊"
+                    id="aiImportBtn-skills"
+                    style="display: none;">
+              📥 讓AI讀取匯入檔
             </button>
             <span class="section-toggle">▼</span>
           </div>
@@ -2483,8 +2713,12 @@
         <div class="form-section">
           <div class="section-header full-mode-only" onclick="toggleSection(this)">
             <h3><span class="icon">🗣️</span> 對話風格</h3>
-            <button class="ai-fill-btn" onclick="event.stopPropagation(); App.import.fillSectionWithAI('speech')" title="AI 補充對話風格">
-              🤖 AI補充
+            <button class="ai-import-btn"
+                    onclick="event.stopPropagation(); App.import.fillSectionWithAI('speech')"
+                    title="從匯入檔案中讀取資料填充此區塊"
+                    id="aiImportBtn-speech"
+                    style="display: none;">
+              📥 讓AI讀取匯入檔
             </button>
             <span class="section-toggle">▼</span>
           </div>
@@ -2521,8 +2755,12 @@
         <div class="form-section">
           <div class="section-header" onclick="toggleSection(this)">
             <h3><span class="icon">🤖</span> AI 核心設定</h3>
-            <button class="ai-fill-btn" onclick="event.stopPropagation(); App.import.fillSectionWithAI('aiSettings')" title="AI 補充核心設定">
-              🤖 AI補充
+            <button class="ai-import-btn"
+                    onclick="event.stopPropagation(); App.import.fillSectionWithAI('aiSettings')"
+                    title="從匯入檔案中讀取資料填充此區塊"
+                    id="aiImportBtn-aiInstructions"
+                    style="display: none;">
+              📥 讓AI讀取匯入檔
             </button>
             <span class="section-toggle">▼</span>
           </div>
@@ -2554,8 +2792,12 @@
         <div class="form-section">
           <div class="section-header" onclick="toggleSection(this)">
             <h3><span class="icon">📎</span> 元資料</h3>
-            <button class="ai-fill-btn" onclick="event.stopPropagation(); App.import.fillSectionWithAI('metadata')" title="AI 補充元資料">
-              🤖 AI補充
+            <button class="ai-import-btn"
+                    onclick="event.stopPropagation(); App.import.fillSectionWithAI('metadata')"
+                    title="從匯入檔案中讀取資料填充此區塊"
+                    id="aiImportBtn-metadata"
+                    style="display: none;">
+              📥 讓AI讀取匯入檔
             </button>
             <span class="section-toggle">▼</span>
           </div>
@@ -3781,6 +4023,8 @@
             }
 
             showToast('匯入成功！', 'success');
+            // 顯示「讓AI讀取匯入檔」按鈕
+            showAIImportButtons();
           } catch (error) {
             console.error('匯入失敗：', error);
             showToast('匯入失敗：' + error.message, 'error');
@@ -4182,6 +4426,19 @@ ${text}`;
             return;
           }
 
+          // 顯示確認對話框
+          const userChoice = await showConfirmDialog({
+            title: '選擇填充模式',
+            message: '請選擇如何填充此區塊的資料：',
+            options: [
+              { value: 'fillEmpty', label: '只填充空白欄位', description: '保留已填寫的內容，只填入空白欄位' },
+              { value: 'overwriteAll', label: '覆蓋全部欄位', description: '用匯入檔案的資料覆蓋所有欄位（包括已填寫的）' }
+            ],
+            cancelable: true
+          });
+
+          if (!userChoice) return; // 用戶取消
+
           // 定義區塊欄位映射
           const sectionFields = {
             skills: {
@@ -4483,14 +4740,25 @@ ${text}`;
 
               if (dynamicFieldTypes.includes(fieldId)) {
                 // 處理動態欄位
+                // 動態欄位暫時總是填充（因為難以判斷是否為空）
                 this.fillDynamicField(fieldId, normalizedData[fieldId]);
               } else {
                 // 處理普通欄位
                 const field = document.getElementById(fieldId);
                 if (field && normalizedData[fieldId]) {
-                  field.value = normalizedData[fieldId];
-                  // 觸發 input 事件以更新預覽
-                  field.dispatchEvent(new Event('input', { bubbles: true }));
+                  // 根據用戶選擇決定是否覆蓋
+                  if (userChoice === 'overwriteAll') {
+                    // 覆蓋全部
+                    field.value = normalizedData[fieldId];
+                    field.dispatchEvent(new Event('input', { bubbles: true }));
+                  } else if (userChoice === 'fillEmpty') {
+                    // 只填充空白
+                    const currentValue = field.value || '';
+                    if (!currentValue.trim()) {
+                      field.value = normalizedData[fieldId];
+                      field.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                  }
                 }
               }
             });
@@ -7559,6 +7827,83 @@ ${text}`;
       setTimeout(() => {
         toast.classList.remove('show');
       }, 3000);
+    }
+
+    // ===== 確認對話框 =====
+    function showConfirmDialog({ title, message, options, cancelable = true }) {
+      return new Promise((resolve) => {
+        // 創建對話框 HTML
+        const dialogHTML = `
+          <div class="confirm-dialog-overlay" id="confirmDialogOverlay">
+            <div class="confirm-dialog-box">
+              <h3 class="confirm-dialog-title">${title}</h3>
+              <p class="confirm-dialog-message">${message}</p>
+              <div class="confirm-dialog-options">
+                ${options.map(opt => `
+                  <button class="confirm-option-btn" data-value="${opt.value}">
+                    <div class="option-label">${opt.label}</div>
+                    <div class="option-description">${opt.description}</div>
+                  </button>
+                `).join('')}
+              </div>
+              ${cancelable ? '<button class="confirm-cancel-btn">取消</button>' : ''}
+            </div>
+          </div>
+        `;
+
+        // 添加到 DOM
+        document.body.insertAdjacentHTML('beforeend', dialogHTML);
+        const overlay = document.getElementById('confirmDialogOverlay');
+
+        // 選項按鈕事件
+        overlay.querySelectorAll('.confirm-option-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const value = btn.getAttribute('data-value');
+            overlay.remove();
+            resolve(value);
+          });
+        });
+
+        // 取消按鈕事件
+        if (cancelable) {
+          const cancelBtn = overlay.querySelector('.confirm-cancel-btn');
+          if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+              overlay.remove();
+              resolve(null);
+            });
+          }
+        }
+
+        // 點擊背景關閉
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) {
+            overlay.remove();
+            resolve(null);
+          }
+        });
+      });
+    }
+
+    // ===== 顯示「讓AI讀取匯入檔」按鈕 =====
+    function showAIImportButtons() {
+      const buttonIds = [
+        'aiImportBtn-basicInfo',
+        'aiImportBtn-appearance',
+        'aiImportBtn-personality',
+        'aiImportBtn-skills',
+        'aiImportBtn-background',
+        'aiImportBtn-speech',
+        'aiImportBtn-aiInstructions',
+        'aiImportBtn-metadata'
+      ];
+
+      buttonIds.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.style.display = 'inline-block';
+        }
+      });
     }
 
     // ===== 初始化 =====
