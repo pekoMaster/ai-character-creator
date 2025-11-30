@@ -3046,7 +3046,10 @@
           }
 
           // Step 2: 轉換 snake_case 到 camelCase
-          const normalized = this.convertToCamelCase(flattened);
+          let normalized = this.convertToCamelCase(flattened);
+
+          // Step 3: 智能提取戰鬥技能（從 strengths 中分離）
+          normalized = this.extractCombatSkills(normalized);
 
           console.log('正規化完成:', normalized);
           return normalized;
@@ -3093,6 +3096,64 @@
           }
 
           return result;
+        },
+
+        /**
+         * 智能提取戰鬥技能
+         * 從 strengths 中分離出戰鬥相關技能到 combatSkills
+         */
+        extractCombatSkills(data) {
+          // 如果已經有 combatSkills，不處理
+          if (data.combatSkills && data.combatSkills.length > 0) {
+            return data;
+          }
+
+          // 如果沒有 strengths，不處理
+          if (!data.strengths) {
+            return data;
+          }
+
+          // 戰鬥相關關鍵詞（擴充清單）
+          const combatKeywords = [
+            // 招式名稱
+            '一流', '劍', '刀', '拳', '腿', '術', '法', '功', '技', '式',
+            // 武器
+            '雙刀', '太刀', '短刀', '長槍', '弓箭', '魔杖',
+            // 能力
+            '反應', '步法', '感知', '速度', '力量', '敏捷', '防禦', '閃避',
+            '預知', '直覺', '戰鬥', '空間', '時間', '元素', '魔力', '靈力',
+            // 特殊能力
+            '操縱', '召喚', '轟炸', '毀滅', '壓制', '斬斷', '治癒', '防護',
+            '五輪', '寶具', '必殺', '奧義', '絕技', '超能力'
+          ];
+
+          // 將 strengths 轉換為陣列（如果是字串）
+          let strengthsArray = Array.isArray(data.strengths)
+            ? data.strengths
+            : (typeof data.strengths === 'string' ? data.strengths.split(/[,，、]/).map(s => s.trim()) : []);
+
+          let combatSkills = [];
+          let remainingStrengths = [];
+
+          strengthsArray.forEach(strength => {
+            // 檢查是否包含戰鬥關鍵詞
+            const isCombat = combatKeywords.some(keyword => strength.includes(keyword));
+
+            if (isCombat) {
+              combatSkills.push(strength);
+            } else {
+              remainingStrengths.push(strength);
+            }
+          });
+
+          // 更新資料
+          if (combatSkills.length > 0) {
+            console.log(`智能提取：從 strengths 中分離出 ${combatSkills.length} 個戰鬥技能`);
+            data.combatSkills = combatSkills.join(', ');
+            data.strengths = remainingStrengths.length > 0 ? remainingStrengths : data.strengths;
+          }
+
+          return data;
         },
 
         async importWithAI(file) {
