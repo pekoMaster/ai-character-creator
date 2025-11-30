@@ -2914,6 +2914,64 @@
 
       // 匯入功能
       import: {
+        /**
+         * 設置 loading 狀態
+         * @param {boolean} isLoading - 是否正在載入
+         */
+        setLoading(isLoading) {
+          const form = document.getElementById('characterForm');
+          const inputs = form.querySelectorAll('input, textarea, select');
+
+          if (isLoading) {
+            // 禁用所有表單欄位
+            inputs.forEach(input => {
+              input.disabled = true;
+              input.style.opacity = '0.6';
+              input.style.cursor = 'not-allowed';
+            });
+
+            // 顯示 loading 遮罩
+            let loadingOverlay = document.getElementById('loadingOverlay');
+            if (!loadingOverlay) {
+              loadingOverlay = document.createElement('div');
+              loadingOverlay.id = 'loadingOverlay';
+              loadingOverlay.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                            background: rgba(255,255,255,0.9); z-index: 9999;
+                            display: flex; align-items: center; justify-content: center;">
+                  <div style="text-align: center;">
+                    <div style="border: 4px solid #f3f3f3; border-top: 4px solid #3498db;
+                                border-radius: 50%; width: 50px; height: 50px;
+                                animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+                    <div style="font-size: 18px; color: #333;">AI 正在分析角色卡...</div>
+                    <div style="font-size: 14px; color: #666; margin-top: 10px;">請稍候，不要關閉頁面</div>
+                  </div>
+                </div>
+                <style>
+                  @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                  }
+                </style>
+              `;
+              document.body.appendChild(loadingOverlay);
+            }
+          } else {
+            // 啟用所有表單欄位
+            inputs.forEach(input => {
+              input.disabled = false;
+              input.style.opacity = '1';
+              input.style.cursor = '';
+            });
+
+            // 移除 loading 遮罩
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+              loadingOverlay.remove();
+            }
+          }
+        },
+
         async execute() {
           const fileInput = document.getElementById('importFileInput');
           const useAI = document.getElementById('useAIImport').checked;
@@ -2928,6 +2986,9 @@
           App.ui.closeImport();
 
           try {
+            // 開始 loading
+            this.setLoading(true);
+
             if (useAI) {
               // 使用 AI 判讀
               showToast('AI 正在判讀中，請稍候...', 'info');
@@ -2942,6 +3003,9 @@
           } catch (error) {
             console.error('匯入失敗：', error);
             showToast('匯入失敗：' + error.message, 'error');
+          } finally {
+            // 結束 loading（無論成功或失敗）
+            this.setLoading(false);
           }
         },
 
@@ -2964,6 +3028,71 @@
           } else {
             throw new Error('無法解析檔案內容');
           }
+        },
+
+        /**
+         * 正規化 AI 返回的 JSON 結構
+         * 處理嵌套結構 → 扁平化
+         * 處理 snake_case → camelCase
+         */
+        normalizeAIResponse(data) {
+          // Step 1: 扁平化嵌套結構
+          let flattened = data;
+          if (data.character_info || data.appearance || data.personality ||
+              data.background || data.speech_patterns || data.ai_instructions ||
+              data.metadata) {
+            console.log('檢測到嵌套結構，開始扁平化...');
+            flattened = this.flattenNestedJSON(data);
+          }
+
+          // Step 2: 轉換 snake_case 到 camelCase
+          const normalized = this.convertToCamelCase(flattened);
+
+          console.log('正規化完成:', normalized);
+          return normalized;
+        },
+
+        /**
+         * 遞歸扁平化嵌套 JSON
+         */
+        flattenNestedJSON(data) {
+          let result = {};
+
+          const flatten = (obj) => {
+            for (let key in obj) {
+              if (obj.hasOwnProperty(key)) {
+                const value = obj[key];
+                // 如果是物件且不是陣列且不是 null，則遞歸展開
+                if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
+                  flatten(value);
+                } else {
+                  // 直接賦值（陣列和基本類型）
+                  result[key] = value;
+                }
+              }
+            }
+          };
+
+          flatten(data);
+          return result;
+        },
+
+        /**
+         * 轉換 snake_case 到 camelCase
+         */
+        convertToCamelCase(data) {
+          let result = {};
+
+          for (let key in data) {
+            if (data.hasOwnProperty(key)) {
+              // 轉換 snake_case 到 camelCase
+              // 例如：hair_color → hairColor, body_type → bodyType
+              const camelKey = key.replace(/_([a-z])/g, (match, letter) => letter.toUpperCase());
+              result[camelKey] = data[key];
+            }
+          }
+
+          return result;
         },
 
         async importWithAI(file) {
@@ -3116,9 +3245,12 @@ ${text}`;
           // 調用 AI API（返回的已經是解析好的 JSON 物件）
           const data = await App.ai.callAIAPI(prompt);
 
+          // 正規化 AI 返回結果（扁平化嵌套結構 + snake_case 轉 camelCase）
+          const normalizedData = this.normalizeAIResponse(data);
+
           // 驗證資料
-          if (data && data.name) {
-            fillFormData(data);
+          if (normalizedData && normalizedData.name) {
+            fillFormData(normalizedData);
           } else {
             throw new Error('AI 無法識別角色資訊');
           }
