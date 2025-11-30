@@ -19,27 +19,177 @@
   <style>
     /* ===== CSS 變數定義 ===== */
     :root {
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --primary-light: #a5b4fc;
-      --secondary: #ec4899;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --dark: #1e1b4b;
-      --gray-50: #f8fafc;
-      --gray-100: #f1f5f9;
-      --gray-200: #e2e8f0;
-      --gray-300: #cbd5e1;
-      --gray-400: #94a3b8;
-      --gray-500: #64748b;
-      --gray-600: #475569;
-      --gray-700: #334155;
-      --gray-800: #1e293b;
-      --gray-900: #0f172a;
-      --radius: 12px;
-      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      /* 🎨 主題色彩（柔和中性） */
+      --primary: #5B7BFF;
+      --primary-dark: #4A6AEE;
+      --primary-light: #8FA9FF;
+      --primary-glow: rgba(91, 123, 255, 0.3);
+
+      --secondary: #FF6B9D;
+      --secondary-dark: #EE5A8C;
+      --secondary-light: #FF9BBF;
+
+      --accent: #9D7BFF;
+      --success: #06D6A0;
+      --warning: #FFB800;
+      --danger: #FF6B6B;
+      --info: #4FC3F7;
+
+      /* 🌈 漸變色彩 */
+      --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      --gradient-soft: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      --gradient-sunset: linear-gradient(135deg, #ff6b9d 0%, #ffa06b 100%);
+      --gradient-ocean: linear-gradient(135deg, #4fc3f7 0%, #5b7bff 100%);
+      --gradient-forest: linear-gradient(135deg, #06d6a0 0%, #54d8c7 100%);
+
+      /* 🌑 淺色模式顏色 */
+      --bg-primary: #F8F9FA;
+      --bg-secondary: #FFFFFF;
+      --bg-tertiary: #F1F3F5;
+
+      --text-primary: #1A1A1A;
+      --text-secondary: #4A5568;
+      --text-tertiary: #718096;
+      --text-inverse: #FFFFFF;
+
+      --border-color: #E2E8F0;
+      --border-light: #F1F3F5;
+      --border-dark: #CBD5E1;
+
+      /* 🎯 中性色系（優化灰階） */
+      --gray-50: #FAFBFC;
+      --gray-100: #F3F4F6;
+      --gray-200: #E5E7EB;
+      --gray-300: #D1D5DB;
+      --gray-400: #9CA3AF;
+      --gray-500: #6B7280;
+      --gray-600: #4B5563;
+      --gray-700: #374151;
+      --gray-800: #1F2937;
+      --gray-900: #111827;
+
+      /* 📐 圓角系統（現代化大圓角） */
+      --radius-xs: 6px;
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 20px;
+      --radius-xl: 24px;
+      --radius-2xl: 32px;
+      --radius-full: 9999px;
+      --radius: var(--radius-md);
+
+      /* 💫 陰影系統（多層次柔和陰影） */
+      --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-sm:
+        0 1px 3px 0 rgba(0, 0, 0, 0.1),
+        0 1px 2px -1px rgba(0, 0, 0, 0.1);
+      --shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      --shadow-md:
+        0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -4px rgba(0, 0, 0, 0.1);
+      --shadow-lg:
+        0 20px 25px -5px rgba(0, 0, 0, 0.1),
+        0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      --shadow-xl:
+        0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      --shadow-2xl:
+        0 30px 60px -15px rgba(0, 0, 0, 0.3);
+      --shadow-colored:
+        0 10px 30px -5px var(--primary-glow);
+      --shadow-glow:
+        0 0 20px rgba(91, 123, 255, 0.3),
+        0 0 40px rgba(91, 123, 255, 0.1);
+
+      /* 🔮 玻璃擬態效果 */
+      --glass-bg: rgba(255, 255, 255, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --glass-blur: blur(12px);
+
+      /* ⚡ 動畫時間 */
+      --transition-fast: 150ms;
+      --transition-base: 250ms;
+      --transition-slow: 350ms;
+      --transition-slower: 500ms;
+
+      /* 📏 間距系統（8px grid） */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --spacing-2xl: 48px;
+      --spacing-3xl: 64px;
+
+      /* 🎭 Z-index 層級 */
+      --z-dropdown: 1000;
+      --z-sticky: 1020;
+      --z-fixed: 1030;
+      --z-modal-backdrop: 1040;
+      --z-modal: 1050;
+      --z-popover: 1060;
+      --z-tooltip: 1070;
+    }
+
+    /* 🌙 深色模式 */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg-primary: #0F1419;
+        --bg-secondary: #1A1F2E;
+        --bg-tertiary: #252C3C;
+
+        --text-primary: #E4E6EB;
+        --text-secondary: #B4B8C5;
+        --text-tertiary: #8B92A6;
+        --text-inverse: #1A1A1A;
+
+        --border-color: #2D3748;
+        --border-light: #252C3C;
+        --border-dark: #3F4758;
+
+        --glass-bg: rgba(26, 31, 46, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.1);
+
+        --shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.3),
+          0 2px 4px -2px rgba(0, 0, 0, 0.3);
+        --shadow-md:
+          0 10px 15px -3px rgba(0, 0, 0, 0.3),
+          0 4px 6px -4px rgba(0, 0, 0, 0.3);
+        --shadow-lg:
+          0 20px 25px -5px rgba(0, 0, 0, 0.4),
+          0 8px 10px -6px rgba(0, 0, 0, 0.4);
+      }
+    }
+
+    /* 🎨 手動深色模式切換 */
+    [data-theme="dark"] {
+      --bg-primary: #0F1419;
+      --bg-secondary: #1A1F2E;
+      --bg-tertiary: #252C3C;
+
+      --text-primary: #E4E6EB;
+      --text-secondary: #B4B8C5;
+      --text-tertiary: #8B92A6;
+      --text-inverse: #1A1A1A;
+
+      --border-color: #2D3748;
+      --border-light: #252C3C;
+      --border-dark: #3F4758;
+
+      --glass-bg: rgba(26, 31, 46, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.1);
+
+      --shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.3),
+        0 2px 4px -2px rgba(0, 0, 0, 0.3);
+      --shadow-md:
+        0 10px 15px -3px rgba(0, 0, 0, 0.3),
+        0 4px 6px -4px rgba(0, 0, 0, 0.3);
+      --shadow-lg:
+        0 20px 25px -5px rgba(0, 0, 0, 0.4),
+        0 8px 10px -6px rgba(0, 0, 0, 0.4);
     }
 
     /* ===== 全域樣式 ===== */
@@ -49,52 +199,135 @@
       box-sizing: border-box;
     }
 
+    *,
+    *::before,
+    *::after {
+      box-sizing: inherit;
+    }
+
+    html {
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
     body {
-      font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg-primary);
       min-height: 100vh;
-      color: var(--gray-800);
+      color: var(--text-primary);
       line-height: 1.6;
+      position: relative;
+      overflow-x: hidden;
+      transition: background-color var(--transition-base) ease;
+    }
+
+    /* 🎨 現代化背景裝飾 */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(91, 123, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 107, 157, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(157, 123, 255, 0.06) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+      animation: backgroundShift 30s ease-in-out infinite;
+    }
+
+    @keyframes backgroundShift {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(2%, 2%) rotate(1deg); }
+      50% { transform: translate(-1%, 3%) rotate(-1deg); }
+      75% { transform: translate(3%, -2%) rotate(0.5deg); }
     }
 
     /* ===== 主容器 ===== */
     .app-container {
       max-width: 1600px;
       margin: 0 auto;
-      padding: 20px;
+      padding: var(--spacing-lg);
+      position: relative;
+      z-index: 1;
     }
 
     /* ===== 頁首 ===== */
     .header {
       text-align: center;
-      padding: 30px 20px;
-      color: white;
+      padding: var(--spacing-3xl) var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+      position: relative;
     }
 
     .header h1 {
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin-bottom: 10px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      margin-bottom: var(--spacing-md);
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+      animation: fadeInDown var(--transition-slower) ease-out;
+      line-height: 1.2;
     }
 
     .header p {
-      font-size: 1.1rem;
-      opacity: 0.9;
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--text-secondary);
+      font-weight: 500;
+      animation: fadeInUp var(--transition-slower) ease-out 0.1s backwards;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* ===== 控制列 ===== */
     .controls-bar {
-      background: white;
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 20px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
       box-shadow: var(--shadow-lg);
       display: flex;
       flex-wrap: wrap;
-      gap: 20px;
+      gap: var(--spacing-lg);
       align-items: center;
       justify-content: space-between;
+      animation: fadeInUp var(--transition-slower) ease-out 0.2s backwards;
+      transition: all var(--transition-base) ease;
+    }
+
+    .controls-bar:hover {
+      box-shadow: var(--shadow-xl);
+      transform: translateY(-2px);
     }
 
     .control-group {
@@ -156,37 +389,72 @@
     /* ===== 平台選擇按鈕 ===== */
     .platform-buttons {
       display: flex;
-      gap: 8px;
+      gap: var(--spacing-sm);
       flex-wrap: wrap;
     }
 
     .platform-btn {
-      padding: 10px 16px;
-      border: 2px solid var(--gray-200);
-      border-radius: 8px;
-      background: white;
+      padding: 12px 20px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-secondary);
       cursor: pointer;
-      font-weight: 500;
-      font-size: 0.9rem;
-      transition: all 0.2s;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: var(--spacing-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .platform-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: var(--primary-glow);
+      transform: translate(-50%, -50%);
+      transition: width var(--transition-slow) ease, height var(--transition-slow) ease;
     }
 
     .platform-btn:hover {
       border-color: var(--primary-light);
-      background: var(--gray-50);
+      background: var(--bg-tertiary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .platform-btn:hover::before {
+      width: 300px;
+      height: 300px;
     }
 
     .platform-btn.active {
       border-color: var(--primary);
       background: var(--primary);
-      color: white;
+      color: var(--text-inverse);
+      box-shadow: var(--shadow-colored);
+      transform: translateY(-2px);
+    }
+
+    .platform-btn.active:hover {
+      background: var(--primary-dark);
     }
 
     .platform-btn .icon {
-      font-size: 1.1rem;
+      font-size: 1.2rem;
+      transition: transform var(--transition-base) ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .platform-btn:hover .icon {
+      transform: scale(1.1) rotate(5deg);
     }
 
     /* ===== 主要內容區 ===== */
@@ -204,10 +472,19 @@
 
     /* ===== 表單區域 ===== */
     .form-panel {
-      background: white;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-xl);
       overflow: hidden;
+      animation: fadeInUp var(--transition-slower) ease-out 0.3s backwards;
+      transition: all var(--transition-base) ease;
+    }
+
+    .form-panel:hover {
+      box-shadow: var(--shadow-2xl);
     }
 
     .form-section {
@@ -336,13 +613,21 @@
     .form-field input,
     .form-field select,
     .form-field textarea {
-      padding: 10px 14px;
-      border: 2px solid var(--gray-200);
-      border-radius: 8px;
+      padding: 12px 16px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
       font-size: 0.95rem;
       font-family: inherit;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      background: white;
+      transition: all var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .form-field input:hover,
+    .form-field select:hover,
+    .form-field textarea:hover {
+      border-color: var(--border-dark);
+      box-shadow: var(--shadow-sm);
     }
 
     .form-field input:focus,
@@ -350,7 +635,8 @@
     .form-field textarea:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      box-shadow: 0 0 0 4px var(--primary-glow), var(--shadow-md);
+      transform: translateY(-1px);
     }
 
     .form-field textarea {
@@ -382,14 +668,24 @@
 
     /* ===== 預覽區域 ===== */
     .preview-panel {
-      background: white;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-xl);
       display: flex;
       flex-direction: column;
       max-height: calc(100vh - 200px);
       position: sticky;
-      top: 20px;
+      top: var(--spacing-lg);
+      animation: fadeInUp var(--transition-slower) ease-out 0.4s backwards;
+      transition: all var(--transition-base) ease;
+      overflow: hidden;
+    }
+
+    .preview-panel:hover {
+      box-shadow: var(--shadow-2xl);
     }
 
     .preview-header {
@@ -1346,6 +1642,417 @@
 
     .error-state {
       color: var(--danger);
+    }
+
+    /* ========== 🎨 現代化新增功能 ========== */
+
+    /* 💫 骨架屏加載動畫 */
+    .skeleton {
+      background: linear-gradient(
+        90deg,
+        var(--gray-200) 0%,
+        var(--gray-100) 50%,
+        var(--gray-200) 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.5s ease-in-out infinite;
+      border-radius: var(--radius-md);
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    .skeleton-text {
+      height: 16px;
+      margin-bottom: var(--spacing-sm);
+      border-radius: var(--radius-sm);
+    }
+
+    .skeleton-title {
+      height: 24px;
+      width: 60%;
+      margin-bottom: var(--spacing-md);
+      border-radius: var(--radius-md);
+    }
+
+    .skeleton-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-full);
+    }
+
+    /* 🌓 深色模式切換器 */
+    .theme-toggle {
+      position: fixed;
+      bottom: var(--spacing-lg);
+      right: var(--spacing-lg);
+      width: 56px;
+      height: 56px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-full);
+      box-shadow: var(--shadow-xl);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      transition: all var(--transition-base) ease;
+      z-index: var(--z-fixed);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .theme-toggle:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .theme-toggle:active {
+      transform: translateY(-2px) scale(0.98);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* ✨ 改進的 Toast 通知 */
+    .toast {
+      position: fixed;
+      bottom: var(--spacing-xl);
+      right: var(--spacing-xl);
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+      transition: all var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: var(--z-tooltip);
+      max-width: 400px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      animation: toastSlideIn var(--transition-base) ease-out;
+    }
+
+    @keyframes toastSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .toast.success {
+      border-left: 4px solid var(--success);
+      background: var(--glass-bg);
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--danger);
+      background: var(--glass-bg);
+    }
+
+    .toast.warning {
+      border-left: 4px solid var(--warning);
+      background: var(--glass-bg);
+    }
+
+    .toast.info {
+      border-left: 4px solid var(--info);
+      background: var(--glass-bg);
+    }
+
+    /* 🎯 改進的匯出按鈕 */
+    .export-btn {
+      flex: 1;
+      min-width: 100px;
+      padding: 14px 24px;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .export-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+      );
+      transition: left var(--transition-slow) ease;
+    }
+
+    .export-btn:hover::before {
+      left: 100%;
+    }
+
+    .export-btn:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .export-btn:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    /* 🎨 AI 補充按鈕增強 */
+    .ai-fill-btn {
+      padding: 6px 14px;
+      font-size: 0.875rem;
+      background: var(--gradient-primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-right: var(--spacing-sm);
+      font-weight: 600;
+      box-shadow: var(--shadow-colored);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ai-fill-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width var(--transition-slow) ease, height var(--transition-slow) ease;
+    }
+
+    .ai-fill-btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .ai-fill-btn:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .ai-fill-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .ai-fill-btn:disabled {
+      background: var(--gray-300);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* 🎲 骰子按鈕增強 */
+    .dice-btn {
+      transition: all var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dice-btn:hover {
+      transform: rotate(360deg) scale(1.2);
+    }
+
+    .dice-btn:active {
+      transform: rotate(360deg) scale(0.9);
+    }
+
+    /* 🔄 旋轉加載動畫 */
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--gray-200);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* 💎 3D 卡片效果 */
+    .card-3d {
+      transition: transform var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+
+    .card-3d:hover {
+      transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) translateY(-4px);
+    }
+
+    /* 🌊 波紋效果 */
+    .ripple {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ripple::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      transform: translate(-50%, -50%);
+      transition: width var(--transition-slow) ease, height var(--transition-slow) ease;
+    }
+
+    .ripple:active::after {
+      width: 300px;
+      height: 300px;
+    }
+
+    /* ✨ 發光效果 */
+    .glow {
+      position: relative;
+    }
+
+    .glow::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: var(--gradient-primary);
+      border-radius: inherit;
+      opacity: 0;
+      filter: blur(10px);
+      transition: opacity var(--transition-base) ease;
+      z-index: -1;
+    }
+
+    .glow:hover::before {
+      opacity: 0.6;
+    }
+
+    /* 📱 改進的響應式設計 */
+    @media (max-width: 1024px) {
+      .app-container {
+        padding: var(--spacing-md);
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .controls-bar {
+        padding: var(--spacing-md);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .theme-toggle {
+        bottom: var(--spacing-md);
+        right: var(--spacing-md);
+        width: 48px;
+        height: 48px;
+        font-size: 1.25rem;
+      }
+
+      .toast {
+        bottom: var(--spacing-md);
+        right: var(--spacing-md);
+        left: var(--spacing-md);
+        max-width: none;
+      }
+
+      .header {
+        padding: var(--spacing-xl) var(--spacing-md);
+      }
+
+      .controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .platform-btn {
+        justify-content: center;
+      }
+    }
+
+    /* 🎯 滾動條美化 */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-sm);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--gray-400);
+      border-radius: var(--radius-sm);
+      transition: background var(--transition-base) ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gray-500);
+    }
+
+    /* 🎭 選取文字美化 */
+    ::selection {
+      background: var(--primary-glow);
+      color: var(--primary-dark);
+    }
+
+    ::-moz-selection {
+      background: var(--primary-glow);
+      color: var(--primary-dark);
+    }
+
+    /* ⚡ 優化過渡性能 */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   </style>
 </head>
@@ -4300,6 +5007,18 @@ ${text}`;
   "dislikes": "厭惡（逗號分隔）",
   "fears": "恐懼（逗號分隔）",
   "goals": "目標（逗號分隔）",
+  "combatSkills": [
+    { "skill": "戰鬥技能名稱1", "level": "等級或描述" },
+    { "skill": "戰鬥技能名稱2", "level": "等級或描述" }
+  ],
+  "lifeSkills": [
+    { "skill": "生活技能名稱1", "level": "等級或描述" },
+    { "skill": "生活技能名稱2", "level": "等級或描述" }
+  ],
+  "customAttributes": [
+    { "attribute": "屬性名稱1", "value": "值或等級" },
+    { "attribute": "屬性名稱2", "value": "值或等級" }
+  ],
   "birthplace": "出生地",
   "backstory": "背景故事（3-5句話）",
   "keyEvents": "關鍵事件",
@@ -4316,15 +5035,28 @@ ${text}`;
 
 重要規則：
 1. 只回傳純 JSON，不要包含任何其他文字、註釋或 markdown 格式（如 \`\`\`json）
-2. 所有字段的值都必須是字符串類型，用雙引號包裹
-3. 確保所有引號、逗號、大括號正確匹配
-4. 不要在最後一個字段後加逗號
-5. JSON 必須能被 JSON.parse() 直接解析，不能有任何語法錯誤
+2. 一般字段的值必須是字符串類型，用雙引號包裹
+3. combatSkills、lifeSkills、customAttributes 必須是陣列格式，每個元素包含指定的屬性
+4. 確保所有引號、逗號、大括號、方括號正確匹配
+5. 不要在最後一個字段後加逗號
+6. JSON 必須能被 JSON.parse() 直接解析，不能有任何語法錯誤
+7. 請為每個角色生成至少 2-3 個戰鬥技能、1-2 個生活技能、2-3 個自訂屬性
 
 範例格式：
 {
-  "name": "角色名稱",
-  "catchphrases": "口頭禪1, 口頭禪2, 口頭禪3"
+  "name": "狐耳VTuber 小狐",
+  "catchphrases": "こんこーん！, 大家好呀～",
+  "combatSkills": [
+    { "skill": "歌聲魅惑", "level": "S級" },
+    { "skill": "狐火魔法", "level": "專精" }
+  ],
+  "lifeSkills": [
+    { "skill": "遊戲實況", "level": "專業級" }
+  ],
+  "customAttributes": [
+    { "attribute": "魅力值", "value": "SSS" },
+    { "attribute": "可愛度", "value": "MAX" }
+  ]
 }`;
 
           const response = await fetch(
@@ -4400,6 +5132,18 @@ ${text}`;
   "dislikes": "厭惡（逗號分隔）",
   "fears": "恐懼（逗號分隔）",
   "goals": "目標（逗號分隔）",
+  "combatSkills": [
+    { "skill": "戰鬥技能名稱1", "level": "等級或描述" },
+    { "skill": "戰鬥技能名稱2", "level": "等級或描述" }
+  ],
+  "lifeSkills": [
+    { "skill": "生活技能名稱1", "level": "等級或描述" },
+    { "skill": "生活技能名稱2", "level": "等級或描述" }
+  ],
+  "customAttributes": [
+    { "attribute": "屬性名稱1", "value": "值或等級" },
+    { "attribute": "屬性名稱2", "value": "值或等級" }
+  ],
   "birthplace": "出生地",
   "backstory": "背景故事（3-5句話）",
   "keyEvents": "關鍵事件",
@@ -4414,10 +5158,29 @@ ${text}`;
 
 重要規則：
 1. 只回傳純 JSON，不要包含任何其他文字、註釋或 markdown 格式（如 \`\`\`json）
-2. 所有字段的值都必須是字符串類型，用雙引號包裹
-3. 確保所有引號、逗號、大括號正確匹配
-4. 不要在最後一個字段後加逗號
-5. JSON 必須能被 JSON.parse() 直接解析，不能有任何語法錯誤`;
+2. 一般字段的值必須是字符串類型，用雙引號包裹
+3. combatSkills、lifeSkills、customAttributes 必須是陣列格式，每個元素包含指定的屬性
+4. 確保所有引號、逗號、大括號、方括號正確匹配
+5. 不要在最後一個字段後加逗號
+6. JSON 必須能被 JSON.parse() 直接解析，不能有任何語法錯誤
+7. 請為每個角色生成至少 2-3 個戰鬥技能、1-2 個生活技能、2-3 個自訂屬性
+
+範例格式：
+{
+  "name": "狐耳VTuber 小狐",
+  "catchphrases": "こんこーん！, 大家好呀～",
+  "combatSkills": [
+    { "skill": "歌聲魅惑", "level": "S級" },
+    { "skill": "狐火魔法", "level": "專精" }
+  ],
+  "lifeSkills": [
+    { "skill": "遊戲實況", "level": "專業級" }
+  ],
+  "customAttributes": [
+    { "attribute": "魅力值", "value": "SSS" },
+    { "attribute": "可愛度", "value": "MAX" }
+  ]
+}`;
 
           const response = await fetch(
             'https://api.openai.com/v1/chat/completions',
@@ -4494,6 +5257,18 @@ ${text}`;
   "dislikes": "厭惡（逗號分隔）",
   "fears": "恐懼（逗號分隔）",
   "goals": "目標（逗號分隔）",
+  "combatSkills": [
+    { "skill": "戰鬥技能名稱1", "level": "等級或描述" },
+    { "skill": "戰鬥技能名稱2", "level": "等級或描述" }
+  ],
+  "lifeSkills": [
+    { "skill": "生活技能名稱1", "level": "等級或描述" },
+    { "skill": "生活技能名稱2", "level": "等級或描述" }
+  ],
+  "customAttributes": [
+    { "attribute": "屬性名稱1", "value": "值或等級" },
+    { "attribute": "屬性名稱2", "value": "值或等級" }
+  ],
   "birthplace": "出生地",
   "backstory": "背景故事（3-5句話）",
   "keyEvents": "關鍵事件",
@@ -4508,10 +5283,29 @@ ${text}`;
 
 重要規則：
 1. 只回傳純 JSON，不要包含任何其他文字、註釋或 markdown 格式（如 \`\`\`json）
-2. 所有字段的值都必須是字符串類型，用雙引號包裹
-3. 確保所有引號、逗號、大括號正確匹配
-4. 不要在最後一個字段後加逗號
-5. JSON 必須能被 JSON.parse() 直接解析，不能有任何語法錯誤`;
+2. 一般字段的值必須是字符串類型，用雙引號包裹
+3. combatSkills、lifeSkills、customAttributes 必須是陣列格式，每個元素包含指定的屬性
+4. 確保所有引號、逗號、大括號、方括號正確匹配
+5. 不要在最後一個字段後加逗號
+6. JSON 必須能被 JSON.parse() 直接解析，不能有任何語法錯誤
+7. 請為每個角色生成至少 2-3 個戰鬥技能、1-2 個生活技能、2-3 個自訂屬性
+
+範例格式：
+{
+  "name": "狐耳VTuber 小狐",
+  "catchphrases": "こんこーん！, 大家好呀～",
+  "combatSkills": [
+    { "skill": "歌聲魅惑", "level": "S級" },
+    { "skill": "狐火魔法", "level": "專精" }
+  ],
+  "lifeSkills": [
+    { "skill": "遊戲實況", "level": "專業級" }
+  ],
+  "customAttributes": [
+    { "attribute": "魅力值", "value": "SSS" },
+    { "attribute": "可愛度", "value": "MAX" }
+  ]
+}`;
 
           const response = await fetch(
             'https://api.anthropic.com/v1/messages',
@@ -4586,6 +5380,18 @@ ${text}`;
   "dislikes": "厭惡（逗號分隔）",
   "fears": "恐懼（逗號分隔）",
   "goals": "目標（逗號分隔）",
+  "combatSkills": [
+    { "skill": "戰鬥技能名稱1", "level": "等級或描述" },
+    { "skill": "戰鬥技能名稱2", "level": "等級或描述" }
+  ],
+  "lifeSkills": [
+    { "skill": "生活技能名稱1", "level": "等級或描述" },
+    { "skill": "生活技能名稱2", "level": "等級或描述" }
+  ],
+  "customAttributes": [
+    { "attribute": "屬性名稱1", "value": "值或等級" },
+    { "attribute": "屬性名稱2", "value": "值或等級" }
+  ],
   "birthplace": "出生地",
   "backstory": "背景故事（3-5句話）",
   "keyEvents": "關鍵事件",
@@ -4600,10 +5406,29 @@ ${text}`;
 
 重要規則：
 1. 只回傳純 JSON，不要包含任何其他文字、註釋或 markdown 格式（如 \`\`\`json）
-2. 所有字段的值都必須是字符串類型，用雙引號包裹
-3. 確保所有引號、逗號、大括號正確匹配
-4. 不要在最後一個字段後加逗號
-5. JSON 必須能被 JSON.parse() 直接解析，不能有任何語法錯誤`;
+2. 一般字段的值必須是字符串類型，用雙引號包裹
+3. combatSkills、lifeSkills、customAttributes 必須是陣列格式，每個元素包含指定的屬性
+4. 確保所有引號、逗號、大括號、方括號正確匹配
+5. 不要在最後一個字段後加逗號
+6. JSON 必須能被 JSON.parse() 直接解析，不能有任何語法錯誤
+7. 請為每個角色生成至少 2-3 個戰鬥技能、1-2 個生活技能、2-3 個自訂屬性
+
+範例格式：
+{
+  "name": "狐耳VTuber 小狐",
+  "catchphrases": "こんこーん！, 大家好呀～",
+  "combatSkills": [
+    { "skill": "歌聲魅惑", "level": "S級" },
+    { "skill": "狐火魔法", "level": "專精" }
+  ],
+  "lifeSkills": [
+    { "skill": "遊戲實況", "level": "專業級" }
+  ],
+  "customAttributes": [
+    { "attribute": "魅力值", "value": "SSS" },
+    { "attribute": "可愛度", "value": "MAX" }
+  ]
+}`;
 
           const response = await fetch(
             'https://api.deepseek.com/chat/completions',
@@ -6682,7 +7507,69 @@ ${text}`;
 
       // 更新預覽
       updatePreview();
+
+      // 🌓 初始化深色模式
+      initThemeToggle();
     });
+
+    /* ========== 🌓 深色模式切換功能 ========== */
+    function initThemeToggle() {
+      // 獲取或創建切換按鈕
+      let themeToggle = document.querySelector('.theme-toggle');
+
+      if (!themeToggle) {
+        themeToggle = document.createElement('button');
+        themeToggle.className = 'theme-toggle';
+        themeToggle.setAttribute('aria-label', '切換深色模式');
+        themeToggle.setAttribute('title', '切換深色/淺色模式');
+        document.body.appendChild(themeToggle);
+      }
+
+      // 從 localStorage 讀取主題偏好
+      const savedTheme = localStorage.getItem('theme');
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const currentTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+
+      // 設置初始主題
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      updateThemeIcon(currentTheme);
+
+      // 點擊切換
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+
+        // 添加切換動畫
+        themeToggle.style.transform = 'rotate(360deg) scale(1.2)';
+        setTimeout(() => {
+          themeToggle.style.transform = '';
+        }, 300);
+
+        // 顯示提示
+        showToast(`已切換至${newTheme === 'dark' ? '深色' : '淺色'}模式`, 'success');
+      });
+
+      // 監聽系統主題變化
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+          const newTheme = e.matches ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', newTheme);
+          updateThemeIcon(newTheme);
+        }
+      });
+    }
+
+    function updateThemeIcon(theme) {
+      const themeToggle = document.querySelector('.theme-toggle');
+      if (themeToggle) {
+        themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+        themeToggle.style.transition = 'transform 0.3s ease';
+      }
+    }
   </script>
 </body>
 </html>
