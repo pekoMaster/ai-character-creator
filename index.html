@@ -5101,37 +5101,43 @@ ${text}`;
       md += `\n`;
       
       // 外觀描述
-      if (data.appearance || data.height || data.bodyType || data.hairColor || data.hairStyle || data.eyes || data.clothing || data.features) {
+      if (data.appearance || (isFullMode && (data.height || data.bodyType || data.hairColor || data.hairStyle || data.eyes || data.clothing || data.features))) {
         md += `## 👤 外觀描述\n\n`;
         if (data.appearance) md += `${data.appearance}\n\n`;
-        if (data.height) md += `**身高**：${data.height}\n\n`;
-        if (data.bodyType) md += `**體型**：${data.bodyType}\n\n`;
-        if (data.hairColor) md += `**髮色**：${data.hairColor}\n\n`;
-        if (data.hairStyle) md += `**髮型**：${data.hairStyle}\n\n`;
-        if (data.eyes) md += `**眼睛**：${data.eyes}\n\n`;
-        if (data.clothing) md += `**服裝風格**：${data.clothing}\n\n`;
-        if (data.features) md += `**特殊標記**：${data.features}\n\n`;
+        // 完整版專屬欄位
+        if (isFullMode) {
+          if (data.height) md += `**身高**：${data.height}\n\n`;
+          if (data.bodyType) md += `**體型**：${data.bodyType}\n\n`;
+          if (data.hairColor) md += `**髮色**：${data.hairColor}\n\n`;
+          if (data.hairStyle) md += `**髮型**：${data.hairStyle}\n\n`;
+          if (data.eyes) md += `**眼睛**：${data.eyes}\n\n`;
+          if (data.clothing) md += `**服裝風格**：${data.clothing}\n\n`;
+          if (data.features) md += `**特殊標記**：${data.features}\n\n`;
+        }
       }
       
       // 性格
-      if (data.personality || data.traits || data.emotionalAttitude || data.strengths || data.weaknesses || data.likes || data.dislikes || data.fears || data.goals || data.moneyAttitude || data.morality) {
+      if (data.personality || data.traits || (isFullMode && (data.emotionalAttitude || data.strengths || data.weaknesses || data.likes || data.dislikes || data.fears || data.goals || data.moneyAttitude || data.morality))) {
         md += `## 💭 性格特質\n\n`;
         if (data.personality) md += `${data.personality}\n\n`;
         if (data.traits) md += `**特質標籤**：${data.traits}\n\n`;
-        if (data.emotionalAttitude) md += `**針對感情**：${data.emotionalAttitude}\n\n`;
-        if (data.strengths) md += `**優點**：${data.strengths}\n\n`;
-        if (data.weaknesses) md += `**缺點**：${data.weaknesses}\n\n`;
-        if (data.likes) md += `**喜好**：${data.likes}\n\n`;
-        if (data.dislikes) md += `**厭惡**：${data.dislikes}\n\n`;
-        if (data.fears) md += `**恐懼**：${data.fears}\n\n`;
-        if (data.goals) md += `**目標**：${data.goals}\n\n`;
-        if (data.moneyAttitude) md += `**金錢觀**：${data.moneyAttitude}\n\n`;
-        if (data.morality) md += `**道德**：${data.morality}\n\n`;
+        // 完整版專屬欄位
+        if (isFullMode) {
+          if (data.emotionalAttitude) md += `**針對感情**：${data.emotionalAttitude}\n\n`;
+          if (data.strengths) md += `**優點**：${data.strengths}\n\n`;
+          if (data.weaknesses) md += `**缺點**：${data.weaknesses}\n\n`;
+          if (data.likes) md += `**喜好**：${data.likes}\n\n`;
+          if (data.dislikes) md += `**厭惡**：${data.dislikes}\n\n`;
+          if (data.fears) md += `**恐懼**：${data.fears}\n\n`;
+          if (data.goals) md += `**目標**：${data.goals}\n\n`;
+          if (data.moneyAttitude) md += `**金錢觀**：${data.moneyAttitude}\n\n`;
+          if (data.morality) md += `**道德**：${data.morality}\n\n`;
+        }
       }
       
-      // 技能（動態欄位）
-      if (Array.isArray(data.combatSkills) && data.combatSkills.length > 0 ||
-          Array.isArray(data.lifeSkills) && data.lifeSkills.length > 0) {
+      // 技能（動態欄位）- 完整版專屬
+      if (isFullMode && (Array.isArray(data.combatSkills) && data.combatSkills.length > 0 ||
+          Array.isArray(data.lifeSkills) && data.lifeSkills.length > 0)) {
         md += `## ⚔️ 技能\n\n`;
         if (Array.isArray(data.combatSkills) && data.combatSkills.length > 0) {
           md += `**戰鬥技能**：\n\n`;
@@ -5153,8 +5159,8 @@ ${text}`;
         }
       }
 
-      // 自訂屬性（動態欄位）
-      if (Array.isArray(data.customAttributes) && data.customAttributes.length > 0) {
+      // 自訂屬性（動態欄位）- 完整版專屬
+      if (isFullMode && Array.isArray(data.customAttributes) && data.customAttributes.length > 0) {
         md += `## 📊 自訂屬性\n\n`;
         md += `| 屬性 | 值 |\n|------|------|\n`;
         data.customAttributes.forEach(item => {
@@ -5165,9 +5171,9 @@ ${text}`;
         md += '\n';
       }
 
-      // 背景故事
-      if (data.backstory || data.birthplace || data.keyEvents ||
-          (Array.isArray(data.relationships) && data.relationships.length > 0)) {
+      // 背景故事 - 完整版專屬
+      if (isFullMode && (data.backstory || data.birthplace || data.keyEvents ||
+          (Array.isArray(data.relationships) && data.relationships.length > 0))) {
         md += `## 📖 背景故事\n\n`;
         if (data.birthplace) md += `**出生地**：${data.birthplace}\n\n`;
         if (data.backstory) md += `${data.backstory}\n\n`;
@@ -5185,9 +5191,9 @@ ${text}`;
         }
       }
 
-      // 對話風格
-      if ((Array.isArray(data.speechStyle) && data.speechStyle.length > 0) ||
-          data.catchphrases || data.verbalTics || data.emotionalExpression) {
+      // 對話風格 - 完整版專屬
+      if (isFullMode && ((Array.isArray(data.speechStyle) && data.speechStyle.length > 0) ||
+          data.catchphrases || data.verbalTics || data.emotionalExpression)) {
         md += `## 🗣️ 對話風格\n\n`;
 
         // 說話方式（動態欄位）
@@ -5209,18 +5215,20 @@ ${text}`;
       // AI 核心設定
       md += `## 🤖 AI 核心設定\n\n`;
       if (data.description) md += `### 角色描述\n\n${data.description}\n\n`;
-      if (data.systemPrompt) md += `### 系統提示\n\n${data.systemPrompt}\n\n`;
+      // systemPrompt 和 scenario 是完整版專屬
+      if (isFullMode && data.systemPrompt) md += `### 系統提示\n\n${data.systemPrompt}\n\n`;
       if (data.firstMessage) md += `### 第一則訊息\n\n${data.firstMessage}\n\n`;
-      if (data.exampleDialogues) md += `### 範例對話\n\n${data.exampleDialogues}\n\n`;
-      if (data.scenario) md += `### 初次相遇地點\n\n${data.scenario}\n\n`;
-      
+      if (!isFullMode && data.exampleDialogues) md += `### 範例對話\n\n${data.exampleDialogues}\n\n`; // 精簡版專屬
+      if (isFullMode && data.scenario) md += `### 初次相遇地點\n\n${data.scenario}\n\n`;
+
       // 元資料
-      if (data.tags || data.worldLore || data.creator || data.version) {
+      if (data.tags || data.creator || (isFullMode && (data.worldLore || data.version))) {
         md += `## 📎 元資料\n\n`;
         if (data.tags) md += `**標籤**：${data.tags}\n\n`;
-        if (data.worldLore) md += `**世界觀**：${data.worldLore}\n\n`;
+        // worldLore 和 version 是完整版專屬
+        if (isFullMode && data.worldLore) md += `**世界觀**：${data.worldLore}\n\n`;
         if (data.creator) md += `**創作者**：${data.creator}\n\n`;
-        if (data.version) md += `**版本**：${data.version}\n\n`;
+        if (isFullMode && data.version) md += `**版本**：${data.version}\n\n`;
       }
       
       md += `---\n*由 AI互動聊天角色卡工具生成*\n`;
@@ -5245,39 +5253,45 @@ ${text}`;
       txt += '\n';
 
       // 外觀描述
-      if (data.appearance || data.height || data.bodyType || data.hairColor || data.hairStyle || data.eyes || data.clothing || data.features) {
+      if (data.appearance || (isFullMode && (data.height || data.bodyType || data.hairColor || data.hairStyle || data.eyes || data.clothing || data.features))) {
         txt += '外觀描述 :\n';
         if (data.appearance) txt += ` -整體外觀 : ${data.appearance}\n`;
-        if (data.height) txt += ` -身高 : ${data.height}\n`;
-        if (data.bodyType) txt += ` -體型 : ${data.bodyType}\n`;
-        if (data.hairColor) txt += ` -髮色 : ${data.hairColor}\n`;
-        if (data.hairStyle) txt += ` -髮型 : ${data.hairStyle}\n`;
-        if (data.eyes) txt += ` -眼睛 : ${data.eyes}\n`;
-        if (data.clothing) txt += ` -服裝風格 : ${data.clothing}\n`;
-        if (data.features) txt += ` -特殊標記 : ${data.features}\n`;
+        // 完整版專屬欄位
+        if (isFullMode) {
+          if (data.height) txt += ` -身高 : ${data.height}\n`;
+          if (data.bodyType) txt += ` -體型 : ${data.bodyType}\n`;
+          if (data.hairColor) txt += ` -髮色 : ${data.hairColor}\n`;
+          if (data.hairStyle) txt += ` -髮型 : ${data.hairStyle}\n`;
+          if (data.eyes) txt += ` -眼睛 : ${data.eyes}\n`;
+          if (data.clothing) txt += ` -服裝風格 : ${data.clothing}\n`;
+          if (data.features) txt += ` -特殊標記 : ${data.features}\n`;
+        }
         txt += '\n';
       }
 
       // 性格特質
-      if (data.personality || data.traits || data.strengths || data.weaknesses || data.likes || data.dislikes || data.fears || data.goals || data.emotionalAttitude || data.moneyAttitude || data.morality) {
+      if (data.personality || data.traits || (isFullMode && (data.strengths || data.weaknesses || data.likes || data.dislikes || data.fears || data.goals || data.emotionalAttitude || data.moneyAttitude || data.morality))) {
         txt += '性格特質 :\n';
         if (data.personality) txt += ` -性格摘要 : ${data.personality}\n`;
         if (data.traits) txt += ` -特質標籤 : ${data.traits}\n`;
-        if (data.emotionalAttitude) txt += ` -針對感情 : ${data.emotionalAttitude}\n`;
-        if (data.strengths) txt += ` -優點 : ${data.strengths}\n`;
-        if (data.weaknesses) txt += ` -缺點 : ${data.weaknesses}\n`;
-        if (data.likes) txt += ` -喜好 : ${data.likes}\n`;
-        if (data.dislikes) txt += ` -厭惡 : ${data.dislikes}\n`;
-        if (data.fears) txt += ` -恐懼 : ${data.fears}\n`;
-        if (data.goals) txt += ` -目標 : ${data.goals}\n`;
-        if (data.moneyAttitude) txt += ` -金錢觀 : ${data.moneyAttitude}\n`;
-        if (data.morality) txt += ` -道德 : ${data.morality}\n`;
+        // 完整版專屬欄位
+        if (isFullMode) {
+          if (data.emotionalAttitude) txt += ` -針對感情 : ${data.emotionalAttitude}\n`;
+          if (data.strengths) txt += ` -優點 : ${data.strengths}\n`;
+          if (data.weaknesses) txt += ` -缺點 : ${data.weaknesses}\n`;
+          if (data.likes) txt += ` -喜好 : ${data.likes}\n`;
+          if (data.dislikes) txt += ` -厭惡 : ${data.dislikes}\n`;
+          if (data.fears) txt += ` -恐懼 : ${data.fears}\n`;
+          if (data.goals) txt += ` -目標 : ${data.goals}\n`;
+          if (data.moneyAttitude) txt += ` -金錢觀 : ${data.moneyAttitude}\n`;
+          if (data.morality) txt += ` -道德 : ${data.morality}\n`;
+        }
         txt += '\n';
       }
 
-      // 技能
-      if (Array.isArray(data.combatSkills) && data.combatSkills.length > 0 ||
-          Array.isArray(data.lifeSkills) && data.lifeSkills.length > 0) {
+      // 技能 - 完整版專屬
+      if (isFullMode && (Array.isArray(data.combatSkills) && data.combatSkills.length > 0 ||
+          Array.isArray(data.lifeSkills) && data.lifeSkills.length > 0)) {
         txt += '技能 :\n';
         if (Array.isArray(data.combatSkills) && data.combatSkills.length > 0) {
           txt += ` -戰鬥技能 : ${data.combatSkills.map(item => item.skill + (item.level ? `(${item.level})` : '')).join(', ')}\n`;
@@ -5288,8 +5302,8 @@ ${text}`;
         txt += '\n';
       }
 
-      // 自訂屬性
-      if (Array.isArray(data.customAttributes) && data.customAttributes.length > 0) {
+      // 自訂屬性 - 完整版專屬
+      if (isFullMode && Array.isArray(data.customAttributes) && data.customAttributes.length > 0) {
         txt += '自訂屬性 :\n';
         data.customAttributes.forEach(item => {
           if (item.attribute && item.value) {
@@ -5299,8 +5313,8 @@ ${text}`;
         txt += '\n';
       }
 
-      // 背景故事
-      if (data.backstory || data.birthplace || data.keyEvents) {
+      // 背景故事 - 完整版專屬
+      if (isFullMode && (data.backstory || data.birthplace || data.keyEvents)) {
         txt += '背景故事 :\n';
         if (data.birthplace) txt += ` -出生地 : ${data.birthplace}\n`;
         if (data.backstory) txt += ` -背景 : ${data.backstory}\n`;
@@ -5308,8 +5322,8 @@ ${text}`;
         txt += '\n';
       }
 
-      // 對話風格
-      if (data.catchphrases || data.verbalTics || data.emotionalExpression) {
+      // 對話風格 - 完整版專屬
+      if (isFullMode && (data.catchphrases || data.verbalTics || data.emotionalExpression)) {
         txt += '對話風格 :\n';
         if (data.catchphrases) txt += ` -口頭禪 : ${data.catchphrases}\n`;
         if (data.verbalTics) txt += ` -語言習慣 : ${data.verbalTics}\n`;
@@ -5317,8 +5331,8 @@ ${text}`;
         txt += '\n';
       }
 
-      // 人際關係
-      if (Array.isArray(data.relationships) && data.relationships.length > 0) {
+      // 人際關係 - 完整版專屬
+      if (isFullMode && Array.isArray(data.relationships) && data.relationships.length > 0) {
         txt += '人際關係 :\n';
         data.relationships.forEach(item => {
           if (item.name && item.description) {
@@ -5331,19 +5345,21 @@ ${text}`;
       // AI 核心設定
       txt += 'AI 核心設定 :\n';
       if (data.description) txt += ` -角色描述 : ${data.description}\n`;
-      if (data.systemPrompt) txt += ` -系統提示 : ${data.systemPrompt}\n`;
+      // systemPrompt 和 scenario 是完整版專屬
+      if (isFullMode && data.systemPrompt) txt += ` -系統提示 : ${data.systemPrompt}\n`;
       if (data.firstMessage) txt += ` -第一則訊息 : ${data.firstMessage}\n`;
-      if (data.exampleDialogues) txt += ` -範例對話 : ${data.exampleDialogues}\n`;
-      if (data.scenario) txt += ` -初次相遇地點 : ${data.scenario}\n`;
+      if (!isFullMode && data.exampleDialogues) txt += ` -範例對話 : ${data.exampleDialogues}\n`; // 精簡版專屬
+      if (isFullMode && data.scenario) txt += ` -初次相遇地點 : ${data.scenario}\n`;
       txt += '\n';
 
       // 元資料
-      if (data.tags || data.worldLore || data.creator || data.version) {
+      if (data.tags || data.creator || (isFullMode && (data.worldLore || data.version))) {
         txt += '元資料 :\n';
         if (data.tags) txt += ` -標籤 : ${data.tags}\n`;
-        if (data.worldLore) txt += ` -世界設定 : ${data.worldLore}\n`;
+        // worldLore 和 version 是完整版專屬
+        if (isFullMode && data.worldLore) txt += ` -世界設定 : ${data.worldLore}\n`;
         if (data.creator) txt += ` -創作者 : ${data.creator}\n`;
-        if (data.version) txt += ` -版本 : ${data.version}\n`;
+        if (isFullMode && data.version) txt += ` -版本 : ${data.version}\n`;
       }
 
       return txt;
