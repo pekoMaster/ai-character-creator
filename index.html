@@ -338,7 +338,7 @@
 
     .control-group label {
       font-weight: 500;
-      color: var(--gray-700);
+      color: var(--text-primary);
       white-space: nowrap;
     }
 
@@ -488,7 +488,7 @@
     }
 
     .form-section {
-      border-bottom: 1px solid var(--gray-200);
+      border-bottom: 1px solid var(--border-color);
     }
 
     .form-section:last-child {
@@ -496,7 +496,7 @@
     }
 
     .section-header {
-      background: var(--gray-50);
+      background: var(--bg-tertiary);
       padding: 16px 20px;
       cursor: pointer;
       display: flex;
@@ -513,7 +513,7 @@
     .section-header h3 {
       font-size: 1rem;
       font-weight: 600;
-      color: var(--gray-700);
+      color: var(--text-primary);
       display: flex;
       align-items: center;
       gap: 10px;
@@ -538,7 +538,7 @@
       padding: 4px 12px;
       font-size: 0.85rem;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      color: var(--text-inverse);
       border: none;
       border-radius: 12px;
       cursor: pointer;
@@ -594,7 +594,7 @@
     .form-field label {
       font-size: 0.875rem;
       font-weight: 500;
-      color: var(--gray-600);
+      color: var(--text-secondary);
       display: flex;
       align-items: center;
       gap: 6px;
@@ -690,7 +690,7 @@
 
     .preview-header {
       padding: 16px 20px;
-      border-bottom: 1px solid var(--gray-200);
+      border-bottom: 1px solid var(--border-color);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -701,7 +701,7 @@
     .preview-header h3 {
       font-size: 1.1rem;
       font-weight: 600;
-      color: var(--gray-700);
+      color: var(--text-primary);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -729,7 +729,7 @@
 
     .preview-tab.active {
       background: var(--primary);
-      color: white;
+      color: var(--text-inverse);
     }
 
     .preview-content {
@@ -749,17 +749,18 @@
     }
 
     .preview-card {
-      background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
-      border: 2px solid var(--gray-200);
-      border-radius: var(--radius);
-      padding: 24px;
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: var(--spacing-lg);
+      box-shadow: var(--shadow-sm);
     }
 
     .preview-card-header {
       text-align: center;
-      padding-bottom: 20px;
-      border-bottom: 2px dashed var(--gray-200);
-      margin-bottom: 20px;
+      padding-bottom: var(--spacing-lg);
+      border-bottom: 2px dashed var(--border-color);
+      margin-bottom: var(--spacing-lg);
     }
 
     .preview-avatar {
@@ -772,7 +773,7 @@
       align-items: center;
       justify-content: center;
       font-size: 2.5rem;
-      color: white;
+      color: var(--text-inverse);
       box-shadow: var(--shadow-lg);
     }
 
@@ -784,7 +785,7 @@
     }
 
     .preview-aliases {
-      color: var(--gray-500);
+      color: var(--text-tertiary);
       font-style: italic;
     }
 
@@ -826,7 +827,7 @@
     }
 
     .preview-section-content {
-      color: var(--gray-700);
+      color: var(--text-primary);
       font-size: 0.95rem;
       line-height: 1.7;
     }
@@ -845,13 +846,13 @@
 
     .preview-item-label {
       font-size: 0.75rem;
-      color: var(--gray-500);
+      color: var(--text-tertiary);
       text-transform: uppercase;
     }
 
     .preview-item-value {
       font-weight: 500;
-      color: var(--gray-700);
+      color: var(--text-primary);
     }
 
     .preview-first-message {
@@ -860,7 +861,7 @@
       padding: 16px;
       border-radius: 0 8px 8px 0;
       font-style: italic;
-      color: var(--gray-600);
+      color: var(--text-secondary);
     }
 
     /* ===== 程式碼預覽 ===== */
@@ -922,32 +923,32 @@
 
     .export-btn.json {
       background: var(--warning);
-      color: white;
+      color: var(--text-inverse);
     }
 
     .export-btn.yaml {
       background: var(--success);
-      color: white;
+      color: var(--text-inverse);
     }
 
     .export-btn.markdown {
       background: var(--primary);
-      color: white;
+      color: var(--text-inverse);
     }
 
     .export-btn.txt {
       background: var(--gray-700);
-      color: white;
+      color: var(--text-inverse);
     }
 
     .export-btn.json-compact {
       background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      color: white;
+      color: var(--text-inverse);
     }
 
     .export-btn.png-markdown {
       background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-      color: white;
+      color: var(--text-inverse);
     }
 
     .export-btn:hover {
@@ -962,7 +963,7 @@
       right: 30px;
       padding: 16px 24px;
       background: var(--gray-800);
-      color: white;
+      color: var(--text-inverse);
       border-radius: 8px;
       box-shadow: var(--shadow-lg);
       display: flex;
@@ -1035,12 +1036,12 @@
 
     .icon-btn {
       padding: 10px 16px;
-      border: 2px solid var(--gray-200);
-      border-radius: 8px;
-      background: white;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-secondary);
       cursor: pointer;
       font-size: 1.2rem;
-      transition: all 0.2s;
+      transition: all var(--transition-base);
       display: flex;
       align-items: center;
       gap: 6px;
@@ -1048,12 +1049,13 @@
 
     .icon-btn:hover {
       border-color: var(--primary);
-      background: var(--gray-50);
+      background: var(--bg-tertiary);
+      box-shadow: var(--shadow-sm);
     }
 
     .icon-btn.primary {
       background: var(--primary);
-      color: white;
+      color: var(--text-inverse);
       border-color: var(--primary);
     }
 
@@ -1066,9 +1068,9 @@
       align-items: center;
       gap: 10px;
       padding: 8px 14px;
-      background: var(--gray-50);
+      background: var(--bg-tertiary);
       border-radius: 8px;
-      border: 2px solid var(--gray-200);
+      border: 2px solid var(--border-color);
     }
 
     .user-avatar {
@@ -1080,7 +1082,7 @@
 
     .user-name {
       font-weight: 500;
-      color: var(--gray-700);
+      color: var(--text-primary);
     }
 
     /* ===== Modal 彈窗 ===== */
@@ -1103,14 +1105,15 @@
     }
 
     .modal-content {
-      background: white;
-      border-radius: var(--radius);
-      padding: 30px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: var(--spacing-xl);
       max-width: 600px;
       width: 90%;
       max-height: 80vh;
       overflow-y: auto;
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--shadow-2xl);
       position: relative;
       animation: modalSlideIn 0.3s ease-out;
     }
@@ -1132,12 +1135,12 @@
       align-items: center;
       margin-bottom: 20px;
       padding-bottom: 15px;
-      border-bottom: 2px solid var(--gray-200);
+      border-bottom: 2px solid var(--border-color);
     }
 
     .modal-header h2 {
       font-size: 1.5rem;
-      color: var(--gray-800);
+      color: var(--text-primary);
       display: flex;
       align-items: center;
       gap: 10px;
@@ -1155,7 +1158,7 @@
     }
 
     .modal-close:hover {
-      color: var(--gray-700);
+      color: var(--text-primary);
     }
 
     .modal-body {
@@ -1172,7 +1175,7 @@
 
     .setting-item label {
       font-weight: 600;
-      color: var(--gray-700);
+      color: var(--text-primary);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -1180,7 +1183,7 @@
 
     .setting-item input {
       padding: 10px 14px;
-      border: 2px solid var(--gray-200);
+      border: 2px solid var(--border-color);
       border-radius: 8px;
       font-size: 0.95rem;
       font-family: 'Courier New', monospace;
@@ -1194,7 +1197,7 @@
 
     .setting-item .hint {
       font-size: 0.85rem;
-      color: var(--gray-500);
+      color: var(--text-tertiary);
       line-height: 1.5;
     }
 
@@ -1208,18 +1211,20 @@
     }
 
     .setting-item select {
-      padding: 10px 14px;
-      border: 2px solid var(--gray-200);
-      border-radius: 8px;
+      padding: 12px 16px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
       font-size: 0.95rem;
-      background: white;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
       cursor: pointer;
+      transition: all var(--transition-base);
     }
 
     .setting-item select:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      box-shadow: 0 0 0 4px var(--primary-glow), var(--shadow-md);
     }
 
     .api-key-item {
@@ -1247,7 +1252,7 @@
 
     .btn.primary {
       background: var(--primary);
-      color: white;
+      color: var(--text-inverse);
     }
 
     .btn.primary:hover {
@@ -1258,7 +1263,7 @@
 
     .btn.secondary {
       background: var(--gray-200);
-      color: var(--gray-700);
+      color: var(--text-primary);
     }
 
     .btn.secondary:hover {
@@ -1293,40 +1298,40 @@
       gap: 6px;
       margin-top: 8px;
       padding: 10px;
-      background: var(--gray-50);
+      background: var(--bg-tertiary);
       border-radius: 8px;
       border: 1px dashed var(--gray-300);
     }
 
     .quick-tag {
-      padding: 4px 10px;
-      background: white;
-      border: 1px solid var(--gray-300);
-      border-radius: 16px;
-      font-size: 0.8rem;
+      padding: 6px 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
       cursor: pointer;
-      transition: all 0.2s;
-      color: var(--gray-700);
+      transition: all var(--transition-base);
+      color: var(--text-primary);
       user-select: none;
     }
 
     .quick-tag:hover {
       background: var(--primary);
-      color: white;
+      color: var(--text-inverse);
       border-color: var(--primary);
       transform: translateY(-2px);
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-md);
     }
 
     /* ===== PNG 匯出按鈕樣式 ===== */
     .export-btn.png-card {
       background: var(--secondary);
-      color: white;
+      color: var(--text-inverse);
     }
 
     .export-btn.png-yaml {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      color: var(--text-inverse);
     }
 
     /* ===== YAML 圖片卡片樣式 ===== */
@@ -1349,7 +1354,7 @@
     .yaml-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       padding: 20px 30px;
-      color: white;
+      color: var(--text-inverse);
     }
 
     .yaml-title {
@@ -1419,7 +1424,7 @@
     .markdown-header {
       background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
       padding: 20px 30px;
-      color: white;
+      color: var(--text-inverse);
     }
 
     .markdown-title {
@@ -1540,7 +1545,7 @@
     .add-field-btn {
       align-self: flex-start;
       background: var(--success);
-      color: white;
+      color: var(--text-inverse);
       border: none;
       padding: 10px 20px;
       border-radius: 8px;
@@ -1585,7 +1590,7 @@
     .cloud-list h3 {
       font-size: 1.1rem;
       margin-bottom: 15px;
-      color: var(--gray-700);
+      color: var(--text-primary);
     }
 
     #cloudCharacterList {
@@ -1598,7 +1603,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 15px;
-      border: 1px solid var(--gray-200);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
       margin-bottom: 10px;
       transition: all 0.2s;
@@ -1606,7 +1611,7 @@
 
     .cloud-item:hover {
       border-color: var(--primary);
-      background: var(--gray-50);
+      background: var(--bg-tertiary);
     }
 
     .cloud-item-info {
@@ -1615,13 +1620,13 @@
 
     .cloud-item-name {
       font-weight: 500;
-      color: var(--gray-800);
+      color: var(--text-primary);
       margin-bottom: 5px;
     }
 
     .cloud-item-meta {
       font-size: 0.85rem;
-      color: var(--gray-500);
+      color: var(--text-tertiary);
     }
 
     .cloud-item-actions {
@@ -1637,7 +1642,7 @@
     .loading, .empty-state, .error-state {
       text-align: center;
       padding: 40px 20px;
-      color: var(--gray-500);
+      color: var(--text-tertiary);
     }
 
     .error-state {
@@ -1833,7 +1838,7 @@
       padding: 6px 14px;
       font-size: 0.875rem;
       background: var(--gradient-primary);
-      color: white;
+      color: var(--text-inverse);
       border: none;
       border-radius: var(--radius-md);
       cursor: pointer;
