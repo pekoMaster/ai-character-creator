@@ -1200,7 +1200,7 @@
 
     .setting-item .hint {
       font-size: 0.85rem;
-      color: var(--text-tertiary);
+      color: var(--text-secondary);
       line-height: 1.5;
     }
 
@@ -2300,7 +2300,10 @@
               <div class="quick-tags-container" id="personalityTags"></div>
             </div>
             <div class="form-field full-width">
-              <label>特質標籤 <span class="hint">(逗號分隔)</span></label>
+              <label>
+                特質標籤 <span class="hint">(逗號分隔)</span>
+                <button class="dice-btn" onclick="App.ui.rollDice('traits')" type="button" title="隨機生成範例">🎲</button>
+              </label>
               <input type="text" id="traits" placeholder="例：內向, 善良, 固執, 好奇心強" oninput="updatePreview()">
               <div class="quick-tags-container" id="traitsTags"></div>
             </div>
