@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:ai.google.dev)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(git push:*)",
+      "Bash(git remote set-url:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(git rm:*)",
+      "WebFetch(domain:platform.openai.com)",
+      "WebFetch(domain:api-docs.deepseek.com)",
+      "mcp__ide__getDiagnostics",
+      "Bash(if [ ! -f .gitignore ])",
+      "Bash(then echo \"創建新的 .gitignore\")",
+      "Bash(else echo \"更新現有的 .gitignore\")",
+      "Bash(fi)",
+      "Bash(git config:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(cat:*)",
+      "Bash(dir /b *.txt)",
+      "Bash(node -c:*)",
+      "Bash(git reset:*)",
+      "Bash(start \"\" \"H:\\OneDrive\\RB\\TRPG\\index.html\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
