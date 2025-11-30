@@ -5776,9 +5776,29 @@ ${text}`;
       // 外觀
       const appearanceSection = document.getElementById('previewAppearanceSection');
       const appearanceContent = document.getElementById('previewAppearance');
-      if (data.appearance) {
+      let hasAppearance = data.appearance || (isFullMode && (data.height || data.bodyType || data.hairColor || data.hairStyle || data.eyes || data.clothing || data.features));
+
+      if (hasAppearance) {
         appearanceSection.style.display = 'block';
-        appearanceContent.textContent = data.appearance;
+        let appearanceText = data.appearance || '';
+
+        // 完整版專屬詳細欄位
+        if (isFullMode) {
+          const details = [];
+          if (data.height) details.push(`身高：${data.height}`);
+          if (data.bodyType) details.push(`體型：${data.bodyType}`);
+          if (data.hairColor) details.push(`髮色：${data.hairColor}`);
+          if (data.hairStyle) details.push(`髮型：${data.hairStyle}`);
+          if (data.eyes) details.push(`眼睛：${data.eyes}`);
+          if (data.clothing) details.push(`服裝：${data.clothing}`);
+          if (data.features) details.push(`特徵：${data.features}`);
+
+          if (details.length > 0) {
+            appearanceText += (appearanceText ? '\n\n' : '') + details.join('\n');
+          }
+        }
+
+        appearanceContent.textContent = appearanceText;
       } else {
         appearanceSection.style.display = 'none';
       }
@@ -5786,13 +5806,31 @@ ${text}`;
       // 性格
       const personalitySection = document.getElementById('previewPersonalitySection');
       const personalityContent = document.getElementById('previewPersonality');
-      if (data.personality || data.traits) {
+      let hasPersonality = data.personality || data.traits || (isFullMode && (data.strengths || data.weaknesses || data.likes || data.dislikes || data.fears || data.goals));
+
+      if (hasPersonality) {
         personalitySection.style.display = 'block';
-        let content = data.personality || '';
+        let personalityText = data.personality || '';
         if (data.traits) {
-          content += (content ? '\n\n' : '') + '特質：' + data.traits;
+          personalityText += (personalityText ? '\n\n' : '') + '特質：' + data.traits;
         }
-        personalityContent.textContent = content;
+
+        // 完整版專屬詳細欄位
+        if (isFullMode) {
+          const details = [];
+          if (data.strengths) details.push(`優點：${data.strengths}`);
+          if (data.weaknesses) details.push(`缺點：${data.weaknesses}`);
+          if (data.likes) details.push(`喜好：${data.likes}`);
+          if (data.dislikes) details.push(`厭惡：${data.dislikes}`);
+          if (data.fears) details.push(`恐懼：${data.fears}`);
+          if (data.goals) details.push(`目標：${data.goals}`);
+
+          if (details.length > 0) {
+            personalityText += (personalityText ? '\n\n' : '') + details.join('\n');
+          }
+        }
+
+        personalityContent.textContent = personalityText;
       } else {
         personalitySection.style.display = 'none';
       }
@@ -5800,9 +5838,17 @@ ${text}`;
       // 背景（完整版限定）
       const backstorySection = document.getElementById('previewBackstorySection');
       const backstoryContent = document.getElementById('previewBackstory');
-      if (data.backstory && isFullMode) {
+      let hasBackstory = isFullMode && (data.backstory || data.birthplace || data.keyEvents);
+
+      if (hasBackstory) {
         backstorySection.style.display = 'block';
-        backstoryContent.textContent = data.backstory;
+        let backstoryText = '';
+
+        if (data.birthplace) backstoryText += `出生地：${data.birthplace}\n\n`;
+        if (data.backstory) backstoryText += data.backstory;
+        if (data.keyEvents) backstoryText += (backstoryText ? '\n\n' : '') + `重要事件：${data.keyEvents}`;
+
+        backstoryContent.textContent = backstoryText;
       } else {
         backstorySection.style.display = 'none';
       }
