@@ -6311,7 +6311,8 @@ ${text}`;
       if (data.appearance) definition += `${data.appearance} `;
       if (data.personality) definition += `${data.personality} `;
       if (data.speechStyle) definition += `{{char}} speaks in a ${data.speechStyle} manner. `;
-      if (data.backstory) definition += `${data.backstory} `;
+      // 背景故事 - 完整版專屬
+      if (isFullMode && data.backstory) definition += `${data.backstory} `;
 
       return {
         name: data.name || "",
@@ -6361,7 +6362,8 @@ ${text}`;
         })).filter(s => s.situation || s.dialogue);
       };
 
-      return {
+      // 基礎輸出結構
+      const output = {
         character_info: {
           name: data.name || "",
           aliases: data.aliases ? data.aliases.split(',').map(a => a.trim()) : [],
@@ -6372,41 +6374,11 @@ ${text}`;
           avatar_url: data.avatarUrl || ""
         },
         appearance: {
-          general: data.appearance || "",
-          height: data.height || "",
-          body_type: data.bodyType || "",
-          hair_color: data.hairColor || "",
-          hair_style: data.hairStyle || "",
-          eyes: data.eyes || "",
-          clothing: data.clothing || "",
-          distinguishing_features: data.features || ""
+          general: data.appearance || ""
         },
         personality: {
           summary: data.personality || "",
-          traits: data.traits ? data.traits.split(',').map(t => t.trim()) : [],
-          strengths: data.strengths ? data.strengths.split(',').map(s => s.trim()) : [],
-          weaknesses: data.weaknesses ? data.weaknesses.split(',').map(w => w.trim()) : [],
-          likes: data.likes ? data.likes.split(',').map(l => l.trim()) : [],
-          dislikes: data.dislikes ? data.dislikes.split(',').map(d => d.trim()) : [],
-          fears: data.fears ? data.fears.split(',').map(f => f.trim()) : [],
-          goals: data.goals ? data.goals.split(',').map(g => g.trim()) : []
-        },
-        skills: {
-          combat_skills: formatSkills(data.combatSkills),
-          life_skills: formatSkills(data.lifeSkills)
-        },
-        attributes: formatAttributes(data.customAttributes),
-        background: {
-          birthplace: data.birthplace || "",
-          backstory: data.backstory || "",
-          key_events: data.keyEvents || "",
-          relationships: formatRelationships(data.relationships)
-        },
-        speech_patterns: {
-          examples: formatSpeechStyles(data.speechStyle),
-          catchphrases: data.catchphrases ? data.catchphrases.split(',').map(c => c.trim()) : [],
-          verbal_tics: data.verbalTics || "",
-          emotional_expression: data.emotionalExpression || ""
+          traits: data.traits ? data.traits.split(',').map(t => t.trim()) : []
         },
         ai_instructions: {
           system_prompt: data.systemPrompt || "",
@@ -6423,6 +6395,53 @@ ${text}`;
           created_at: new Date().toISOString()
         }
       };
+
+      // 完整版專屬欄位
+      if (isFullMode) {
+        // 外觀詳細欄位
+        output.appearance.height = data.height || "";
+        output.appearance.body_type = data.bodyType || "";
+        output.appearance.hair_color = data.hairColor || "";
+        output.appearance.hair_style = data.hairStyle || "";
+        output.appearance.eyes = data.eyes || "";
+        output.appearance.clothing = data.clothing || "";
+        output.appearance.distinguishing_features = data.features || "";
+
+        // 性格詳細欄位
+        output.personality.strengths = data.strengths ? data.strengths.split(',').map(s => s.trim()) : [];
+        output.personality.weaknesses = data.weaknesses ? data.weaknesses.split(',').map(w => w.trim()) : [];
+        output.personality.likes = data.likes ? data.likes.split(',').map(l => l.trim()) : [];
+        output.personality.dislikes = data.dislikes ? data.dislikes.split(',').map(d => d.trim()) : [];
+        output.personality.fears = data.fears ? data.fears.split(',').map(f => f.trim()) : [];
+        output.personality.goals = data.goals ? data.goals.split(',').map(g => g.trim()) : [];
+
+        // 技能
+        output.skills = {
+          combat_skills: formatSkills(data.combatSkills),
+          life_skills: formatSkills(data.lifeSkills)
+        };
+
+        // 自訂屬性
+        output.attributes = formatAttributes(data.customAttributes);
+
+        // 背景故事
+        output.background = {
+          birthplace: data.birthplace || "",
+          backstory: data.backstory || "",
+          key_events: data.keyEvents || "",
+          relationships: formatRelationships(data.relationships)
+        };
+
+        // 說話方式
+        output.speech_patterns = {
+          examples: formatSpeechStyles(data.speechStyle),
+          catchphrases: data.catchphrases ? data.catchphrases.split(',').map(c => c.trim()) : [],
+          verbal_tics: data.verbalTics || "",
+          emotional_expression: data.emotionalExpression || ""
+        };
+      }
+
+      return output;
     }
 
     function buildCharacterDescription(data) {
@@ -6437,35 +6456,41 @@ ${text}`;
       if (data.avatarUrl) desc += `Avatar: ${data.avatarUrl}\n`;
       desc += "\n";
 
-      if (data.appearance || data.height || data.bodyType || data.hairColor || data.hairStyle || data.eyes || data.clothing || data.features) {
+      if (data.appearance || (isFullMode && (data.height || data.bodyType || data.hairColor || data.hairStyle || data.eyes || data.clothing || data.features))) {
         desc += "【Appearance】\n";
         if (data.appearance) desc += `${data.appearance}\n`;
-        if (data.height) desc += `Height: ${data.height}\n`;
-        if (data.bodyType) desc += `Build: ${data.bodyType}\n`;
-        if (data.hairColor) desc += `Hair Color: ${data.hairColor}\n`;
-        if (data.hairStyle) desc += `Hair Style: ${data.hairStyle}\n`;
-        if (data.eyes) desc += `Eyes: ${data.eyes}\n`;
-        if (data.clothing) desc += `Clothing: ${data.clothing}\n`;
-        if (data.features) desc += `Distinguishing features: ${data.features}\n`;
+        // 完整版專屬欄位
+        if (isFullMode) {
+          if (data.height) desc += `Height: ${data.height}\n`;
+          if (data.bodyType) desc += `Build: ${data.bodyType}\n`;
+          if (data.hairColor) desc += `Hair Color: ${data.hairColor}\n`;
+          if (data.hairStyle) desc += `Hair Style: ${data.hairStyle}\n`;
+          if (data.eyes) desc += `Eyes: ${data.eyes}\n`;
+          if (data.clothing) desc += `Clothing: ${data.clothing}\n`;
+          if (data.features) desc += `Distinguishing features: ${data.features}\n`;
+        }
         desc += "\n";
       }
 
-      if (data.personality || data.traits) {
+      if (data.personality || data.traits || (isFullMode && (data.strengths || data.weaknesses || data.likes || data.dislikes || data.fears || data.goals))) {
         desc += "【Personality】\n";
         if (data.personality) desc += `${data.personality}\n`;
         if (data.traits) desc += `Traits: ${data.traits}\n`;
-        if (data.strengths) desc += `Strengths: ${data.strengths}\n`;
-        if (data.weaknesses) desc += `Weaknesses: ${data.weaknesses}\n`;
-        if (data.likes) desc += `Likes: ${data.likes}\n`;
-        if (data.dislikes) desc += `Dislikes: ${data.dislikes}\n`;
-        if (data.fears) desc += `Fears: ${data.fears}\n`;
-        if (data.goals) desc += `Goals: ${data.goals}\n`;
+        // 完整版專屬欄位
+        if (isFullMode) {
+          if (data.strengths) desc += `Strengths: ${data.strengths}\n`;
+          if (data.weaknesses) desc += `Weaknesses: ${data.weaknesses}\n`;
+          if (data.likes) desc += `Likes: ${data.likes}\n`;
+          if (data.dislikes) desc += `Dislikes: ${data.dislikes}\n`;
+          if (data.fears) desc += `Fears: ${data.fears}\n`;
+          if (data.goals) desc += `Goals: ${data.goals}\n`;
+        }
         desc += "\n";
       }
 
-      // 處理動態技能欄位
-      if (Array.isArray(data.combatSkills) && data.combatSkills.length > 0 ||
-          Array.isArray(data.lifeSkills) && data.lifeSkills.length > 0) {
+      // 處理動態技能欄位 - 完整版專屬
+      if (isFullMode && (Array.isArray(data.combatSkills) && data.combatSkills.length > 0 ||
+          Array.isArray(data.lifeSkills) && data.lifeSkills.length > 0)) {
         desc += "【Skills】\n";
         if (Array.isArray(data.combatSkills) && data.combatSkills.length > 0) {
           const skills = data.combatSkills.map(item =>
@@ -6482,8 +6507,8 @@ ${text}`;
         desc += "\n";
       }
 
-      // 處理動態屬性欄位
-      if (Array.isArray(data.customAttributes) && data.customAttributes.length > 0) {
+      // 處理動態屬性欄位 - 完整版專屬
+      if (isFullMode && Array.isArray(data.customAttributes) && data.customAttributes.length > 0) {
         desc += "【Attributes】\n";
         data.customAttributes.forEach(item => {
           if (item.attribute && item.value) {
@@ -6493,7 +6518,8 @@ ${text}`;
         desc += "\n";
       }
 
-      if (data.backstory || data.birthplace) {
+      // 背景故事 - 完整版專屬
+      if (isFullMode && (data.backstory || data.birthplace || data.keyEvents || (Array.isArray(data.relationships) && data.relationships.length > 0))) {
         desc += "【Background】\n";
         if (data.birthplace) desc += `Birthplace: ${data.birthplace}\n`;
         if (data.backstory) desc += `${data.backstory}\n`;
@@ -6511,9 +6537,9 @@ ${text}`;
         desc += "\n";
       }
 
-      // 處理動態說話方式欄位
-      if (Array.isArray(data.speechStyle) && data.speechStyle.length > 0 ||
-          data.catchphrases || data.verbalTics) {
+      // 處理動態說話方式欄位 - 完整版專屬
+      if (isFullMode && (Array.isArray(data.speechStyle) && data.speechStyle.length > 0 ||
+          data.catchphrases || data.verbalTics || data.emotionalExpression)) {
         desc += "【Speech Style】\n";
         if (Array.isArray(data.speechStyle) && data.speechStyle.length > 0) {
           data.speechStyle.forEach(item => {
@@ -6652,12 +6678,15 @@ ${text}`;
       if (data.occupation) content += `職業/身分: ${data.occupation}\n`;
 
       // 外觀
-      if (data.appearance || data.height || data.hairColor) {
+      if (data.appearance || (isFullMode && (data.height || data.hairColor || data.hairStyle))) {
         content += `\n--- 外觀 ---\n`;
         if (data.appearance) content += `${data.appearance}\n`;
-        if (data.height) content += `身高: ${data.height}\n`;
-        if (data.hairColor) content += `髮色: ${data.hairColor}\n`;
-        if (data.hairStyle) content += `髮型: ${data.hairStyle}\n`;
+        // 完整版專屬欄位
+        if (isFullMode) {
+          if (data.height) content += `身高: ${data.height}\n`;
+          if (data.hairColor) content += `髮色: ${data.hairColor}\n`;
+          if (data.hairStyle) content += `髮型: ${data.hairStyle}\n`;
+        }
       }
 
       // 性格
@@ -6665,8 +6694,8 @@ ${text}`;
         content += `\n--- 性格 ---\n${data.personality}\n`;
       }
 
-      // 背景故事
-      if (data.backstory) {
+      // 背景故事 - 完整版專屬
+      if (isFullMode && data.backstory) {
         content += `\n--- 背景故事 ---\n${data.backstory}\n`;
       }
 
