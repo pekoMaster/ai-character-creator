@@ -7276,12 +7276,13 @@ ${contextInfo}
           post_history_instructions: "",
           alternate_greetings: [],
           tags: data.tags ? data.tags.split(',').map(t => t.trim()) : [],
-          creator: data.creator || "",
-          character_version: data.version || "1.0",
           extensions: {
             world: data.worldLore || "",
             depth_prompt: { prompt: "", depth: 4 }
-          }
+          },
+          // 元資料放在最後
+          creator: data.creator || "",
+          character_version: data.version || "1.0"
         }
       };
     }
@@ -7300,8 +7301,6 @@ ${contextInfo}
           creatorNotes: data.creatorNotes || "",
           systemPrompt: data.systemPrompt || "",
           tags: data.tags ? data.tags.split(',').map(t => t.trim()) : [],
-          creator: data.creator || "",
-          characterVersion: data.version || "1.0",
           lorebook: {
             name: data.worldLore ? "World Lore" : "",
             entries: data.worldLore ? [{
@@ -7309,7 +7308,10 @@ ${contextInfo}
               content: data.worldLore,
               enabled: true
             }] : []
-          }
+          },
+          // 元資料放在最後
+          creator: data.creator || "",
+          characterVersion: data.version || "1.0"
         }
       };
     }
@@ -7392,20 +7394,6 @@ ${contextInfo}
         personality: {
           summary: data.personality || "",
           traits: data.traits ? data.traits.split(',').map(t => t.trim()) : []
-        },
-        ai_instructions: {
-          system_prompt: data.systemPrompt || "",
-          character_description: data.description || "",
-          first_message: data.firstMessage || "",
-          example_dialogues: data.exampleDialogues || "",
-          scenario: data.scenario || ""
-        },
-        metadata: {
-          tags: data.tags ? data.tags.split(',').map(t => t.trim()) : [],
-          world_lore: data.worldLore || "",
-          creator: data.creator || "",
-          version: data.version || "1.0",
-          created_at: new Date().toISOString()
         }
       };
 
@@ -7453,6 +7441,24 @@ ${contextInfo}
           emotional_expression: data.emotionalExpression || ""
         };
       }
+
+      // AI 指令（放在完整版欄位之後）
+      output.ai_instructions = {
+        system_prompt: data.systemPrompt || "",
+        character_description: data.description || "",
+        first_message: data.firstMessage || "",
+        example_dialogues: data.exampleDialogues || "",
+        scenario: data.scenario || ""
+      };
+
+      // 元資料（永遠放在最後）
+      output.metadata = {
+        tags: data.tags ? data.tags.split(',').map(t => t.trim()) : [],
+        world_lore: data.worldLore || "",
+        creator: data.creator || "",
+        version: data.version || "1.0",
+        created_at: new Date().toISOString()
+      };
 
       return output;
     }
