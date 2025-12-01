@@ -6,6 +6,9 @@
   <title>角色卡共享平台</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
+  <!-- Google OAuth -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <!-- 配置文件 -->
   <script src="config.js"></script>
 
@@ -101,6 +104,49 @@
     .header-actions {
       display: flex;
       gap: 12px;
+      align-items: center;
+    }
+
+    /* ===== 用戶資訊樣式 ===== */
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .user-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .login-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: white;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .login-btn:hover {
+      border-color: var(--primary);
+      background: var(--bg-tertiary);
     }
 
     .btn {
@@ -475,6 +521,23 @@
         <span>角色卡共享平台</span>
       </div>
       <div class="header-actions">
+        <!-- 用戶資訊區域 -->
+        <div id="userSection">
+          <!-- 未登入時顯示 -->
+          <button class="login-btn" id="loginBtn" style="display: none;">
+            <span>🔐</span> 登入 Google
+          </button>
+
+          <!-- 已登入時顯示 -->
+          <div class="user-info" id="userInfo" style="display: none;">
+            <img class="user-avatar" id="userAvatar" src="" alt="User">
+            <span class="user-name" id="userName"></span>
+            <button class="btn btn-secondary" onclick="App.auth.logout()" style="padding: 6px 12px; font-size: 12px;">
+              登出
+            </button>
+          </div>
+        </div>
+
         <a href="index.html" class="btn btn-secondary">
           <span>✏️</span> 返回編輯器
         </a>
@@ -555,20 +618,153 @@
     let currentSearch = '';
     let selectedCharacter = null;
 
-    // ===== 本地角色卡管理（與 index.html 共用） =====
+    // ===== App 狀態管理 =====
+    const App = {
+      state: {
+        user: null,
+        isAuthenticated: false
+      },
 
-    function getMyCharacters() {
-      const stored = localStorage.getItem('myCharacters');
-      return stored ? JSON.parse(stored) : [];
-    }
+      auth: {
+        // 初始化 Google OAuth
+        init() {
+          if (typeof google === 'undefined') {
+            console.warn('Google OAuth SDK 尚未載入');
+            setTimeout(() => this.init(), 100);
+            return;
+          }
 
-    function isMyCharacter(characterId) {
-      const myCharacters = getMyCharacters();
-      return myCharacters.some(c => c.id === characterId);
+          google.accounts.id.initialize({
+            client_id: CONFIG.GOOGLE_CLIENT_ID,
+            callback: this.handleCredentialResponse.bind(this)
+          });
+
+          // 顯示登入按鈕
+          const loginBtn = document.getElementById('loginBtn');
+          if (loginBtn) {
+            loginBtn.style.display = 'flex';
+            loginBtn.onclick = () => this.login();
+          }
+
+          // 檢查是否有保存的登入狀態
+          this.checkSavedAuth();
+        },
+
+        // 處理 Google 登入回應
+        handleCredentialResponse(response) {
+          try {
+            const credential = response.credential;
+            const payload = JSON.parseFromString(atob(credential.split('.')[1]));
+
+            App.state.user = {
+              email: payload.email,
+              name: payload.name,
+              picture: payload.picture,
+              credential: credential
+            };
+            App.state.isAuthenticated = true;
+
+            // 保存登入狀態
+            localStorage.setItem('googleAuth', JSON.stringify({
+              email: payload.email,
+              name: payload.name,
+              picture: payload.picture
+            }));
+
+            this.updateUI();
+            showToast('✅ 登入成功！', 'success');
+
+            // 重新載入角色列表以更新編輯按鈕
+            filterAndDisplayCharacters();
+          } catch (error) {
+            console.error('登入處理錯誤：', error);
+            showToast('❌ 登入失敗', 'error');
+          }
+        },
+
+        // 執行登入
+        login() {
+          google.accounts.id.prompt();
+        },
+
+        // 登出
+        logout() {
+          App.state.user = null;
+          App.state.isAuthenticated = false;
+          localStorage.removeItem('googleAuth');
+
+          this.updateUI();
+          showToast('✅ 已登出', 'success');
+
+          // 重新載入角色列表以隱藏編輯按鈕
+          filterAndDisplayCharacters();
+        },
+
+        // 檢查保存的登入狀態
+        checkSavedAuth() {
+          try {
+            const saved = localStorage.getItem('googleAuth');
+            if (saved) {
+              const userData = JSON.parse(saved);
+              App.state.user = userData;
+              App.state.isAuthenticated = true;
+              this.updateUI();
+            }
+          } catch (error) {
+            console.error('讀取登入狀態錯誤：', error);
+          }
+        },
+
+        // 更新 UI 顯示
+        updateUI() {
+          const loginBtn = document.getElementById('loginBtn');
+          const userInfo = document.getElementById('userInfo');
+          const userAvatar = document.getElementById('userAvatar');
+          const userName = document.getElementById('userName');
+
+          if (App.state.isAuthenticated && App.state.user) {
+            loginBtn.style.display = 'none';
+            userInfo.style.display = 'flex';
+            userAvatar.src = App.state.user.picture || '';
+            userName.textContent = App.state.user.name || App.state.user.email;
+          } else {
+            loginBtn.style.display = 'flex';
+            userInfo.style.display = 'none';
+          }
+        }
+      }
+    };
+
+    // ===== 修正 JSON.parseFromString（相容性修正） =====
+    JSON.parseFromString = function(str) {
+      return JSON.parse(str);
+    };
+
+    // ===== 角色所有權驗證（使用 Google Email） =====
+
+    // 檢查當前用戶是否擁有該角色
+    async function isMyCharacter(characterId) {
+      // 如果未登入，直接返回 false
+      if (!App.state.isAuthenticated || !App.state.user || !App.state.user.email) {
+        return false;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}?action=checkOwnership&id=${characterId}&email=${encodeURIComponent(App.state.user.email)}`);
+        const result = await response.json();
+
+        return result.success && result.data && result.data.isOwner === true;
+      } catch (error) {
+        console.error('檢查所有權錯誤：', error);
+        return false;
+      }
     }
 
     // 初始化
     document.addEventListener('DOMContentLoaded', () => {
+      // 初始化 Google 認證
+      App.auth.init();
+
       loadCharacters();
       setupEventListeners();
 
@@ -650,8 +846,8 @@
       displayCharacters(filtered);
     }
 
-    // 顯示角色卡
-    function displayCharacters(characters) {
+    // 顯示角色卡（異步版本，支援所有權檢查）
+    async function displayCharacters(characters) {
       const grid = document.getElementById('cardsGrid');
       const loading = document.getElementById('loading');
 
@@ -663,6 +859,17 @@
         displayEmpty();
         return;
       }
+
+      // 批量檢查所有權
+      const ownershipChecks = await Promise.all(
+        characters.map(char => isMyCharacter(char.id))
+      );
+
+      // 建立所有權映射表
+      const ownershipMap = {};
+      characters.forEach((char, index) => {
+        ownershipMap[char.id] = ownershipChecks[index];
+      });
 
       grid.innerHTML = characters.map(char => `
         <div class="character-card" onclick="showDetail('${char.id}')">
@@ -687,7 +894,7 @@
               </div>
             ` : ''}
             <div class="card-actions">
-              ${isMyCharacter(char.id) ? `
+              ${ownershipMap[char.id] ? `
                 <button class="btn btn-small" onclick="event.stopPropagation(); editCharacter('${char.id}')" style="background: var(--gradient-sunset); color: white; flex: 1;">
                   <span>✏️</span> 編輯
                 </button>
@@ -823,6 +1030,24 @@
     // 編輯角色（僅原作者可用）
     async function editCharacter(id) {
       try {
+        // 檢查登入狀態
+        if (!App.state.isAuthenticated || !App.state.user || !App.state.user.email) {
+          showToast('⚠️ 請先登入 Google 才能編輯角色卡', 'warning');
+          setTimeout(() => {
+            if (confirm('需要登入 Google 才能編輯角色卡。\n\n是否要立即登入？')) {
+              App.auth.login();
+            }
+          }, 500);
+          return;
+        }
+
+        // 驗證所有權
+        const isOwner = await isMyCharacter(id);
+        if (!isOwner) {
+          showToast('❌ 您無權編輯此角色卡（非原作者）', 'error');
+          return;
+        }
+
         showToast('正在載入角色資料...', 'info');
 
         const response = await fetch(`${API_URL}?action=get&id=${id}`);

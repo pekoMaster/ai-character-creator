@@ -2291,9 +2291,6 @@
         <button class="icon-btn" onclick="openPlatform()" style="background: var(--gradient-ocean); color: white; border: none; font-weight: 500;">
           <span>🌐</span> 瀏覽共享平台
         </button>
-        <button class="icon-btn" onclick="showMyCharacters()" style="background: var(--gradient-sunset); color: white; border: none; font-weight: 500;">
-          <span>📝</span> 我的角色卡
-        </button>
       </div>
     </header>
 
@@ -9251,67 +9248,8 @@ ${contextInfo}
       });
     }
 
-    // ===== 本地角色卡記錄管理 =====
-
-    /**
-     * 儲存已上傳的角色卡資訊到 localStorage
-     */
-    function saveMyCharacter(characterInfo) {
-      const myCharacters = getMyCharacters();
-
-      // 檢查是否已存在（更新情況）
-      const existingIndex = myCharacters.findIndex(c => c.id === characterInfo.id);
-
-      if (existingIndex >= 0) {
-        // 更新現有記錄
-        myCharacters[existingIndex] = {
-          ...myCharacters[existingIndex],
-          ...characterInfo,
-          updatedAt: new Date().toISOString()
-        };
-      } else {
-        // 新增記錄
-        myCharacters.push({
-          ...characterInfo,
-          uploadedAt: new Date().toISOString()
-        });
-      }
-
-      localStorage.setItem('myCharacters', JSON.stringify(myCharacters));
-    }
-
-    /**
-     * 取得我的角色卡列表
-     */
-    function getMyCharacters() {
-      const stored = localStorage.getItem('myCharacters');
-      return stored ? JSON.parse(stored) : [];
-    }
-
-    /**
-     * 檢查是否為我的角色卡
-     */
-    function isMyCharacter(characterId) {
-      const myCharacters = getMyCharacters();
-      return myCharacters.some(c => c.id === characterId);
-    }
-
-    /**
-     * 根據名稱查找我的角色卡
-     */
-    function findMyCharacterByName(name) {
-      const myCharacters = getMyCharacters();
-      return myCharacters.find(c => c.name === name);
-    }
-
-    /**
-     * 刪除本地角色卡記錄
-     */
-    function removeMyCharacter(characterId) {
-      const myCharacters = getMyCharacters();
-      const filtered = myCharacters.filter(c => c.id !== characterId);
-      localStorage.setItem('myCharacters', JSON.stringify(filtered));
-    }
+    // ===== 角色卡所有權管理已改用 Google Email 驗證 =====
+    // localStorage 相關函數已移除，所有權驗證現在由 Google Apps Script 後端處理
 
     /**
      * 顯示上傳對話框
@@ -9422,35 +9360,25 @@ ${contextInfo}
      */
     async function uploadToPlatform() {
       try {
+        // 檢查是否已登入 Google
+        if (!App.state.user || !App.state.user.email) {
+          showToast('⚠️ 請先登入 Google 帳號才能上傳角色卡', 'warning');
+          setTimeout(() => {
+            if (confirm('需要登入 Google 才能上傳到共享平台。\n\n是否要立即登入？')) {
+              App.auth.login();
+            }
+          }, 500);
+          return;
+        }
+
         // 驗證表單資料
         const data = collectFormData();
         if (!App.validator.validate(data)) {
           return;
         }
 
-        // 檢查是否已經上傳過同名角色
-        const existingCharacter = findMyCharacterByName(data.name);
-        let isUpdate = false;
-        let characterId;
-
-        if (existingCharacter) {
-          // 詢問是否要更新
-          const shouldUpdate = confirm(
-            `您之前已上傳過名為「${data.name}」的角色卡。\n\n` +
-            `是否要更新該角色卡？\n` +
-            `- 點擊「確定」= 更新現有角色卡\n` +
-            `- 點擊「取消」= 建立新的角色卡`
-          );
-
-          if (shouldUpdate) {
-            isUpdate = true;
-            characterId = existingCharacter.id;
-          } else {
-            characterId = generateUUID();
-          }
-        } else {
-          characterId = generateUUID();
-        }
+        // 生成新的角色卡 ID（每次上傳都是新的）
+        const characterId = generateUUID();
 
         // 顯示上傳對話框
         const uploadInfo = await showUploadDialog();
@@ -9459,19 +9387,20 @@ ${contextInfo}
         }
 
         // 顯示載入中
-        showToast(isUpdate ? '正在更新到平台...' : '正在上傳到平台...', 'info');
+        showToast('正在上傳到平台...', 'info');
 
         // 準備上傳資料
         const uploadData = {
-          action: isUpdate ? 'update' : 'upload',
+          action: 'upload',
           id: characterId,
           name: data.name || '未命名角色',
           author: uploadInfo.author,
+          authorEmail: App.state.user.email, // Google Email
           source: data.source || '原創',
           tags: uploadInfo.tags,
           type: isFullMode ? '完整版' : '精簡版',
           characterData: data, // 完整的角色資料
-          version: isUpdate ? (existingCharacter.version || '1.0') : '1.0',
+          version: '1.0',
           thumbnail: uploadInfo.thumbnail
         };
 
@@ -9485,22 +9414,12 @@ ${contextInfo}
           body: JSON.stringify(uploadData)
         });
 
-        // 儲存到本地記錄
-        saveMyCharacter({
-          id: characterId,
-          name: data.name,
-          author: uploadInfo.author,
-          source: data.source || '原創',
-          type: isFullMode ? '完整版' : '精簡版',
-          version: uploadData.version
-        });
-
         // 注意：no-cors 模式下無法讀取回應，但請求會成功送出
-        showToast(isUpdate ? '✅ 角色卡已成功更新！' : '✅ 角色卡已成功上傳到平台！', 'success');
+        showToast('✅ 角色卡已成功上傳到平台！', 'success');
 
         // 詢問是否要查看平台
         setTimeout(() => {
-          if (confirm((isUpdate ? '更新' : '上傳') + '成功！是否要前往共享平台查看？')) {
+          if (confirm('上傳成功！是否要前往共享平台查看？')) {
             openPlatform();
           }
         }, 1000);
@@ -9519,78 +9438,6 @@ ${contextInfo}
       window.open('platform.html', '_blank');
     }
 
-    /**
-     * 顯示我的角色卡列表
-     */
-    function showMyCharacters() {
-      const myCharacters = getMyCharacters();
-
-      if (myCharacters.length === 0) {
-        showToast('您還沒有上傳任何角色卡', 'info');
-        return;
-      }
-
-      const dialogHTML = `
-        <div class="confirm-dialog-overlay" id="myCharactersDialog">
-          <div class="confirm-dialog-box" style="max-width: 700px; max-height: 80vh; overflow-y: auto;">
-            <h3 class="confirm-dialog-title">📝 我的角色卡 (${myCharacters.length})</h3>
-            <p class="confirm-dialog-message">您可以從平台下載並編輯這些角色卡</p>
-
-            <div style="margin: 20px 0;">
-              ${myCharacters.map(char => `
-                <div style="padding: 16px; border: 2px solid var(--border-color); border-radius: var(--radius-md); margin-bottom: 12px; background: var(--bg-secondary);">
-                  <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                    <div style="flex: 1;">
-                      <div style="font-size: 18px; font-weight: 600; margin-bottom: 4px;">${char.name}</div>
-                      <div style="font-size: 13px; color: var(--text-secondary);">
-                        <span>👤 ${char.author}</span>
-                        <span style="margin: 0 8px;">•</span>
-                        <span>📚 ${char.source || '原創'}</span>
-                        <span style="margin: 0 8px;">•</span>
-                        <span>📋 ${char.type || '精簡版'}</span>
-                      </div>
-                      <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px;">
-                        上傳於：${new Date(char.uploadedAt).toLocaleString('zh-TW')}
-                        ${char.updatedAt ? ` • 更新於：${new Date(char.updatedAt).toLocaleString('zh-TW')}` : ''}
-                      </div>
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                      <button onclick="viewOnPlatform('${char.id}')" style="padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px;">
-                        🌐 查看
-                      </button>
-                      <button onclick="removeMyCharacter('${char.id}'); document.getElementById('myCharactersDialog').remove(); showMyCharacters();" style="padding: 8px 16px; background: var(--danger); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px;">
-                        🗑️ 移除
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-
-            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-color);">
-              <button class="confirm-cancel-btn" onclick="document.getElementById('myCharactersDialog').remove()">關閉</button>
-            </div>
-          </div>
-        </div>
-      `;
-
-      document.body.insertAdjacentHTML('beforeend', dialogHTML);
-
-      // 點擊背景關閉
-      const overlay = document.getElementById('myCharactersDialog');
-      overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-          overlay.remove();
-        }
-      });
-    }
-
-    /**
-     * 在平台上查看指定角色卡
-     */
-    function viewOnPlatform(characterId) {
-      window.open(`platform.html?id=${characterId}`, '_blank');
-    }
 
     /**
      * 檢查編輯模式（從平台跳轉過來編輯）

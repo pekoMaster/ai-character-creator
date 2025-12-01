@@ -25,7 +25,16 @@
       "Bash(dir /b *.txt)",
       "Bash(node -c:*)",
       "Bash(git reset:*)",
-      "Bash(start \"\" \"H:\\OneDrive\\RB\\TRPG\\index.html\")"
+      "Bash(start \"\" \"H:\\OneDrive\\RB\\TRPG\\index.html\")",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:www.dzmm.ai)",
+      "WebFetch(domain:docs.google.com)",
+      "WebFetch(domain:doc-0s-bk-sheets.googleusercontent.com)",
+      "WebFetch(domain:script.google.com)",
+      "WebFetch(domain:script.googleusercontent.com)",
+      "Bash(curl:*)",
+      "Bash(git show-ref:*)",
+      "Bash(git branch:*)"
     ],
     "deny": [],
     "ask": []
