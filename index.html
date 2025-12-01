@@ -2656,7 +2656,15 @@
             </div>
             <div class="form-field full-width full-mode-only">
               <div class="dynamic-field-header">
-                <label>人際關係 <span class="hint">(名稱與關係描述)</span></label>
+                <label>
+                  人際關係 <span class="hint">(可填人物、群體、單位等)</span>
+                  <button class="ai-generate-btn"
+                          onclick="App.ai.generateDynamicField('relationships')"
+                          type="button"
+                          title="使用AI根據當前角色資料創意生成人際關係">
+                    🎨 讓AI生成
+                  </button>
+                </label>
               </div>
               <div class="dynamic-fields-container" id="relationshipsContainer">
                 <!-- 動態欄位將由 JavaScript 生成 -->
@@ -2684,7 +2692,15 @@
           <div class="section-content">
             <div class="form-field full-width full-mode-only">
               <div class="dynamic-field-header">
-                <label>戰鬥技能 <span class="hint">(技能名稱與等級/描述)</span></label>
+                <label>
+                  戰鬥技能 <span class="hint">(技能名稱與等級/描述)</span>
+                  <button class="ai-generate-btn"
+                          onclick="App.ai.generateDynamicField('combatSkills')"
+                          type="button"
+                          title="使用AI根據當前角色資料創意生成戰鬥技能">
+                    🎨 讓AI生成
+                  </button>
+                </label>
               </div>
               <div class="dynamic-fields-container" id="combatSkillsContainer">
                 <!-- 動態欄位將由 JavaScript 生成 -->
@@ -2695,7 +2711,15 @@
             </div>
             <div class="form-field full-width full-mode-only">
               <div class="dynamic-field-header">
-                <label>生活技能 <span class="hint">(技能名稱與等級/描述)</span></label>
+                <label>
+                  生活技能 <span class="hint">(技能名稱與等級/描述)</span>
+                  <button class="ai-generate-btn"
+                          onclick="App.ai.generateDynamicField('lifeSkills')"
+                          type="button"
+                          title="使用AI根據當前角色資料創意生成生活技能">
+                    🎨 讓AI生成
+                  </button>
+                </label>
               </div>
               <div class="dynamic-fields-container" id="lifeSkillsContainer">
                 <!-- 動態欄位將由 JavaScript 生成 -->
@@ -2716,7 +2740,15 @@
           <div class="section-content">
             <div class="form-field full-width full-mode-only">
               <div class="dynamic-field-header">
-                <label>自訂屬性 <span class="hint">(屬性名稱與值/等級/描述)</span></label>
+                <label>
+                  自訂屬性 <span class="hint">(屬性名稱與值/等級/描述)</span>
+                  <button class="ai-generate-btn"
+                          onclick="App.ai.generateDynamicField('customAttributes')"
+                          type="button"
+                          title="使用AI根據當前角色資料創意生成自訂屬性">
+                    🎨 讓AI生成
+                  </button>
+                </label>
               </div>
               <div class="dynamic-fields-container" id="customAttributesContainer">
                 <!-- 動態欄位將由 JavaScript 生成 -->
@@ -2770,7 +2802,15 @@
               </div>
             </div>
             <div class="form-field full-width full-mode-only">
-              <label>情緒表達方式</label>
+              <label>
+                情緒表達方式
+                <button class="ai-generate-btn"
+                        onclick="App.ai.generateField('emotionalExpression')"
+                        type="button"
+                        title="使用AI根據當前角色資料創意生成情緒表達方式">
+                  🎨 讓AI生成
+                </button>
+              </label>
               <textarea id="emotionalExpression" placeholder="開心/生氣/害羞時的反應..." oninput="updatePreview()"></textarea>
             </div>
           </div>
@@ -3718,13 +3758,13 @@
         config: {
           relationships: {
             fields: [
-              { name: 'name', label: '名稱/稱呼', placeholder: '例：白上吹雪', type: 'text', hasExample: true },
-              { name: 'description', label: '關係描述', placeholder: '例：GAMERS 的同期夥伴', type: 'text', hasExample: true }
+              { name: 'name', label: '名稱/稱呼/群體/單位', placeholder: '例：白上吹雪、偶像事務所、魔法協會', type: 'text', hasExample: true },
+              { name: 'description', label: '關係描述', placeholder: '例：GAMERS 的同期夥伴、對公司的忠誠、協會的敵對態度', type: 'text', hasExample: true }
             ],
             defaultCount: 1,
             examples: {
-              name: ['白上吹雪', '湊阿庫婭', '大空昴', 'Gawr Gura', '寶鐘瑪琳', '星街彗星'],
-              description: ['GAMERS 的同期夥伴，經常一起直播', '同期生，互相競爭又互相扶持', '前輩，經常給予建議和鼓勵', '後輩，非常尊敬的對象', '好朋友，經常一起合作企劃', '歌唱夥伴，互相切磋歌藝']
+              name: ['白上吹雪', '湊阿庫婭', 'GAMERS 社團', 'Hololive 公司', '魔法學院', '冒險者公會', '星街彗星', '當地圖書館'],
+              description: ['GAMERS 的同期夥伴，經常一起直播', '同期生，互相競爭又互相扶持', '所屬團體，有強烈歸屬感', '工作單位，對公司充滿感激', '母校，保持聯繫和懷念', '註冊成員，經常接取任務', '歌唱夥伴，互相切磋歌藝', '常去的地方，喜愛那裡的氛圍']
             }
           },
           combatSkills: {
@@ -6043,7 +6083,22 @@ ${contextInfo}
 - 長度控制在 80-200 字之間
 - 只需要輸出世界觀描述本身，不要加任何說明或前綴
 
-請生成世界觀：`
+請生成世界觀：`,
+
+            emotionalExpression: `你是一位專業的角色設定創作者。請根據以下角色資訊，生成「情緒表達方式」描述。
+
+${contextInfo}
+
+要求：
+- 描述這個角色在不同情緒下的表現方式（例如：開心時、生氣時、害羞時、悲傷時等）
+- 要符合角色的性格特質和背景
+- 具體且富有個性，展現角色的獨特性
+- 長度控制在 80-150 字之間
+- 只需要輸出情緒表達描述本身，不要加任何說明或前綴
+
+範例：開心時會笑得很大聲並拍手；生氣時會鼓起臉頰保持沉默；害羞時會臉紅結巴說不出話來。
+
+請生成情緒表達方式：`
           };
 
           return prompts[fieldId] || `請根據角色資訊生成「${fieldLabel}」的內容。`;
@@ -6261,6 +6316,235 @@ ${contextInfo}
           } finally {
             App.import.setLoading(false);
           }
+        },
+
+        /**
+         * 生成動態欄位（人際關係、技能、自訂屬性等）
+         * @param {string} fieldType - 動態欄位類型 (relationships, combatSkills, lifeSkills, customAttributes)
+         */
+        async generateDynamicField(fieldType) {
+          // 檢查 API KEY
+          const settings = App.settings.load();
+          const provider = settings.aiProvider || 'gemini';
+
+          let hasApiKey = false;
+          if (provider === 'gemini' && settings.geminiApiKey) hasApiKey = true;
+          if (provider === 'openai' && settings.openaiApiKey) hasApiKey = true;
+          if (provider === 'claude' && settings.claudeApiKey) hasApiKey = true;
+          if (provider === 'deepseek' && settings.deepseekApiKey) hasApiKey = true;
+
+          if (!hasApiKey) {
+            showToast('請先在設定中填寫 API KEY', 'error');
+            return;
+          }
+
+          // 欄位標籤對應
+          const fieldLabels = {
+            relationships: '人際關係',
+            combatSkills: '戰鬥技能',
+            lifeSkills: '生活技能',
+            customAttributes: '自訂屬性'
+          };
+
+          const fieldLabel = fieldLabels[fieldType] || fieldType;
+
+          // 顯示確認對話框
+          const userChoice = await showConfirmDialog({
+            title: 'AI 生成確認',
+            message: `確定要使用 AI 生成「${fieldLabel}」嗎？\n這將會消耗 TOKEN。`,
+            options: [
+              {
+                value: 'confirm',
+                label: '✓ 確定生成',
+                description: `AI 將根據當前角色資料創意生成${fieldLabel}`
+              }
+            ],
+            cancelable: true
+          });
+
+          if (!userChoice) return; // 用戶取消
+
+          // 顯示全螢幕 loading
+          App.import.setLoading(true);
+
+          try {
+            // 收集當前表單資料
+            const currentData = this.collectFormData();
+
+            // 建構 prompt
+            const prompt = this.buildDynamicFieldPrompt(fieldType, currentData);
+
+            // 呼叫 AI API
+            const result = await this.callAIForText(prompt, provider);
+
+            if (!result) {
+              throw new Error('AI 未返回結果');
+            }
+
+            // 解析結果並填入動態欄位
+            this.parseDynamicFieldResult(fieldType, result);
+
+            showToast(`${fieldLabel}生成完成！`, 'success');
+
+          } catch (error) {
+            console.error('AI 生成失敗：', error);
+            showToast(`生成失敗：${error.message}`, 'error');
+          } finally {
+            App.import.setLoading(false);
+          }
+        },
+
+        /**
+         * 建構動態欄位生成的 prompt
+         */
+        buildDynamicFieldPrompt(fieldType, currentData) {
+          let contextInfo = '';
+          if (currentData.name) contextInfo += `角色名稱：${currentData.name}\n`;
+          if (currentData.species) contextInfo += `種族：${currentData.species}\n`;
+          if (currentData.occupation) contextInfo += `職業：${currentData.occupation}\n`;
+          if (currentData.age) contextInfo += `年齡：${currentData.age}\n`;
+          if (currentData.gender) contextInfo += `性別：${currentData.gender}\n`;
+          if (currentData.summary) contextInfo += `性格摘要：${currentData.summary}\n`;
+          if (currentData.appearance) contextInfo += `外觀：${currentData.appearance}\n`;
+          if (currentData.backstory) contextInfo += `背景故事：${currentData.backstory}\n`;
+
+          const prompts = {
+            relationships: `你是一位專業的角色設定創作者。請根據以下角色資訊，生成 2-4 個「人際關係」。
+
+${contextInfo}
+
+要求：
+- 人際關係可以是具體的人物、群體、組織、單位等
+- 每個關係要包含：名稱/稱呼/群體/單位 + 關係描述
+- 關係類型要多樣化（例如：朋友、敵人、所屬團體、工作單位、競爭對手等）
+- 要符合角色的背景和職業
+- 具體且富有故事性
+
+輸出格式（每行一個關係，用「｜」分隔名稱和描述）：
+名稱｜關係描述
+名稱｜關係描述
+
+範例：
+白上吹雪｜GAMERS 的同期夥伴，經常一起直播
+Hololive 公司｜工作單位，對公司充滿感激
+魔法學院｜母校，保持聯繫和懷念
+
+請生成人際關係：`,
+
+            combatSkills: `你是一位專業的角色設定創作者。請根據以下角色資訊，生成 2-4 個「戰鬥技能」。
+
+${contextInfo}
+
+要求：
+- 戰鬥技能要符合角色的種族、職業、背景
+- 每個技能要包含：技能名稱 + 等級/描述
+- 技能要有層次感（例如：S級、A+、專精、大師級等）
+- 富有想像力且符合角色設定
+
+輸出格式（每行一個技能，用「｜」分隔名稱和等級）：
+技能名稱｜等級/描述
+技能名稱｜等級/描述
+
+範例：
+歌唱魔法｜S級，可魅惑聽眾
+舞蹈戰技｜A+，華麗且致命
+聲音攻擊｜專精，震懾敵人
+
+請生成戰鬥技能：`,
+
+            lifeSkills: `你是一位專業的角色設定創作者。請根據以下角色資訊，生成 2-4 個「生活技能」。
+
+${contextInfo}
+
+要求：
+- 生活技能要符合角色的職業、興趣、背景
+- 每個技能要包含：技能名稱 + 等級/描述
+- 技能要展現角色的生活面向和興趣愛好
+- 具體且富有個性
+
+輸出格式（每行一個技能，用「｜」分隔名稱和等級）：
+技能名稱｜等級/描述
+技能名稱｜等級/描述
+
+範例：
+遊戲實況｜專業級，擅長恐怖遊戲
+唱歌｜S級，擁有天籟之音
+料理｜熟練，擅長甜點製作
+
+請生成生活技能：`,
+
+            customAttributes: `你是一位專業的角色設定創作者。請根據以下角色資訊，生成 3-5 個「自訂屬性」。
+
+${contextInfo}
+
+要求：
+- 自訂屬性要能展現角色的特色和數據化特質
+- 每個屬性要包含：屬性名稱 + 值/等級/描述
+- 屬性值要有趣且富有個性（例如：SSS、S+、MAX、破表、10萬訂閱等）
+- 要符合角色的設定和世界觀
+
+輸出格式（每行一個屬性，用「｜」分隔名稱和值）：
+屬性名稱｜值/等級/描述
+屬性名稱｜值/等級/描述
+
+範例：
+魅力值｜SSS
+歌唱力｜S+
+遊戲技術｜A++
+可愛度｜MAX
+粉絲人氣｜10萬訂閱
+
+請生成自訂屬性：`
+          };
+
+          return prompts[fieldType] || '請生成對應的內容。';
+        },
+
+        /**
+         * 解析動態欄位生成結果並填入表單
+         */
+        parseDynamicFieldResult(fieldType, result) {
+          // 解析結果（每行一個項目，用「｜」分隔）
+          const lines = result.split('\n')
+            .map(line => line.trim())
+            .filter(line => line && !line.startsWith('範例') && !line.startsWith('請生成'));
+
+          // 清空現有的動態欄位
+          App.dynamicFields.clear(fieldType);
+
+          // 根據欄位類型填入資料
+          const fieldMapping = {
+            relationships: { first: 'name', second: 'description' },
+            combatSkills: { first: 'skill', second: 'level' },
+            lifeSkills: { first: 'skill', second: 'level' },
+            customAttributes: { first: 'attribute', second: 'value' }
+          };
+
+          const mapping = fieldMapping[fieldType];
+          if (!mapping) return;
+
+          lines.forEach(line => {
+            const parts = line.split(/[｜|]/).map(p => p.trim());
+            if (parts.length >= 2) {
+              // 添加動態欄位
+              App.dynamicFields.add(fieldType);
+
+              // 獲取最新添加的欄位索引
+              const container = document.getElementById(`${fieldType}Container`);
+              const items = container.querySelectorAll('.dynamic-field-item');
+              const lastIndex = items.length - 1;
+
+              // 填入值
+              const firstField = document.getElementById(`${fieldType}_${lastIndex}_${mapping.first}`);
+              const secondField = document.getElementById(`${fieldType}_${lastIndex}_${mapping.second}`);
+
+              if (firstField) firstField.value = parts[0];
+              if (secondField) secondField.value = parts[1];
+            }
+          });
+
+          // 觸發更新預覽
+          updatePreview();
         },
 
         /**
