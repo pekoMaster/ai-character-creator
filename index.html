@@ -7709,7 +7709,7 @@ ${contextInfo}
 
     // 平台特定格式
     function convertToSillyTavernFormat(data) {
-      return {
+      const output = {
         spec: "chara_card_v2",
         spec_version: "2.0",
         data: {
@@ -7724,68 +7724,42 @@ ${contextInfo}
           post_history_instructions: "",
           alternate_greetings: [],
           tags: data.tags ? data.tags.split(',').map(t => t.trim()) : [],
-          extensions: {
-            world: data.worldLore || "",
-            depth_prompt: { prompt: "", depth: 4 }
-          },
-          // 元資料放在最後
           creator: data.creator || "",
-          character_version: data.version || "1.0"
+          character_version: data.version || "1.0",
+          extensions: {}
         }
       };
+
+      // 如果有 worldLore，使用標準的 character_book 格式
+      if (data.worldLore) {
+        output.data.character_book = {
+          entries: [{
+            keys: [data.name || "character"],
+            content: data.worldLore,
+            enabled: true,
+            insertion_order: 100
+          }]
+        };
+      }
+
+      return output;
     }
 
     function convertToRisuAIFormat(data) {
-      return {
-        type: "risuai",
-        ver: 1,
-        data: {
-          name: data.name || "",
-          firstMessage: data.firstMessage || "",
-          description: buildCharacterDescription(data),
-          personality: data.personality || "",
-          scenario: data.scenario || "",
-          exampleMessage: data.exampleDialogues || "",
-          creatorNotes: data.creatorNotes || "",
-          systemPrompt: data.systemPrompt || "",
-          tags: data.tags ? data.tags.split(',').map(t => t.trim()) : [],
-          lorebook: {
-            name: data.worldLore ? "World Lore" : "",
-            entries: data.worldLore ? [{
-              keys: [data.name || "character"],
-              content: data.worldLore,
-              enabled: true
-            }] : []
-          },
-          // 元資料放在最後
-          creator: data.creator || "",
-          characterVersion: data.version || "1.0"
-        }
-      };
+      // RisuAI 支援 Character Card V2 格式，使用相同格式以提高相容性
+      return convertToSillyTavernFormat(data);
     }
 
     function convertToCharacterAIFormat(data) {
-      let definition = "";
-      if (data.name) definition += `{{char}} is named ${data.name}. `;
-      if (data.age) definition += `{{char}} is ${data.age} years old. `;
-      if (data.gender) definition += `{{char}}'s gender is ${data.gender}. `;
-      if (data.species && data.species !== '人類') definition += `{{char}} is a ${data.species}. `;
-      if (data.occupation) definition += `{{char}} works as ${data.occupation}. `;
-      if (data.appearance) definition += `${data.appearance} `;
-      if (data.personality) definition += `${data.personality} `;
-      if (data.speechStyle) definition += `{{char}} speaks in a ${data.speechStyle} manner. `;
-      // 背景故事 - 完整版專屬
-      if (isFullMode && data.backstory) definition += `${data.backstory} `;
+      // 使用 buildCharacterDescription 構建完整定義
+      const fullDescription = buildCharacterDescription(data);
 
+      // Character.AI 只需要 4 個核心欄位
       return {
         name: data.name || "",
-        title: data.aliases || "",
-        description: data.description || definition.trim(),
         greeting: data.firstMessage || "",
-        definition: definition.trim(),
-        visibility: "private",
-        copyable: true,
-        categories: data.tags ? data.tags.split(',').map(t => t.trim()) : []
+        description: data.description || "",
+        definition: fullDescription
       };
     }
 
