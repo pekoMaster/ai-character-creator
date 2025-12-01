@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>角色卡共享平台</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <!-- 配置文件 -->
+  <script src="config.js"></script>
+
+  <style>
+    /* ===== CSS 變數定義 ===== */
+    :root {
+      /* 🎨 主題色彩 */
+      --primary: #5B7BFF;
+      --primary-dark: #4A6AEE;
+      --primary-light: #8FA9FF;
+      --primary-glow: rgba(91, 123, 255, 0.3);
+
+      --secondary: #FF6B9D;
+      --success: #06D6A0;
+      --warning: #FFB800;
+      --danger: #FF6B6B;
+      --info: #4FC3F7;
+
+      /* 🌈 漸變色彩 */
+      --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      --gradient-ocean: linear-gradient(135deg, #4fc3f7 0%, #5b7bff 100%);
+      --gradient-sunset: linear-gradient(135deg, #ff6b9d 0%, #ffa06b 100%);
+
+      /* 🌑 淺色模式顏色 */
+      --bg-primary: #F8F9FA;
+      --bg-secondary: #FFFFFF;
+      --bg-tertiary: #F1F3F5;
+
+      --text-primary: #1A1A1A;
+      --text-secondary: #4A5568;
+      --text-tertiary: #718096;
+
+      --border-color: #E2E8F0;
+      --border-light: #F1F3F5;
+
+      /* 📐 圓角系統 */
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 20px;
+      --radius-xl: 24px;
+
+      /* 💫 陰影系統 */
+      --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    /* ===== 頂部導航列 ===== */
+    .header {
+      background: var(--bg-secondary);
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 20px 0;
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 24px;
+      font-weight: 700;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border-color);
+    }
+
+    /* ===== 搜尋與篩選區 ===== */
+    .search-section {
+      max-width: 1400px;
+      margin: 32px auto;
+      padding: 0 24px;
+    }
+
+    .search-box {
+      position: relative;
+      margin-bottom: 24px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 16px 50px 16px 20px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background: var(--bg-secondary);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-glow);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+      color: var(--text-tertiary);
+    }
+
+    .filters {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 10px 20px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .filter-btn.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: white;
+    }
+
+    /* ===== 統計資訊 ===== */
+    .stats {
+      max-width: 1400px;
+      margin: 0 auto 32px;
+      padding: 0 24px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* ===== 角色卡網格 ===== */
+    .cards-grid {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px 48px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .character-card {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .character-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .card-thumbnail {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      color: white;
+    }
+
+    .card-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-content {
+      padding: 20px;
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .card-meta {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .card-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tag {
+      padding: 4px 12px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-small {
+      padding: 8px 16px;
+      font-size: 13px;
+      flex: 1;
+    }
+
+    /* ===== 載入中動畫 ===== */
+    .loading {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-secondary);
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--border-color);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ===== 空狀態 ===== */
+    .empty-state {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--text-secondary);
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    /* ===== Toast 提示 ===== */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      background: var(--bg-secondary);
+      padding: 16px 24px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      display: none;
+      align-items: center;
+      gap: 12px;
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+    }
+
+    .toast.show {
+      display: flex;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+      }
+      to {
+        transform: translateX(0);
+      }
+    }
+
+    /* ===== 詳情彈窗 ===== */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .modal.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-content {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .modal-close:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-section {
+      margin-bottom: 24px;
+    }
+
+    .modal-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .modal-section-content {
+      color: var(--text-primary);
+    }
+
+    .modal-actions {
+      padding: 24px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 12px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 頂部導航列 -->
+  <header class="header">
+    <div class="header-content">
+      <div class="logo">
+        <span>🌐</span>
+        <span>角色卡共享平台</span>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" class="btn btn-secondary">
+          <span>✏️</span> 返回編輯器
+        </a>
+        <button class="btn btn-primary" onclick="refreshList()">
+          <span>🔄</span> 重新整理
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 搜尋與篩選區 -->
+  <div class="search-section">
+    <div class="search-box">
+      <input type="text" class="search-input" id="searchInput" placeholder="搜尋角色名稱、作者或標籤...">
+      <span class="search-icon">🔍</span>
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">全部</button>
+      <button class="filter-btn" data-filter="完整版">完整版</button>
+      <button class="filter-btn" data-filter="精簡版">精簡版</button>
+      <button class="filter-btn" data-filter="原創">原創</button>
+      <button class="filter-btn" data-filter="fanwork">同人</button>
+    </div>
+  </div>
+
+  <!-- 統計資訊 -->
+  <div class="stats">
+    <div class="stat-item">
+      <span>📊</span>
+      <span>總共 <strong id="totalCount">0</strong> 張角色卡</span>
+    </div>
+    <div class="stat-item">
+      <span>👥</span>
+      <span>由 <strong id="authorCount">0</strong> 位作者創建</span>
+    </div>
+  </div>
+
+  <!-- 角色卡網格 -->
+  <div class="cards-grid" id="cardsGrid">
+    <!-- 載入中 -->
+    <div class="loading" id="loading">
+      <div class="loading-spinner"></div>
+      <div>正在載入角色卡...</div>
+    </div>
+  </div>
+
+  <!-- Toast 提示 -->
+  <div class="toast" id="toast">
+    <span id="toastIcon"></span>
+    <span id="toastMessage"></span>
+  </div>
+
+  <!-- 詳情彈窗 -->
+  <div class="modal" id="detailModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle"></div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">關閉</button>
+        <button class="btn btn-primary" onclick="downloadCharacter()">
+          <span>📥</span> 下載並匯入
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // API URL（從配置文件讀取）
+    const API_URL = CONFIG.PLATFORM_API_URL;
+
+    // 全局變數
+    let allCharacters = [];
+    let currentFilter = 'all';
+    let currentSearch = '';
+    let selectedCharacter = null;
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCharacters();
+      setupEventListeners();
+    });
+
+    // 設定事件監聽
+    function setupEventListeners() {
+      // 搜尋
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        currentSearch = e.target.value.toLowerCase();
+        filterAndDisplayCharacters();
+      });
+
+      // 篩選按鈕
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          e.target.classList.add('active');
+          currentFilter = e.target.dataset.filter;
+          filterAndDisplayCharacters();
+        });
+      });
+
+      // 彈窗背景點擊關閉
+      document.getElementById('detailModal').addEventListener('click', (e) => {
+        if (e.target.id === 'detailModal') {
+          closeModal();
+        }
+      });
+    }
+
+    // 載入角色卡列表
+    async function loadCharacters() {
+      try {
+        const response = await fetch(`${API_URL}?action=list&limit=1000`);
+        const result = await response.json();
+
+        if (result.success) {
+          allCharacters = result.data.characters;
+          filterAndDisplayCharacters();
+          updateStats();
+        } else {
+          showToast('❌ 載入失敗：' + result.message, 'error');
+        }
+      } catch (error) {
+        console.error('載入錯誤：', error);
+        showToast('❌ 載入失敗：' + error.message, 'error');
+        displayEmpty();
+      }
+    }
+
+    // 篩選並顯示角色卡
+    function filterAndDisplayCharacters() {
+      let filtered = allCharacters;
+
+      // 套用篩選器
+      if (currentFilter !== 'all') {
+        if (currentFilter === 'fanwork') {
+          filtered = filtered.filter(c => c.source && c.source !== '原創');
+        } else {
+          filtered = filtered.filter(c => c.type === currentFilter || c.source === currentFilter);
+        }
+      }
+
+      // 套用搜尋
+      if (currentSearch) {
+        filtered = filtered.filter(c => {
+          const searchText = `${c.name} ${c.author} ${c.source} ${c.tags}`.toLowerCase();
+          return searchText.includes(currentSearch);
+        });
+      }
+
+      displayCharacters(filtered);
+    }
+
+    // 顯示角色卡
+    function displayCharacters(characters) {
+      const grid = document.getElementById('cardsGrid');
+      const loading = document.getElementById('loading');
+
+      if (loading) {
+        loading.style.display = 'none';
+      }
+
+      if (characters.length === 0) {
+        displayEmpty();
+        return;
+      }
+
+      grid.innerHTML = characters.map(char => `
+        <div class="character-card" onclick="showDetail('${char.id}')">
+          <div class="card-thumbnail">
+            ${char.thumbnail ? `<img src="${char.thumbnail}" alt="${char.name}">` : '🎭'}
+          </div>
+          <div class="card-content">
+            <div class="card-title">${char.name || '未命名角色'}</div>
+            <div class="card-meta">
+              <div class="card-meta-item">
+                <span>👤</span>
+                <span>${char.author || '匿名'}</span>
+              </div>
+              <div class="card-meta-item">
+                <span>📚</span>
+                <span>${char.source || '原創'}</span>
+              </div>
+            </div>
+            ${char.tags ? `
+              <div class="card-tags">
+                ${char.tags.split(',').map(tag => `<span class="tag">${tag.trim()}</span>`).join('')}
+              </div>
+            ` : ''}
+            <div class="card-actions">
+              <button class="btn btn-small btn-secondary" onclick="event.stopPropagation(); showDetail('${char.id}')">
+                <span>👁️</span> 查看
+              </button>
+              <button class="btn btn-small btn-primary" onclick="event.stopPropagation(); quickDownload('${char.id}')">
+                <span>📥</span> 下載
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 顯示空狀態
+    function displayEmpty() {
+      const grid = document.getElementById('cardsGrid');
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <div class="empty-icon">🔍</div>
+          <div style="font-size: 18px; margin-bottom: 8px;">找不到符合條件的角色卡</div>
+          <div>試試調整篩選條件或搜尋關鍵字</div>
+        </div>
+      `;
+    }
+
+    // 更新統計資訊
+    function updateStats() {
+      document.getElementById('totalCount').textContent = allCharacters.length;
+      const authors = new Set(allCharacters.map(c => c.author));
+      document.getElementById('authorCount').textContent = authors.size;
+    }
+
+    // 顯示角色詳情
+    async function showDetail(id) {
+      try {
+        const response = await fetch(`${API_URL}?action=get&id=${id}`);
+        const result = await response.json();
+
+        if (result.success) {
+          selectedCharacter = result.data;
+          const char = result.data;
+          const data = typeof char.data === 'string' ? JSON.parse(char.data) : char.data;
+
+          document.getElementById('modalTitle').textContent = char.name;
+          document.getElementById('modalBody').innerHTML = `
+            <div class="modal-section">
+              <div class="modal-section-title">基本資訊</div>
+              <div class="modal-section-content">
+                <p><strong>作者：</strong>${char.author}</p>
+                <p><strong>原作品：</strong>${char.source}</p>
+                <p><strong>類型：</strong>${char.type}</p>
+                <p><strong>版本：</strong>${char.version}</p>
+                <p><strong>上傳時間：</strong>${new Date(char.uploadDate).toLocaleString('zh-TW')}</p>
+              </div>
+            </div>
+            ${data.description ? `
+              <div class="modal-section">
+                <div class="modal-section-title">角色描述</div>
+                <div class="modal-section-content">${data.description}</div>
+              </div>
+            ` : ''}
+            ${data.personality ? `
+              <div class="modal-section">
+                <div class="modal-section-title">性格</div>
+                <div class="modal-section-content">${data.personality}</div>
+              </div>
+            ` : ''}
+            ${char.tags ? `
+              <div class="modal-section">
+                <div class="modal-section-title">標籤</div>
+                <div class="modal-section-content">
+                  <div class="card-tags">
+                    ${char.tags.split(',').map(tag => `<span class="tag">${tag.trim()}</span>`).join('')}
+                  </div>
+                </div>
+              </div>
+            ` : ''}
+          `;
+
+          document.getElementById('detailModal').classList.add('show');
+        }
+      } catch (error) {
+        console.error('載入詳情錯誤：', error);
+        showToast('❌ 載入失敗', 'error');
+      }
+    }
+
+    // 關閉彈窗
+    function closeModal() {
+      document.getElementById('detailModal').classList.remove('show');
+      selectedCharacter = null;
+    }
+
+    // 快速下載
+    function quickDownload(id) {
+      const char = allCharacters.find(c => c.id === id);
+      if (char) {
+        downloadCharacterData(char);
+      }
+    }
+
+    // 下載角色（從詳情頁）
+    function downloadCharacter() {
+      if (selectedCharacter) {
+        downloadCharacterData(selectedCharacter);
+        closeModal();
+      }
+    }
+
+    // 下載角色資料
+    function downloadCharacterData(char) {
+      try {
+        const data = typeof char.data === 'string' ? JSON.parse(char.data) : char.data;
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${char.name || 'character'}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        showToast('✅ 下載成功！請在編輯器中匯入此檔案', 'success');
+      } catch (error) {
+        console.error('下載錯誤：', error);
+        showToast('❌ 下載失敗', 'error');
+      }
+    }
+
+    // 重新整理
+    function refreshList() {
+      allCharacters = [];
+      document.getElementById('cardsGrid').innerHTML = '<div class="loading" id="loading"><div class="loading-spinner"></div><div>正在載入角色卡...</div></div>';
+      loadCharacters();
+      showToast('🔄 正在重新整理...', 'info');
+    }
+
+    // 顯示 Toast
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      const icon = document.getElementById('toastIcon');
+      const msg = document.getElementById('toastMessage');
+
+      const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+      };
+
+      icon.textContent = icons[type] || icons.info;
+      msg.textContent = message;
+
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

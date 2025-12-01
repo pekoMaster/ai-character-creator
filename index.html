@@ -866,7 +866,7 @@
     /* ===== 程式碼預覽 ===== */
     .code-preview {
       display: none;
-      height: 100%;
+      /* 移除 height: 100% 讓高度自動適應內容 */
     }
 
     .code-preview.active {
@@ -885,8 +885,9 @@
       max-width: 100%; /* 限制最大寬度 */
       font-size: 0.85rem;
       line-height: 1.6;
-      max-height: 500px;
-      overflow-y: auto;
+      /* 移除 max-height 限制，讓高度隨內容自動增長 */
+      min-height: 200px; /* 設定最小高度 */
+      /* overflow-y: auto; 移除滾動條，讓內容完整顯示 */
     }
 
     /* ===== 匯出按鈕區 ===== */
@@ -3056,6 +3057,16 @@
             </button>
             <button class="export-btn png-markdown" onclick="exportMarkdownImage()">
               <span>🖼️</span> 匯出 Markdown 圖片
+            </button>
+          </div>
+
+          <!-- 第三行：平台功能 -->
+          <div class="export-buttons">
+            <button class="export-btn upload-platform" onclick="uploadToPlatform()" style="background: var(--gradient-primary); color: white; font-weight: 500;">
+              <span>☁️</span> 上傳到共享平台
+            </button>
+            <button class="export-btn browse-platform" onclick="openPlatform()" style="background: var(--gradient-ocean); color: white; font-weight: 500;">
+              <span>🌐</span> 瀏覽共享平台
             </button>
           </div>
         </div>
@@ -9218,6 +9229,197 @@ ${contextInfo}
         themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
         themeToggle.style.transition = 'transform 0.3s ease';
       }
+    }
+
+    // ===== 共享平台功能 =====
+
+    // Google Apps Script API URL（從配置文件讀取）
+    const PLATFORM_API_URL = CONFIG.PLATFORM_API_URL;
+
+    /**
+     * 生成 UUID v4
+     */
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
+    /**
+     * 顯示上傳對話框
+     */
+    async function showUploadDialog() {
+      return new Promise((resolve) => {
+        const dialogHTML = `
+          <div class="confirm-dialog-overlay" id="uploadDialogOverlay">
+            <div class="confirm-dialog-box" style="max-width: 600px;">
+              <h3 class="confirm-dialog-title">☁️ 上傳到共享平台</h3>
+              <p class="confirm-dialog-message">請填寫以下資訊，將您的角色卡分享給其他使用者！</p>
+
+              <div style="margin: 20px 0;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">
+                  作者名稱 <span style="color: var(--danger);">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="uploadAuthor"
+                  placeholder="請輸入您的名稱或暱稱"
+                  style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 14px; box-sizing: border-box;"
+                />
+              </div>
+
+              <div style="margin: 20px 0;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">
+                  分類標籤（選填）
+                </label>
+                <input
+                  type="text"
+                  id="uploadTags"
+                  placeholder="例：VTuber, 狐耳, 遊戲實況主（用逗號分隔）"
+                  style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 14px; box-sizing: border-box;"
+                />
+              </div>
+
+              <div style="margin: 20px 0;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">
+                  縮圖連結（選填）
+                </label>
+                <input
+                  type="url"
+                  id="uploadThumbnail"
+                  placeholder="角色圖片的網址（如 Imgur、Gyazo）"
+                  style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 14px; box-sizing: border-box;"
+                />
+              </div>
+
+              <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                <button class="confirm-cancel-btn" id="uploadCancelBtn">取消</button>
+                <button class="confirm-option-btn" id="uploadConfirmBtn" style="background: var(--gradient-primary); color: white; border: none; padding: 12px 24px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 500;">
+                  <div class="option-label">開始上傳</div>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', dialogHTML);
+        const overlay = document.getElementById('uploadDialogOverlay');
+        const authorInput = document.getElementById('uploadAuthor');
+        const tagsInput = document.getElementById('uploadTags');
+        const thumbnailInput = document.getElementById('uploadThumbnail');
+        const confirmBtn = document.getElementById('uploadConfirmBtn');
+        const cancelBtn = document.getElementById('uploadCancelBtn');
+
+        // 自動填入作者名稱（如果之前有儲存）
+        const savedAuthor = localStorage.getItem('platformAuthor');
+        if (savedAuthor) {
+          authorInput.value = savedAuthor;
+        }
+
+        confirmBtn.addEventListener('click', () => {
+          const author = authorInput.value.trim();
+          const tags = tagsInput.value.trim();
+          const thumbnail = thumbnailInput.value.trim();
+
+          if (!author) {
+            showToast('請填寫作者名稱！', 'warning');
+            return;
+          }
+
+          // 儲存作者名稱
+          localStorage.setItem('platformAuthor', author);
+
+          overlay.remove();
+          resolve({ author, tags, thumbnail });
+        });
+
+        cancelBtn.addEventListener('click', () => {
+          overlay.remove();
+          resolve(null);
+        });
+
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) {
+            overlay.remove();
+            resolve(null);
+          }
+        });
+
+        setTimeout(() => authorInput.focus(), 100);
+      });
+    }
+
+    /**
+     * 上傳角色卡到共享平台
+     */
+    async function uploadToPlatform() {
+      try {
+        // 驗證表單資料
+        const data = collectFormData();
+        if (!App.validator.validate(data)) {
+          return;
+        }
+
+        // 顯示上傳對話框
+        const uploadInfo = await showUploadDialog();
+        if (!uploadInfo) {
+          return; // 用戶取消
+        }
+
+        // 顯示載入中
+        showToast('正在上傳到平台...', 'info');
+
+        // 生成 UUID
+        const characterId = generateUUID();
+
+        // 準備上傳資料
+        const uploadData = {
+          action: 'upload',
+          id: characterId,
+          name: data.name || '未命名角色',
+          author: uploadInfo.author,
+          source: data.source || '原創',
+          tags: uploadInfo.tags,
+          type: isFullMode ? '完整版' : '精簡版',
+          characterData: data, // 完整的角色資料
+          version: '1.0',
+          thumbnail: uploadInfo.thumbnail
+        };
+
+        // 發送 POST 請求
+        const response = await fetch(PLATFORM_API_URL, {
+          method: 'POST',
+          mode: 'no-cors', // 使用 no-cors 模式避免 CORS 問題
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(uploadData)
+        });
+
+        // 注意：no-cors 模式下無法讀取回應，但請求會成功送出
+        showToast('✅ 角色卡已成功上傳到平台！', 'success');
+
+        // 詢問是否要查看平台
+        setTimeout(() => {
+          if (confirm('上傳成功！是否要前往共享平台查看？')) {
+            openPlatform();
+          }
+        }, 1000);
+
+      } catch (error) {
+        console.error('上傳錯誤：', error);
+        showToast('❌ 上傳失敗：' + error.message, 'error');
+      }
+    }
+
+    /**
+     * 開啟共享平台
+     */
+    function openPlatform() {
+      // 在新分頁開啟平台首頁
+      window.open('platform.html', '_blank');
     }
   </script>
 </body>
