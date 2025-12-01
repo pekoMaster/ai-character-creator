@@ -677,9 +677,7 @@
       box-shadow: var(--shadow-xl);
       display: flex;
       flex-direction: column;
-      max-height: calc(100vh - 200px);
-      position: sticky;
-      top: var(--spacing-lg);
+      /* 移除 max-height 和 sticky 定位，讓預覽區塊與表單區一樣長 */
       animation: fadeInUp var(--transition-slower) ease-out 0.4s backwards;
       transition: all var(--transition-base) ease;
       overflow: hidden;
@@ -4851,633 +4849,6 @@ ${text}`;
         }
       },
 
-      // AI 生成功能
-      ai: {
-        /**
-         * 取得欄位的中文標籤
-         */
-        getFieldLabel(fieldId) {
-          const labels = {
-            birthplace: '出生地',
-            backstory: '背景故事',
-            keyEvents: '重要事件',
-            catchphrases: '口頭禪',
-            verbalTics: '語言習慣',
-            emotionalExpression: '情緒表達方式',
-            description: '角色描述',
-            systemPrompt: '系統提示',
-            firstMessage: '第一則訊息',
-            scenario: '初次相遇地點',
-            worldLore: '世界觀'
-          };
-          return labels[fieldId] || fieldId;
-        },
-
-        /**
-         * 收集當前表單所有已填寫的資料
-         */
-        collectFormData() {
-          const data = {};
-
-          // 基本資訊
-          const basicFields = ['name', 'aliases', 'age', 'gender', 'species', 'occupation'];
-          basicFields.forEach(field => {
-            const el = document.getElementById(field);
-            if (el && el.value.trim()) {
-              data[field] = el.value.trim();
-            }
-          });
-
-          // 外觀
-          const appearanceFields = ['appearance', 'hairColor', 'hairStyle', 'eyes', 'clothing', 'distinguishingFeatures'];
-          appearanceFields.forEach(field => {
-            const el = document.getElementById(field);
-            if (el && el.value.trim()) {
-              data[field] = el.value.trim();
-            }
-          });
-
-          // 性格
-          const personalityFields = ['summary', 'traits', 'strengths', 'weaknesses', 'likes', 'dislikes', 'fears', 'goals'];
-          personalityFields.forEach(field => {
-            const el = document.getElementById(field);
-            if (el && el.value.trim()) {
-              data[field] = el.value.trim();
-            }
-          });
-
-          // 背景
-          const backgroundFields = ['birthplace', 'backstory', 'keyEvents'];
-          backgroundFields.forEach(field => {
-            const el = document.getElementById(field);
-            if (el && el.value.trim()) {
-              data[field] = el.value.trim();
-            }
-          });
-
-          // 對話風格
-          const speechFields = ['catchphrases', 'verbalTics', 'emotionalExpression'];
-          speechFields.forEach(field => {
-            const el = document.getElementById(field);
-            if (el && el.value.trim()) {
-              data[field] = el.value.trim();
-            }
-          });
-
-          // AI 核心設定
-          const aiFields = ['description', 'systemPrompt', 'firstMessage', 'scenario'];
-          aiFields.forEach(field => {
-            const el = document.getElementById(field);
-            if (el && el.value.trim()) {
-              data[field] = el.value.trim();
-            }
-          });
-
-          // 元資料
-          const metadataFields = ['tags', 'worldLore'];
-          metadataFields.forEach(field => {
-            const el = document.getElementById(field);
-            if (el && el.value.trim()) {
-              data[field] = el.value.trim();
-            }
-          });
-
-          return data;
-        },
-
-        /**
-         * 建構單一欄位生成的 prompt
-         */
-        buildGenerationPrompt(fieldId, currentData) {
-          const fieldLabel = this.getFieldLabel(fieldId);
-
-          let contextInfo = '';
-          if (currentData.name) contextInfo += `角色名稱：${currentData.name}\n`;
-          if (currentData.species) contextInfo += `種族：${currentData.species}\n`;
-          if (currentData.occupation) contextInfo += `職業：${currentData.occupation}\n`;
-          if (currentData.age) contextInfo += `年齡：${currentData.age}\n`;
-          if (currentData.gender) contextInfo += `性別：${currentData.gender}\n`;
-          if (currentData.summary) contextInfo += `性格摘要：${currentData.summary}\n`;
-          if (currentData.appearance) contextInfo += `外觀：${currentData.appearance}\n`;
-          if (currentData.backstory) contextInfo += `背景故事：${currentData.backstory}\n`;
-
-          const prompts = {
-            birthplace: `你是一位專業的角色設定創作者。請根據以下角色資訊，創意生成一個合適的「出生地」。
-
-${contextInfo}
-
-要求：
-- 出生地應該與角色的種族、職業、背景相符
-- 描述具體且富有想像力（例如：北方雪國的小村莊、海底亞特蘭提斯城、浮空魔法學院）
-- 長度控制在 10-30 字之間
-- 只需要輸出出生地本身，不要加任何說明或前綴
-
-請生成出生地：`,
-
-            backstory: `你是一位專業的角色設定創作者。請根據以下角色資訊，創意生成一段精彩的「背景故事」。
-
-${contextInfo}
-
-要求：
-- 背景故事應該描述角色的過去經歷、成長背景
-- 與角色的性格、職業、出生地相呼應
-- 具有戲劇性和吸引力，讓讀者對角色產生興趣
-- 長度控制在 80-200 字之間
-- 只需要輸出背景故事本身，不要加任何說明或前綴
-
-請生成背景故事：`,
-
-            keyEvents: `你是一位專業的角色設定創作者。請根據以下角色資訊，創意生成 1-3 個「重要事件」。
-
-${contextInfo}
-
-要求：
-- 重要事件應該是形塑角色性格的關鍵經歷
-- 與角色的背景故事相呼應，具有轉折性
-- 可以是創傷、頓悟、重大選擇等
-- 每個事件用一段話描述，如果有多個事件請用換行分隔
-- 長度控制在 50-150 字之間
-- 只需要輸出事件本身，不要加任何說明或前綴
-
-請生成重要事件：`,
-
-            description: `你是一位專業的角色設定創作者。請根據以下角色資訊，生成一段完整的「角色描述」，這是給 AI 閱讀的完整角色描述。
-
-${contextInfo}
-
-要求：
-- 整合角色的外觀、性格、背景、能力等所有重要資訊
-- 描述要全面且具體，讓 AI 能夠準確理解角色
-- 使用第三人稱描述
-- 長度控制在 100-300 字之間
-- 只需要輸出角色描述本身，不要加任何說明或前綴
-
-請生成角色描述：`,
-
-            systemPrompt: `你是一位專業的 AI 提示詞工程師。請根據以下角色資訊，生成一段「系統提示」(System Prompt)。
-
-${contextInfo}
-
-要求：
-- 系統提示應該清楚指示 AI 如何扮演這個角色
-- 包含角色的身分、性格特質、說話方式、行為模式
-- 使用第二人稱「你」來指示 AI
-- 語氣專業且具體
-- 長度控制在 80-200 字之間
-- 只需要輸出系統提示本身，不要加任何說明或前綴
-
-請生成系統提示：`,
-
-            firstMessage: `你是一位專業的角色設定創作者。請根據以下角色資訊，生成一段精彩的「第一則訊息」，這是對話開始時角色說的話。
-
-${contextInfo}
-
-要求：
-- 第一則訊息應該展現角色的性格和說話風格
-- 可以包含動作描述（用 * 包裹）和對話
-- 要吸引人，讓玩家想要繼續對話
-- 符合角色的身分和情境
-- 長度控制在 30-100 字之間
-- 只需要輸出第一則訊息本身，不要加任何說明或前綴
-
-範例格式：*她抬起頭，從書本中望向你* 「啊，有客人嗎？歡迎來到圖書館。」
-
-請生成第一則訊息：`,
-
-            scenario: `你是一位專業的角色設定創作者。請根據以下角色資訊，生成一個合適的「初次相遇地點」。
-
-${contextInfo}
-
-要求：
-- 初次相遇地點應該與角色的職業、性格相符
-- 描述具體且富有氛圍感
-- 可以是具體地點或情境描述
-- 長度控制在 15-50 字之間
-- 只需要輸出地點描述本身，不要加任何說明或前綴
-
-範例：在熱鬧的虛擬直播間、在寧靜的圖書館、在神秘的魔法森林中
-
-請生成初次相遇地點：`,
-
-            worldLore: `你是一位專業的世界觀設定創作者。請根據以下角色資訊，生成一段「世界觀」描述。
-
-${contextInfo}
-
-要求：
-- 世界觀應該描述角色所處的世界設定、背景故事、世界規則
-- 與角色的種族、職業、背景相呼應
-- 富有想像力且具有沉浸感
-- 長度控制在 80-200 字之間
-- 只需要輸出世界觀描述本身，不要加任何說明或前綴
-
-請生成世界觀：`
-          };
-
-          return prompts[fieldId] || `請根據角色資訊生成「${fieldLabel}」的內容。`;
-        },
-
-        /**
-         * 建構語言風格批次生成的 prompt
-         */
-        buildSpeechGenerationPrompt(currentData) {
-          let contextInfo = '';
-          if (currentData.name) contextInfo += `角色名稱：${currentData.name}\n`;
-          if (currentData.species) contextInfo += `種族：${currentData.species}\n`;
-          if (currentData.occupation) contextInfo += `職業：${currentData.occupation}\n`;
-          if (currentData.age) contextInfo += `年齡：${currentData.age}\n`;
-          if (currentData.gender) contextInfo += `性別：${currentData.gender}\n`;
-          if (currentData.summary) contextInfo += `性格摘要：${currentData.summary}\n`;
-          if (currentData.backstory) contextInfo += `背景故事：${currentData.backstory}\n`;
-
-          return `你是一位專業的角色設定創作者。請根據以下角色資訊，生成角色的「語言風格」相關內容。
-
-${contextInfo}
-
-請按照以下格式生成三個項目：
-
-1. 口頭禪（2-4 個常說的短語，用逗號分隔）
-2. 語言習慣（描述角色說話的特殊習慣，例如：句尾常加「呢」、喜歡用文言文、說話結巴等）
-3. 情緒表達方式（描述角色在不同情緒下的反應，例如：開心時會笑得很大聲、生氣時會沉默、害羞時會臉紅結巴等）
-
-要求：
-- 語言風格應該與角色的性格、種族、職業相符
-- 具體且富有個性
-- 每個項目單獨一行
-
-輸出格式（嚴格按照此格式）：
-口頭禪：[內容]
-語言習慣：[內容]
-情緒表達：[內容]
-
-請生成：`;
-        },
-
-        /**
-         * 生成單一欄位
-         */
-        async generateField(fieldId) {
-          // 檢查 API KEY
-          const settings = App.settings.load();
-          const provider = settings.aiProvider || 'gemini';
-
-          let hasApiKey = false;
-          if (provider === 'gemini' && settings.geminiApiKey) hasApiKey = true;
-          if (provider === 'openai' && settings.openaiApiKey) hasApiKey = true;
-          if (provider === 'claude' && settings.claudeApiKey) hasApiKey = true;
-          if (provider === 'deepseek' && settings.deepseekApiKey) hasApiKey = true;
-
-          if (!hasApiKey) {
-            showToast('請先在設定中填寫 API KEY', 'error');
-            return;
-          }
-
-          // 顯示確認對話框
-          const fieldLabel = this.getFieldLabel(fieldId);
-          const userChoice = await showConfirmDialog({
-            title: 'AI 生成確認',
-            message: `確定要使用 AI 生成「${fieldLabel}」嗎？\n這將會消耗 TOKEN。`,
-            options: [
-              {
-                value: 'confirm',
-                label: '✓ 確定生成',
-                description: 'AI 將根據當前角色資料創意生成內容'
-              }
-            ],
-            cancelable: true
-          });
-
-          if (!userChoice) return; // 用戶取消
-
-          // 顯示全螢幕 loading
-          App.import.setLoading(true);
-
-          try {
-            // 收集當前表單資料
-            const currentData = this.collectFormData();
-
-            // 建構 prompt
-            const prompt = this.buildGenerationPrompt(fieldId, currentData);
-
-            // 呼叫 AI API
-            const result = await this.callAIForText(prompt, provider);
-
-            // 填入生成的內容
-            const field = document.getElementById(fieldId);
-            if (field && result) {
-              field.value = result.trim();
-              field.dispatchEvent(new Event('input', { bubbles: true }));
-              showToast(`「${fieldLabel}」生成完成！`, 'success');
-            }
-
-          } catch (error) {
-            console.error('AI 生成失敗：', error);
-            showToast(`生成失敗：${error.message}`, 'error');
-          } finally {
-            App.import.setLoading(false);
-          }
-        },
-
-        /**
-         * 批次生成語言風格欄位
-         */
-        async generateSpeechFields() {
-          // 檢查 API KEY
-          const settings = App.settings.load();
-          const provider = settings.aiProvider || 'gemini';
-
-          let hasApiKey = false;
-          if (provider === 'gemini' && settings.geminiApiKey) hasApiKey = true;
-          if (provider === 'openai' && settings.openaiApiKey) hasApiKey = true;
-          if (provider === 'claude' && settings.claudeApiKey) hasApiKey = true;
-          if (provider === 'deepseek' && settings.deepseekApiKey) hasApiKey = true;
-
-          if (!hasApiKey) {
-            showToast('請先在設定中填寫 API KEY', 'error');
-            return;
-          }
-
-          // 顯示確認對話框
-          const userChoice = await showConfirmDialog({
-            title: 'AI 生成確認',
-            message: '確定要使用 AI 生成「語言風格」（口頭禪、語言習慣、情緒表達）嗎？\n這將會消耗 TOKEN。',
-            options: [
-              {
-                value: 'confirm',
-                label: '✓ 確定生成',
-                description: 'AI 將根據當前角色資料創意生成語言風格'
-              }
-            ],
-            cancelable: true
-          });
-
-          if (!userChoice) return; // 用戶取消
-
-          // 顯示全螢幕 loading
-          App.import.setLoading(true);
-
-          try {
-            // 收集當前表單資料
-            const currentData = this.collectFormData();
-
-            // 建構 prompt
-            const prompt = this.buildSpeechGenerationPrompt(currentData);
-
-            // 呼叫 AI API
-            const result = await this.callAIForText(prompt, provider);
-
-            if (!result) {
-              throw new Error('AI 未返回結果');
-            }
-
-            // 解析結果
-            const lines = result.split('\n').map(line => line.trim()).filter(line => line);
-
-            let catchphrases = '';
-            let verbalTics = '';
-            let emotionalExpression = '';
-
-            lines.forEach(line => {
-              if (line.includes('口頭禪：') || line.includes('口頭禪:')) {
-                catchphrases = line.replace(/口頭禪[：:]\s*/, '');
-              } else if (line.includes('語言習慣：') || line.includes('語言習慣:')) {
-                verbalTics = line.replace(/語言習慣[：:]\s*/, '');
-              } else if (line.includes('情緒表達：') || line.includes('情緒表達:')) {
-                emotionalExpression = line.replace(/情緒表達[：:]\s*/, '');
-              }
-            });
-
-            // 填入各欄位
-            let successCount = 0;
-
-            if (catchphrases) {
-              const field = document.getElementById('catchphrases');
-              if (field) {
-                field.value = catchphrases;
-                field.dispatchEvent(new Event('input', { bubbles: true }));
-                successCount++;
-              }
-            }
-
-            if (verbalTics) {
-              const field = document.getElementById('verbalTics');
-              if (field) {
-                field.value = verbalTics;
-                field.dispatchEvent(new Event('input', { bubbles: true }));
-                successCount++;
-              }
-            }
-
-            if (emotionalExpression) {
-              const field = document.getElementById('emotionalExpression');
-              if (field) {
-                field.value = emotionalExpression;
-                field.dispatchEvent(new Event('input', { bubbles: true }));
-                successCount++;
-              }
-            }
-
-            if (successCount > 0) {
-              showToast(`語言風格生成完成！（${successCount}/3 個欄位）`, 'success');
-            } else {
-              throw new Error('無法解析 AI 回應格式');
-            }
-
-          } catch (error) {
-            console.error('AI 生成失敗：', error);
-            showToast(`生成失敗：${error.message}`, 'error');
-          } finally {
-            App.import.setLoading(false);
-          }
-        },
-
-        /**
-         * 調用 AI API 生成純文本（不解析 JSON）
-         * @param {string} prompt - 提示詞
-         * @param {string} provider - AI 提供商
-         * @returns {Promise<string>} 生成的文本
-         */
-        async callAIForText(prompt, provider) {
-          // 獲取 API Key
-          const settings = App.settings.load();
-          let apiKey;
-
-          switch (provider) {
-            case 'gemini':
-              apiKey = settings.geminiApiKey;
-              break;
-            case 'openai':
-              apiKey = settings.openaiApiKey;
-              break;
-            case 'claude':
-              apiKey = settings.claudeApiKey;
-              break;
-            case 'deepseek':
-              apiKey = settings.deepseekApiKey;
-              break;
-            default:
-              throw new Error(`不支援的 AI 提供商: ${provider}`);
-          }
-
-          if (!apiKey || apiKey.trim() === '') {
-            throw new Error(`請先在設定中填寫 API KEY`);
-          }
-
-          // 調用對應提供商的 API
-          switch (provider) {
-            case 'gemini':
-              return await this.callGeminiForText(apiKey, prompt);
-            case 'openai':
-              return await this.callOpenAIForText(apiKey, prompt);
-            case 'claude':
-              return await this.callClaudeForText(apiKey, prompt);
-            case 'deepseek':
-              return await this.callDeepSeekForText(apiKey, prompt);
-            default:
-              throw new Error(`不支援的 AI 提供商: ${provider}`);
-          }
-        },
-
-        /**
-         * 調用 Gemini API 生成純文本
-         */
-        async callGeminiForText(apiKey, prompt) {
-          const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-goog-api-key': apiKey
-              },
-              body: JSON.stringify({
-                contents: [{
-                  parts: [{
-                    text: prompt
-                  }]
-                }],
-                generationConfig: {
-                  temperature: 0.8,
-                  topK: 40,
-                  topP: 0.95,
-                  maxOutputTokens: 2048,
-                }
-              })
-            }
-          );
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || '無法連接到 Gemini API');
-          }
-
-          const data = await response.json();
-
-          if (!data.candidates || !data.candidates[0]) {
-            console.error('API 回應結構錯誤:', data);
-            throw new Error(data.error?.message || 'API 回應格式不正確');
-          }
-
-          return data.candidates[0].content.parts[0].text;
-        },
-
-        /**
-         * 調用 OpenAI API 生成純文本
-         */
-        async callOpenAIForText(apiKey, prompt) {
-          const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-              model: 'gpt-4o-mini',
-              messages: [
-                {
-                  role: 'user',
-                  content: prompt
-                }
-              ],
-              temperature: 0.8,
-              max_tokens: 2048
-            })
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || '無法連接到 OpenAI API');
-          }
-
-          const data = await response.json();
-          return data.choices[0].message.content;
-        },
-
-        /**
-         * 調用 Claude API 生成純文本
-         */
-        async callClaudeForText(apiKey, prompt) {
-          const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': apiKey,
-              'anthropic-version': '2023-06-01'
-            },
-            body: JSON.stringify({
-              model: 'claude-3-5-sonnet-20241022',
-              max_tokens: 2048,
-              messages: [
-                {
-                  role: 'user',
-                  content: prompt
-                }
-              ],
-              temperature: 0.8
-            })
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || '無法連接到 Claude API');
-          }
-
-          const data = await response.json();
-          return data.content[0].text;
-        },
-
-        /**
-         * 調用 DeepSeek API 生成純文本
-         */
-        async callDeepSeekForText(apiKey, prompt) {
-          const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-              model: 'deepseek-chat',
-              messages: [
-                {
-                  role: 'user',
-                  content: prompt
-                }
-              ],
-              temperature: 0.8,
-              max_tokens: 2048
-            })
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || '無法連接到 DeepSeek API');
-          }
-
-          const data = await response.json();
-          return data.choices[0].message.content;
-        }
-      },
-
       // Google Drive 整合
       drive: {
         userFolderId: null, // 用戶專屬資料夾 ID
@@ -6451,6 +5822,632 @@ ${contextInfo}
 
           // 使用統一的解析函數
           return this.parseAIResponse(generatedText);
+        },
+
+        // ===== 以下為「讓AI生成」功能的函數 =====
+
+        /**
+         * 取得欄位的中文標籤
+         */
+        getFieldLabel(fieldId) {
+          const labels = {
+            birthplace: '出生地',
+            backstory: '背景故事',
+            keyEvents: '重要事件',
+            catchphrases: '口頭禪',
+            verbalTics: '語言習慣',
+            emotionalExpression: '情緒表達方式',
+            description: '角色描述',
+            systemPrompt: '系統提示',
+            firstMessage: '第一則訊息',
+            scenario: '初次相遇地點',
+            worldLore: '世界觀'
+          };
+          return labels[fieldId] || fieldId;
+        },
+
+        /**
+         * 收集當前表單所有已填寫的資料
+         */
+        collectFormData() {
+          const data = {};
+
+          // 基本資訊
+          const basicFields = ['name', 'aliases', 'age', 'gender', 'species', 'occupation'];
+          basicFields.forEach(field => {
+            const el = document.getElementById(field);
+            if (el && el.value.trim()) {
+              data[field] = el.value.trim();
+            }
+          });
+
+          // 外觀
+          const appearanceFields = ['appearance', 'hairColor', 'hairStyle', 'eyes', 'clothing', 'distinguishingFeatures'];
+          appearanceFields.forEach(field => {
+            const el = document.getElementById(field);
+            if (el && el.value.trim()) {
+              data[field] = el.value.trim();
+            }
+          });
+
+          // 性格
+          const personalityFields = ['summary', 'traits', 'strengths', 'weaknesses', 'likes', 'dislikes', 'fears', 'goals'];
+          personalityFields.forEach(field => {
+            const el = document.getElementById(field);
+            if (el && el.value.trim()) {
+              data[field] = el.value.trim();
+            }
+          });
+
+          // 背景
+          const backgroundFields = ['birthplace', 'backstory', 'keyEvents'];
+          backgroundFields.forEach(field => {
+            const el = document.getElementById(field);
+            if (el && el.value.trim()) {
+              data[field] = el.value.trim();
+            }
+          });
+
+          // 對話風格
+          const speechFields = ['catchphrases', 'verbalTics', 'emotionalExpression'];
+          speechFields.forEach(field => {
+            const el = document.getElementById(field);
+            if (el && el.value.trim()) {
+              data[field] = el.value.trim();
+            }
+          });
+
+          // AI 核心設定
+          const aiFields = ['description', 'systemPrompt', 'firstMessage', 'scenario'];
+          aiFields.forEach(field => {
+            const el = document.getElementById(field);
+            if (el && el.value.trim()) {
+              data[field] = el.value.trim();
+            }
+          });
+
+          // 元資料
+          const metadataFields = ['tags', 'worldLore'];
+          metadataFields.forEach(field => {
+            const el = document.getElementById(field);
+            if (el && el.value.trim()) {
+              data[field] = el.value.trim();
+            }
+          });
+
+          return data;
+        },
+
+        /**
+         * 建構單一欄位生成的 prompt
+         */
+        buildGenerationPrompt(fieldId, currentData) {
+          const fieldLabel = this.getFieldLabel(fieldId);
+
+          let contextInfo = '';
+          if (currentData.name) contextInfo += `角色名稱：${currentData.name}\n`;
+          if (currentData.species) contextInfo += `種族：${currentData.species}\n`;
+          if (currentData.occupation) contextInfo += `職業：${currentData.occupation}\n`;
+          if (currentData.age) contextInfo += `年齡：${currentData.age}\n`;
+          if (currentData.gender) contextInfo += `性別：${currentData.gender}\n`;
+          if (currentData.summary) contextInfo += `性格摘要：${currentData.summary}\n`;
+          if (currentData.appearance) contextInfo += `外觀：${currentData.appearance}\n`;
+          if (currentData.backstory) contextInfo += `背景故事：${currentData.backstory}\n`;
+
+          const prompts = {
+            birthplace: `你是一位專業的角色設定創作者。請根據以下角色資訊，創意生成一個合適的「出生地」。
+
+${contextInfo}
+
+要求：
+- 出生地應該與角色的種族、職業、背景相符
+- 描述具體且富有想像力（例如：北方雪國的小村莊、海底亞特蘭提斯城、浮空魔法學院）
+- 長度控制在 10-30 字之間
+- 只需要輸出出生地本身，不要加任何說明或前綴
+
+請生成出生地：`,
+
+            backstory: `你是一位專業的角色設定創作者。請根據以下角色資訊，創意生成一段精彩的「背景故事」。
+
+${contextInfo}
+
+要求：
+- 背景故事應該描述角色的過去經歷、成長背景
+- 與角色的性格、職業、出生地相呼應
+- 具有戲劇性和吸引力，讓讀者對角色產生興趣
+- 長度控制在 80-200 字之間
+- 只需要輸出背景故事本身，不要加任何說明或前綴
+
+請生成背景故事：`,
+
+            keyEvents: `你是一位專業的角色設定創作者。請根據以下角色資訊，創意生成 1-3 個「重要事件」。
+
+${contextInfo}
+
+要求：
+- 重要事件應該是形塑角色性格的關鍵經歷
+- 與角色的背景故事相呼應，具有轉折性
+- 可以是創傷、頓悟、重大選擇等
+- 每個事件用一段話描述，如果有多個事件請用換行分隔
+- 長度控制在 50-150 字之間
+- 只需要輸出事件本身，不要加任何說明或前綴
+
+請生成重要事件：`,
+
+            description: `你是一位專業的角色設定創作者。請根據以下角色資訊，生成一段完整的「角色描述」，這是給 AI 閱讀的完整角色描述。
+
+${contextInfo}
+
+要求：
+- 整合角色的外觀、性格、背景、能力等所有重要資訊
+- 描述要全面且具體，讓 AI 能夠準確理解角色
+- 使用第三人稱描述
+- 長度控制在 100-300 字之間
+- 只需要輸出角色描述本身，不要加任何說明或前綴
+
+請生成角色描述：`,
+
+            systemPrompt: `你是一位專業的 AI 提示詞工程師。請根據以下角色資訊，生成一段「系統提示」(System Prompt)。
+
+${contextInfo}
+
+要求：
+- 系統提示應該清楚指示 AI 如何扮演這個角色
+- 包含角色的身分、性格特質、說話方式、行為模式
+- 使用第二人稱「你」來指示 AI
+- 語氣專業且具體
+- 長度控制在 80-200 字之間
+- 只需要輸出系統提示本身，不要加任何說明或前綴
+
+請生成系統提示：`,
+
+            firstMessage: `你是一位專業的角色設定創作者。請根據以下角色資訊，生成一段精彩的「第一則訊息」，這是對話開始時角色說的話。
+
+${contextInfo}
+
+要求：
+- 第一則訊息應該展現角色的性格和說話風格
+- 可以包含動作描述（用 * 包裹）和對話
+- 要吸引人，讓玩家想要繼續對話
+- 符合角色的身分和情境
+- 長度控制在 30-100 字之間
+- 只需要輸出第一則訊息本身，不要加任何說明或前綴
+
+範例格式：*她抬起頭，從書本中望向你* 「啊，有客人嗎？歡迎來到圖書館。」
+
+請生成第一則訊息：`,
+
+            scenario: `你是一位專業的角色設定創作者。請根據以下角色資訊，生成一個合適的「初次相遇地點」。
+
+${contextInfo}
+
+要求：
+- 初次相遇地點應該與角色的職業、性格相符
+- 描述具體且富有氛圍感
+- 可以是具體地點或情境描述
+- 長度控制在 15-50 字之間
+- 只需要輸出地點描述本身，不要加任何說明或前綴
+
+範例：在熱鬧的虛擬直播間、在寧靜的圖書館、在神秘的魔法森林中
+
+請生成初次相遇地點：`,
+
+            worldLore: `你是一位專業的世界觀設定創作者。請根據以下角色資訊，生成一段「世界觀」描述。
+
+${contextInfo}
+
+要求：
+- 世界觀應該描述角色所處的世界設定、背景故事、世界規則
+- 與角色的種族、職業、背景相呼應
+- 富有想像力且具有沉浸感
+- 長度控制在 80-200 字之間
+- 只需要輸出世界觀描述本身，不要加任何說明或前綴
+
+請生成世界觀：`
+          };
+
+          return prompts[fieldId] || `請根據角色資訊生成「${fieldLabel}」的內容。`;
+        },
+
+        /**
+         * 建構語言風格批次生成的 prompt
+         */
+        buildSpeechGenerationPrompt(currentData) {
+          let contextInfo = '';
+          if (currentData.name) contextInfo += `角色名稱：${currentData.name}\n`;
+          if (currentData.species) contextInfo += `種族：${currentData.species}\n`;
+          if (currentData.occupation) contextInfo += `職業：${currentData.occupation}\n`;
+          if (currentData.age) contextInfo += `年齡：${currentData.age}\n`;
+          if (currentData.gender) contextInfo += `性別：${currentData.gender}\n`;
+          if (currentData.summary) contextInfo += `性格摘要：${currentData.summary}\n`;
+          if (currentData.backstory) contextInfo += `背景故事：${currentData.backstory}\n`;
+
+          return `你是一位專業的角色設定創作者。請根據以下角色資訊，生成角色的「語言風格」相關內容。
+
+${contextInfo}
+
+請按照以下格式生成三個項目：
+
+1. 口頭禪（2-4 個常說的短語，用逗號分隔）
+2. 語言習慣（描述角色說話的特殊習慣，例如：句尾常加「呢」、喜歡用文言文、說話結巴等）
+3. 情緒表達方式（描述角色在不同情緒下的反應，例如：開心時會笑得很大聲、生氣時會沉默、害羞時會臉紅結巴等）
+
+要求：
+- 語言風格應該與角色的性格、種族、職業相符
+- 具體且富有個性
+- 每個項目單獨一行
+
+輸出格式（嚴格按照此格式）：
+口頭禪：[內容]
+語言習慣：[內容]
+情緒表達：[內容]
+
+請生成：`;
+        },
+
+        /**
+         * 生成單一欄位
+         */
+        async generateField(fieldId) {
+          // 檢查 API KEY
+          const settings = App.settings.load();
+          const provider = settings.aiProvider || 'gemini';
+
+          let hasApiKey = false;
+          if (provider === 'gemini' && settings.geminiApiKey) hasApiKey = true;
+          if (provider === 'openai' && settings.openaiApiKey) hasApiKey = true;
+          if (provider === 'claude' && settings.claudeApiKey) hasApiKey = true;
+          if (provider === 'deepseek' && settings.deepseekApiKey) hasApiKey = true;
+
+          if (!hasApiKey) {
+            showToast('請先在設定中填寫 API KEY', 'error');
+            return;
+          }
+
+          // 顯示確認對話框
+          const fieldLabel = this.getFieldLabel(fieldId);
+          const userChoice = await showConfirmDialog({
+            title: 'AI 生成確認',
+            message: `確定要使用 AI 生成「${fieldLabel}」嗎？\n這將會消耗 TOKEN。`,
+            options: [
+              {
+                value: 'confirm',
+                label: '✓ 確定生成',
+                description: 'AI 將根據當前角色資料創意生成內容'
+              }
+            ],
+            cancelable: true
+          });
+
+          if (!userChoice) return; // 用戶取消
+
+          // 顯示全螢幕 loading
+          App.import.setLoading(true);
+
+          try {
+            // 收集當前表單資料
+            const currentData = this.collectFormData();
+
+            // 建構 prompt
+            const prompt = this.buildGenerationPrompt(fieldId, currentData);
+
+            // 呼叫 AI API
+            const result = await this.callAIForText(prompt, provider);
+
+            // 填入生成的內容
+            const field = document.getElementById(fieldId);
+            if (field && result) {
+              field.value = result.trim();
+              field.dispatchEvent(new Event('input', { bubbles: true }));
+              showToast(`「${fieldLabel}」生成完成！`, 'success');
+            }
+
+          } catch (error) {
+            console.error('AI 生成失敗：', error);
+            showToast(`生成失敗：${error.message}`, 'error');
+          } finally {
+            App.import.setLoading(false);
+          }
+        },
+
+        /**
+         * 批次生成語言風格欄位
+         */
+        async generateSpeechFields() {
+          // 檢查 API KEY
+          const settings = App.settings.load();
+          const provider = settings.aiProvider || 'gemini';
+
+          let hasApiKey = false;
+          if (provider === 'gemini' && settings.geminiApiKey) hasApiKey = true;
+          if (provider === 'openai' && settings.openaiApiKey) hasApiKey = true;
+          if (provider === 'claude' && settings.claudeApiKey) hasApiKey = true;
+          if (provider === 'deepseek' && settings.deepseekApiKey) hasApiKey = true;
+
+          if (!hasApiKey) {
+            showToast('請先在設定中填寫 API KEY', 'error');
+            return;
+          }
+
+          // 顯示確認對話框
+          const userChoice = await showConfirmDialog({
+            title: 'AI 生成確認',
+            message: '確定要使用 AI 生成「語言風格」（口頭禪、語言習慣、情緒表達）嗎？\n這將會消耗 TOKEN。',
+            options: [
+              {
+                value: 'confirm',
+                label: '✓ 確定生成',
+                description: 'AI 將根據當前角色資料創意生成語言風格'
+              }
+            ],
+            cancelable: true
+          });
+
+          if (!userChoice) return; // 用戶取消
+
+          // 顯示全螢幕 loading
+          App.import.setLoading(true);
+
+          try {
+            // 收集當前表單資料
+            const currentData = this.collectFormData();
+
+            // 建構 prompt
+            const prompt = this.buildSpeechGenerationPrompt(currentData);
+
+            // 呼叫 AI API
+            const result = await this.callAIForText(prompt, provider);
+
+            if (!result) {
+              throw new Error('AI 未返回結果');
+            }
+
+            // 解析結果
+            const lines = result.split('\n').map(line => line.trim()).filter(line => line);
+
+            let catchphrases = '';
+            let verbalTics = '';
+            let emotionalExpression = '';
+
+            lines.forEach(line => {
+              if (line.includes('口頭禪：') || line.includes('口頭禪:')) {
+                catchphrases = line.replace(/口頭禪[：:]\s*/, '');
+              } else if (line.includes('語言習慣：') || line.includes('語言習慣:')) {
+                verbalTics = line.replace(/語言習慣[：:]\s*/, '');
+              } else if (line.includes('情緒表達：') || line.includes('情緒表達:')) {
+                emotionalExpression = line.replace(/情緒表達[：:]\s*/, '');
+              }
+            });
+
+            // 填入各欄位
+            let successCount = 0;
+
+            if (catchphrases) {
+              const field = document.getElementById('catchphrases');
+              if (field) {
+                field.value = catchphrases;
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+                successCount++;
+              }
+            }
+
+            if (verbalTics) {
+              const field = document.getElementById('verbalTics');
+              if (field) {
+                field.value = verbalTics;
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+                successCount++;
+              }
+            }
+
+            if (emotionalExpression) {
+              const field = document.getElementById('emotionalExpression');
+              if (field) {
+                field.value = emotionalExpression;
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+                successCount++;
+              }
+            }
+
+            if (successCount > 0) {
+              showToast(`語言風格生成完成！（${successCount}/3 個欄位）`, 'success');
+            } else {
+              throw new Error('無法解析 AI 回應格式');
+            }
+
+          } catch (error) {
+            console.error('AI 生成失敗：', error);
+            showToast(`生成失敗：${error.message}`, 'error');
+          } finally {
+            App.import.setLoading(false);
+          }
+        },
+
+        /**
+         * 調用 AI API 生成純文本（不解析 JSON）
+         * @param {string} prompt - 提示詞
+         * @param {string} provider - AI 提供商
+         * @returns {Promise<string>} 生成的文本
+         */
+        async callAIForText(prompt, provider) {
+          // 獲取 API Key
+          const settings = App.settings.load();
+          let apiKey;
+
+          switch (provider) {
+            case 'gemini':
+              apiKey = settings.geminiApiKey;
+              break;
+            case 'openai':
+              apiKey = settings.openaiApiKey;
+              break;
+            case 'claude':
+              apiKey = settings.claudeApiKey;
+              break;
+            case 'deepseek':
+              apiKey = settings.deepseekApiKey;
+              break;
+            default:
+              throw new Error(`不支援的 AI 提供商: ${provider}`);
+          }
+
+          if (!apiKey || apiKey.trim() === '') {
+            throw new Error(`請先在設定中填寫 API KEY`);
+          }
+
+          // 調用對應提供商的 API
+          switch (provider) {
+            case 'gemini':
+              return await this.callGeminiForText(apiKey, prompt);
+            case 'openai':
+              return await this.callOpenAIForText(apiKey, prompt);
+            case 'claude':
+              return await this.callClaudeForText(apiKey, prompt);
+            case 'deepseek':
+              return await this.callDeepSeekForText(apiKey, prompt);
+            default:
+              throw new Error(`不支援的 AI 提供商: ${provider}`);
+          }
+        },
+
+        /**
+         * 調用 Gemini API 生成純文本
+         */
+        async callGeminiForText(apiKey, prompt) {
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': apiKey
+              },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [{
+                    text: prompt
+                  }]
+                }],
+                generationConfig: {
+                  temperature: 0.8,
+                  topK: 40,
+                  topP: 0.95,
+                  maxOutputTokens: 2048,
+                }
+              })
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || '無法連接到 Gemini API');
+          }
+
+          const data = await response.json();
+
+          if (!data.candidates || !data.candidates[0]) {
+            console.error('API 回應結構錯誤:', data);
+            throw new Error(data.error?.message || 'API 回應格式不正確');
+          }
+
+          return data.candidates[0].content.parts[0].text;
+        },
+
+        /**
+         * 調用 OpenAI API 生成純文本
+         */
+        async callOpenAIForText(apiKey, prompt) {
+          const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+              model: 'gpt-4o-mini',
+              messages: [
+                {
+                  role: 'user',
+                  content: prompt
+                }
+              ],
+              temperature: 0.8,
+              max_tokens: 2048
+            })
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || '無法連接到 OpenAI API');
+          }
+
+          const data = await response.json();
+          return data.choices[0].message.content;
+        },
+
+        /**
+         * 調用 Claude API 生成純文本
+         */
+        async callClaudeForText(apiKey, prompt) {
+          const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': apiKey,
+              'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+              model: 'claude-3-5-sonnet-20241022',
+              max_tokens: 2048,
+              messages: [
+                {
+                  role: 'user',
+                  content: prompt
+                }
+              ],
+              temperature: 0.8
+            })
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || '無法連接到 Claude API');
+          }
+
+          const data = await response.json();
+          return data.content[0].text;
+        },
+
+        /**
+         * 調用 DeepSeek API 生成純文本
+         */
+        async callDeepSeekForText(apiKey, prompt) {
+          const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+              model: 'deepseek-chat',
+              messages: [
+                {
+                  role: 'user',
+                  content: prompt
+                }
+              ],
+              temperature: 0.8,
+              max_tokens: 2048
+            })
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || '無法連接到 DeepSeek API');
+          }
+
+          const data = await response.json();
+          return data.choices[0].message.content;
         }
       },
 
