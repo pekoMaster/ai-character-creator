@@ -34,7 +34,10 @@
       "WebFetch(domain:script.googleusercontent.com)",
       "Bash(curl:*)",
       "Bash(git show-ref:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(python -m http.server:*)",
+      "Bash(timeout:*)",
+      "WebFetch(domain:pekomaster.github.io)"
     ],
     "deny": [],
     "ask": []

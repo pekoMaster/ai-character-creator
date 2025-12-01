@@ -635,7 +635,7 @@
           }
 
           google.accounts.id.initialize({
-            client_id: CONFIG.GOOGLE_CLIENT_ID,
+            client_id: CONFIG.GOOGLE_CLIENT_ID_PLATFORM, // 使用平台專用的 Client ID（可公開）
             callback: this.handleCredentialResponse.bind(this)
           });
 
