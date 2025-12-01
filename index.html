@@ -2313,8 +2313,8 @@
 
       <div class="settings-login-group">
         <!-- AI 生成按鈕 -->
-        <button class="icon-btn primary" onclick="App.ai.generateCharacter()" title="AI 一鍵創角">
-          ✨ AI 生成
+        <button class="icon-btn primary" onclick="App.ai.generateCharacter()" title="使用AI一鍵全部生成">
+          ✨ 使用AI一鍵全部生成
         </button>
 
         <!-- 匯入按鈕 -->
@@ -3076,7 +3076,7 @@
           <label>🌟 Gemini API Key</label>
           <input type="text" id="geminiApiKey" placeholder="請輸入您的 Gemini API Key">
           <div class="hint" style="color: white;">
-            用於 AI 一鍵創角功能。
+            用於使用AI一鍵全部生成功能。
             <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-weight: bold; color: #1a73e8;">👉 前往 Google AI Studio 申請</a>
           </div>
         </div>
@@ -5234,7 +5234,7 @@ ${text}`;
 
           // 提示用戶輸入角色概念
           const prompt = window.prompt(
-            '✨ AI 一鍵創角\n\n' +
+            '✨ 使用AI一鍵全部生成\n\n' +
             '請輸入您想創建的角色概念，AI 將為您生成完整的角色資料！\n\n' +
             '範例：\n' +
             '• 一個活潑可愛的狐耳 VTuber，喜歡遊戲實況\n' +
@@ -5247,8 +5247,8 @@ ${text}`;
             return;
           }
 
-          const providerName = this.getProviderName(provider);
-          showToast(`使用 ${providerName} 生成中，請稍候...`, 'info');
+          // 顯示全螢幕 loading
+          App.import.setLoading(true);
 
           try {
             // 使用統一的 AI API 調用函數
@@ -5262,6 +5262,9 @@ ${text}`;
           } catch (error) {
             console.error('AI 生成失敗:', error);
             showToast('AI 生成失敗：' + error.message, 'error');
+          } finally {
+            // 關閉全螢幕 loading
+            App.import.setLoading(false);
           }
         },
 
