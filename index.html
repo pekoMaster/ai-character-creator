@@ -5247,27 +5247,35 @@ ${text}`;
             return;
           }
 
-          // 提示用戶輸入角色概念
-          const prompt = window.prompt(
-            '✨ 使用AI一鍵全部生成\n\n' +
-            '請輸入您想創建的角色概念，AI 將為您生成完整的角色資料！\n\n' +
-            '範例：\n' +
-            '• 一個活潑可愛的狐耳 VTuber，喜歡遊戲實況\n' +
-            '• 冷靜成熟的精靈弓手，擅長治癒魔法\n' +
-            '• 搞笑擔當的海賊船長，個性豪爽\n\n' +
-            '請輸入您的創意：'
-          );
+          // 顯示新的對話框
+          const result = await showAIGenerateDialog();
 
-          if (!prompt || prompt.trim() === '') {
-            return;
+          if (!result) {
+            return; // 用戶取消
           }
+
+          const { source, prompt } = result;
 
           // 顯示全螢幕 loading
           App.import.setLoading(true);
 
           try {
+            // 構建完整的提示詞
+            let fullPrompt = '';
+
+            if (source) {
+              // 有參考原作品
+              fullPrompt = `請根據以下資訊生成一個角色：\n\n`;
+              fullPrompt += `【參考原作品】：${source}\n\n`;
+              fullPrompt += `【角色描述】：${prompt}\n\n`;
+              fullPrompt += `請先嘗試從原作品中查找相關資訊。如果找不到，請將其視為原創角色。`;
+            } else {
+              // 原創角色
+              fullPrompt = `請根據以下描述生成一個原創角色：\n\n${prompt}`;
+            }
+
             // 使用統一的 AI API 調用函數
-            const characterData = await this.callAIAPI(prompt);
+            const characterData = await this.callAIAPI(fullPrompt);
 
             // 將生成的資料填入表單
             fillFormData(characterData);
@@ -9004,6 +9012,89 @@ ${contextInfo}
             resolve(null);
           }
         });
+      });
+    }
+
+    // ===== AI 生成對話框（兩個輸入框） =====
+    function showAIGenerateDialog() {
+      return new Promise((resolve) => {
+        const dialogHTML = `
+          <div class="confirm-dialog-overlay" id="aiGenerateDialogOverlay">
+            <div class="confirm-dialog-box" style="max-width: 600px;">
+              <h3 class="confirm-dialog-title">✨ 使用 AI 一鍵全部生成</h3>
+              <p class="confirm-dialog-message">請填寫以下資訊，AI 將為您生成完整的角色資料！</p>
+
+              <div style="margin: 20px 0;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">
+                  參考原作品（原創請留白）
+                </label>
+                <input
+                  type="text"
+                  id="aiGenerateSource"
+                  placeholder="例：Hololive、東方Project、原神等"
+                  style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 14px; box-sizing: border-box;"
+                />
+              </div>
+
+              <div style="margin: 20px 0;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">
+                  角色描述（簡單或詳細都可以）
+                </label>
+                <textarea
+                  id="aiGeneratePrompt"
+                  placeholder="範例：&#10;• 一個活潑可愛的狐耳 VTuber，喜歡遊戲實況&#10;• 冷靜成熟的精靈弓手，擅長治癒魔法&#10;• 搞笑擔當的海賊船長，個性豪爽"
+                  rows="6"
+                  style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 14px; resize: vertical; box-sizing: border-box; font-family: inherit;"
+                ></textarea>
+              </div>
+
+              <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="confirm-cancel-btn" id="aiGenerateCancelBtn">取消</button>
+                <button class="confirm-option-btn" id="aiGenerateConfirmBtn" style="background: var(--gradient-primary); color: white; border: none; padding: 12px 24px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 500;">
+                  <div class="option-label">開始生成</div>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', dialogHTML);
+        const overlay = document.getElementById('aiGenerateDialogOverlay');
+        const sourceInput = document.getElementById('aiGenerateSource');
+        const promptInput = document.getElementById('aiGeneratePrompt');
+        const confirmBtn = document.getElementById('aiGenerateConfirmBtn');
+        const cancelBtn = document.getElementById('aiGenerateCancelBtn');
+
+        // 確認按鈕事件
+        confirmBtn.addEventListener('click', () => {
+          const source = sourceInput.value.trim();
+          const prompt = promptInput.value.trim();
+
+          if (!prompt) {
+            showToast('請填寫角色描述！', 'warning');
+            return;
+          }
+
+          overlay.remove();
+          resolve({ source, prompt });
+        });
+
+        // 取消按鈕事件
+        cancelBtn.addEventListener('click', () => {
+          overlay.remove();
+          resolve(null);
+        });
+
+        // 點擊背景關閉
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) {
+            overlay.remove();
+            resolve(null);
+          }
+        });
+
+        // 自動聚焦到提示輸入框
+        setTimeout(() => promptInput.focus(), 100);
       });
     }
 
