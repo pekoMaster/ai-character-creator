@@ -2284,6 +2284,14 @@
     <header class="header">
       <h1>🎭 AI互動聊天角色卡工具</h1>
       <p>創建專業的 AI 互動角色卡，支援多平台格式輸出</p>
+      <div style="display: flex; gap: 12px; justify-content: center; margin-top: 16px;">
+        <button class="icon-btn" onclick="uploadToPlatform()" style="background: var(--gradient-primary); color: white; border: none; font-weight: 500;">
+          <span>☁️</span> 上傳到共享平台
+        </button>
+        <button class="icon-btn" onclick="openPlatform()" style="background: var(--gradient-ocean); color: white; border: none; font-weight: 500;">
+          <span>🌐</span> 瀏覽共享平台
+        </button>
+      </div>
     </header>
 
     <!-- 控制列 -->
@@ -3057,16 +3065,6 @@
             </button>
             <button class="export-btn png-markdown" onclick="exportMarkdownImage()">
               <span>🖼️</span> 匯出 Markdown 圖片
-            </button>
-          </div>
-
-          <!-- 第三行：平台功能 -->
-          <div class="export-buttons">
-            <button class="export-btn upload-platform" onclick="uploadToPlatform()" style="background: var(--gradient-primary); color: white; font-weight: 500;">
-              <span>☁️</span> 上傳到共享平台
-            </button>
-            <button class="export-btn browse-platform" onclick="openPlatform()" style="background: var(--gradient-ocean); color: white; font-weight: 500;">
-              <span>🌐</span> 瀏覽共享平台
             </button>
           </div>
         </div>
