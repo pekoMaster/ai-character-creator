@@ -2982,6 +2982,21 @@
                 <div class="preview-section-content" id="previewRelationships"></div>
               </div>
 
+              <div class="preview-section" id="previewSkillsSection" style="display: none;">
+                <div class="preview-section-title">⚔️ 技能</div>
+                <div class="preview-section-content" id="previewSkills"></div>
+              </div>
+
+              <div class="preview-section" id="previewAttributesSection" style="display: none;">
+                <div class="preview-section-title">📊 自訂屬性</div>
+                <div class="preview-section-content" id="previewAttributes"></div>
+              </div>
+
+              <div class="preview-section" id="previewDialogueSection" style="display: none;">
+                <div class="preview-section-title">🗣️ 對話風格</div>
+                <div class="preview-section-content" id="previewDialogue"></div>
+              </div>
+
               <div class="preview-section" id="previewFirstMessageSection" style="display: none;">
                 <div class="preview-section-title">💬 第一則訊息</div>
                 <div class="preview-first-message" id="previewFirstMessage"></div>
@@ -7107,7 +7122,7 @@ ${contextInfo}
       // 性格
       const personalitySection = document.getElementById('previewPersonalitySection');
       const personalityContent = document.getElementById('previewPersonality');
-      let hasPersonality = data.personality || data.traits || (isFullMode && (data.strengths || data.weaknesses || data.likes || data.dislikes || data.fears || data.goals));
+      let hasPersonality = data.personality || data.traits || (isFullMode && (data.emotionalAttitude || data.strengths || data.weaknesses || data.likes || data.dislikes || data.fears || data.goals || data.moneyAttitude || data.morality));
 
       if (hasPersonality) {
         personalitySection.style.display = 'block';
@@ -7119,12 +7134,15 @@ ${contextInfo}
         // 完整版專屬詳細欄位
         if (isFullMode) {
           const details = [];
+          if (data.emotionalAttitude) details.push(`針對感情：${data.emotionalAttitude}`);
           if (data.strengths) details.push(`優點：${data.strengths}`);
           if (data.weaknesses) details.push(`缺點：${data.weaknesses}`);
           if (data.likes) details.push(`喜好：${data.likes}`);
           if (data.dislikes) details.push(`厭惡：${data.dislikes}`);
           if (data.fears) details.push(`恐懼：${data.fears}`);
           if (data.goals) details.push(`目標：${data.goals}`);
+          if (data.moneyAttitude) details.push(`金錢觀：${data.moneyAttitude}`);
+          if (data.morality) details.push(`道德：${data.morality}`);
 
           if (details.length > 0) {
             personalityText += (personalityText ? '\n\n' : '') + details.join('\n');
@@ -7168,6 +7186,100 @@ ${contextInfo}
         relationshipsContent.innerHTML = relationshipsHTML;
       } else {
         relationshipsSection.style.display = 'none';
+      }
+
+      // 技能（完整版限定）
+      const skillsSection = document.getElementById('previewSkillsSection');
+      const skillsContent = document.getElementById('previewSkills');
+      let hasSkills = isFullMode && (
+        (Array.isArray(data.combatSkills) && data.combatSkills.length > 0) ||
+        (Array.isArray(data.lifeSkills) && data.lifeSkills.length > 0)
+      );
+
+      if (hasSkills) {
+        skillsSection.style.display = 'block';
+        let skillsHTML = '';
+
+        if (Array.isArray(data.combatSkills) && data.combatSkills.length > 0) {
+          skillsHTML += '<div style="margin-bottom: 12px;"><strong>戰鬥技能：</strong></div>';
+          data.combatSkills.forEach(item => {
+            if (item.skill) {
+              skillsHTML += `<div style="margin-left: 12px; margin-bottom: 4px;">• ${item.skill}${item.level ? ` (${item.level})` : ''}</div>`;
+            }
+          });
+        }
+
+        if (Array.isArray(data.lifeSkills) && data.lifeSkills.length > 0) {
+          if (skillsHTML) skillsHTML += '<div style="margin-top: 12px;"></div>';
+          skillsHTML += '<div style="margin-bottom: 12px;"><strong>生活技能：</strong></div>';
+          data.lifeSkills.forEach(item => {
+            if (item.skill) {
+              skillsHTML += `<div style="margin-left: 12px; margin-bottom: 4px;">• ${item.skill}${item.level ? ` (${item.level})` : ''}</div>`;
+            }
+          });
+        }
+
+        skillsContent.innerHTML = skillsHTML;
+      } else {
+        skillsSection.style.display = 'none';
+      }
+
+      // 自訂屬性（完整版限定）
+      const attributesSection = document.getElementById('previewAttributesSection');
+      const attributesContent = document.getElementById('previewAttributes');
+      let hasAttributes = isFullMode && Array.isArray(data.customAttributes) && data.customAttributes.length > 0;
+
+      if (hasAttributes) {
+        attributesSection.style.display = 'block';
+        let attributesHTML = '<div style="display: grid; grid-template-columns: auto 1fr; gap: 8px 16px;">';
+        data.customAttributes.forEach(item => {
+          if (item.attribute && item.value) {
+            attributesHTML += `
+              <div style="font-weight: 500;">${item.attribute}：</div>
+              <div>${item.value}</div>
+            `;
+          }
+        });
+        attributesHTML += '</div>';
+        attributesContent.innerHTML = attributesHTML;
+      } else {
+        attributesSection.style.display = 'none';
+      }
+
+      // 對話風格（完整版限定）
+      const dialogueSection = document.getElementById('previewDialogueSection');
+      const dialogueContent = document.getElementById('previewDialogue');
+      let hasDialogue = isFullMode && (
+        (Array.isArray(data.speechStyle) && data.speechStyle.length > 0) ||
+        data.catchphrases || data.verbalTics || data.emotionalExpression
+      );
+
+      if (hasDialogue) {
+        dialogueSection.style.display = 'block';
+        let dialogueHTML = '';
+
+        if (Array.isArray(data.speechStyle) && data.speechStyle.length > 0) {
+          dialogueHTML += '<div style="margin-bottom: 12px;"><strong>說話方式範例：</strong></div>';
+          data.speechStyle.forEach(item => {
+            if (item.situation && item.dialogue) {
+              dialogueHTML += `<div style="margin-left: 12px; margin-bottom: 8px;"><strong>${item.situation}：</strong>${item.dialogue}</div>`;
+            }
+          });
+        }
+
+        const details = [];
+        if (data.catchphrases) details.push(`口頭禪：${data.catchphrases}`);
+        if (data.verbalTics) details.push(`語言習慣：${data.verbalTics}`);
+        if (data.emotionalExpression) details.push(`情緒表達：${data.emotionalExpression}`);
+
+        if (details.length > 0) {
+          if (dialogueHTML) dialogueHTML += '<div style="margin-top: 12px;"></div>';
+          dialogueHTML += details.join('<br><br>');
+        }
+
+        dialogueContent.innerHTML = dialogueHTML;
+      } else {
+        dialogueSection.style.display = 'none';
       }
 
       // 第一則訊息
