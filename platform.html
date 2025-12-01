@@ -555,10 +555,29 @@
     let currentSearch = '';
     let selectedCharacter = null;
 
+    // ===== 本地角色卡管理（與 index.html 共用） =====
+
+    function getMyCharacters() {
+      const stored = localStorage.getItem('myCharacters');
+      return stored ? JSON.parse(stored) : [];
+    }
+
+    function isMyCharacter(characterId) {
+      const myCharacters = getMyCharacters();
+      return myCharacters.some(c => c.id === characterId);
+    }
+
     // 初始化
     document.addEventListener('DOMContentLoaded', () => {
       loadCharacters();
       setupEventListeners();
+
+      // 檢查 URL 參數，如果有 id 則直接顯示該角色
+      const urlParams = new URLSearchParams(window.location.search);
+      const characterId = urlParams.get('id');
+      if (characterId) {
+        setTimeout(() => showDetail(characterId), 500);
+      }
     });
 
     // 設定事件監聽
@@ -668,12 +687,18 @@
               </div>
             ` : ''}
             <div class="card-actions">
-              <button class="btn btn-small btn-secondary" onclick="event.stopPropagation(); showDetail('${char.id}')">
-                <span>👁️</span> 查看
-              </button>
-              <button class="btn btn-small btn-primary" onclick="event.stopPropagation(); quickDownload('${char.id}')">
-                <span>📥</span> 下載
-              </button>
+              ${isMyCharacter(char.id) ? `
+                <button class="btn btn-small" onclick="event.stopPropagation(); editCharacter('${char.id}')" style="background: var(--gradient-sunset); color: white; flex: 1;">
+                  <span>✏️</span> 編輯
+                </button>
+              ` : `
+                <button class="btn btn-small btn-secondary" onclick="event.stopPropagation(); showDetail('${char.id}')">
+                  <span>👁️</span> 查看
+                </button>
+                <button class="btn btn-small btn-primary" onclick="event.stopPropagation(); quickDownload('${char.id}')">
+                  <span>📥</span> 下載
+                </button>
+              `}
             </div>
           </div>
         </div>
@@ -792,6 +817,36 @@
       } catch (error) {
         console.error('下載錯誤：', error);
         showToast('❌ 下載失敗', 'error');
+      }
+    }
+
+    // 編輯角色（僅原作者可用）
+    async function editCharacter(id) {
+      try {
+        showToast('正在載入角色資料...', 'info');
+
+        const response = await fetch(`${API_URL}?action=get&id=${id}`);
+        const result = await response.json();
+
+        if (result.success) {
+          const char = result.data;
+          const data = typeof char.data === 'string' ? JSON.parse(char.data) : char.data;
+
+          // 將資料儲存到 sessionStorage，讓編輯器讀取
+          sessionStorage.setItem('editCharacterData', JSON.stringify(data));
+          sessionStorage.setItem('editCharacterId', id);
+
+          // 跳轉回編輯器
+          showToast('✅ 正在跳轉到編輯器...', 'success');
+          setTimeout(() => {
+            window.location.href = 'index.html?edit=true';
+          }, 500);
+        } else {
+          showToast('❌ 載入失敗', 'error');
+        }
+      } catch (error) {
+        console.error('載入錯誤：', error);
+        showToast('❌ 載入失敗', 'error');
       }
     }
 
