@@ -5414,6 +5414,10 @@ ${text}`;
   "birthplace": "出生地",
   "backstory": "背景故事（3-5句話）",
   "keyEvents": "關鍵事件",
+  "relationships": [
+    { "name": "人物/群體/單位名稱1", "description": "關係描述1" },
+    { "name": "人物/群體/單位名稱2", "description": "關係描述2" }
+  ],
   "catchphrases": "口頭禪（逗號分隔）",
   "verbalTics": "語言習慣",
   "emotionalExpression": "情緒表達方式",
@@ -5428,11 +5432,15 @@ ${text}`;
 重要規則：
 1. 只回傳純 JSON，不要包含任何其他文字、註釋或 markdown 格式（如 \`\`\`json）
 2. 一般字段的值必須是字符串類型，用雙引號包裹
-3. combatSkills、lifeSkills、customAttributes 必須是陣列格式，每個元素包含指定的屬性
+3. combatSkills、lifeSkills、customAttributes、relationships 必須是陣列格式，每個元素包含指定的屬性
 4. 確保所有引號、逗號、大括號、方括號正確匹配
 5. 不要在最後一個字段後加逗號
 6. JSON 必須能被 JSON.parse() 直接解析，不能有任何語法錯誤
-7. 請為每個角色生成至少 2-3 個戰鬥技能、1-2 個生活技能、2-3 個自訂屬性
+7. 請為每個角色生成：
+   - 至少 2-3 個戰鬥技能
+   - 至少 1-2 個生活技能
+   - 至少 2-3 個自訂屬性
+   - 至少 2-3 個人際關係（可以是人物、群體、組織、單位等）
 
 範例格式：
 {
@@ -5448,6 +5456,11 @@ ${text}`;
   "customAttributes": [
     { "attribute": "魅力值", "value": "SSS" },
     { "attribute": "可愛度", "value": "MAX" }
+  ],
+  "relationships": [
+    { "name": "白上吹雪", "description": "GAMERS 的同期夥伴，經常一起直播" },
+    { "name": "Hololive 公司", "description": "工作單位，對公司充滿感激" },
+    { "name": "粉絲團", "description": "最重要的支持者，充滿感謝" }
   ]
 }`;
 
@@ -5539,6 +5552,10 @@ ${text}`;
   "birthplace": "出生地",
   "backstory": "背景故事（3-5句話）",
   "keyEvents": "關鍵事件",
+  "relationships": [
+    { "name": "人物/群體/單位名稱1", "description": "關係描述1" },
+    { "name": "人物/群體/單位名稱2", "description": "關係描述2" }
+  ],
   "catchphrases": "口頭禪（逗號分隔）",
   "verbalTics": "語言習慣",
   "emotionalExpression": "情緒表達方式",
@@ -5551,11 +5568,15 @@ ${text}`;
 重要規則：
 1. 只回傳純 JSON，不要包含任何其他文字、註釋或 markdown 格式（如 \`\`\`json）
 2. 一般字段的值必須是字符串類型，用雙引號包裹
-3. combatSkills、lifeSkills、customAttributes 必須是陣列格式，每個元素包含指定的屬性
+3. combatSkills、lifeSkills、customAttributes、relationships 必須是陣列格式，每個元素包含指定的屬性
 4. 確保所有引號、逗號、大括號、方括號正確匹配
 5. 不要在最後一個字段後加逗號
 6. JSON 必須能被 JSON.parse() 直接解析，不能有任何語法錯誤
-7. 請為每個角色生成至少 2-3 個戰鬥技能、1-2 個生活技能、2-3 個自訂屬性
+7. 請為每個角色生成：
+   - 至少 2-3 個戰鬥技能
+   - 至少 1-2 個生活技能
+   - 至少 2-3 個自訂屬性
+   - 至少 2-3 個人際關係（可以是人物、群體、組織、單位等）
 
 範例格式：
 {
@@ -5571,6 +5592,11 @@ ${text}`;
   "customAttributes": [
     { "attribute": "魅力值", "value": "SSS" },
     { "attribute": "可愛度", "value": "MAX" }
+  ],
+  "relationships": [
+    { "name": "白上吹雪", "description": "GAMERS 的同期夥伴，經常一起直播" },
+    { "name": "Hololive 公司", "description": "工作單位，對公司充滿感激" },
+    { "name": "粉絲團", "description": "最重要的支持者，充滿感謝" }
   ]
 }`;
 
@@ -5664,6 +5690,10 @@ ${text}`;
   "birthplace": "出生地",
   "backstory": "背景故事（3-5句話）",
   "keyEvents": "關鍵事件",
+  "relationships": [
+    { "name": "人物/群體/單位名稱1", "description": "關係描述1" },
+    { "name": "人物/群體/單位名稱2", "description": "關係描述2" }
+  ],
   "catchphrases": "口頭禪（逗號分隔）",
   "verbalTics": "語言習慣",
   "emotionalExpression": "情緒表達方式",
@@ -5676,11 +5706,15 @@ ${text}`;
 重要規則：
 1. 只回傳純 JSON，不要包含任何其他文字、註釋或 markdown 格式（如 \`\`\`json）
 2. 一般字段的值必須是字符串類型，用雙引號包裹
-3. combatSkills、lifeSkills、customAttributes 必須是陣列格式，每個元素包含指定的屬性
+3. combatSkills、lifeSkills、customAttributes、relationships 必須是陣列格式，每個元素包含指定的屬性
 4. 確保所有引號、逗號、大括號、方括號正確匹配
 5. 不要在最後一個字段後加逗號
 6. JSON 必須能被 JSON.parse() 直接解析，不能有任何語法錯誤
-7. 請為每個角色生成至少 2-3 個戰鬥技能、1-2 個生活技能、2-3 個自訂屬性
+7. 請為每個角色生成：
+   - 至少 2-3 個戰鬥技能
+   - 至少 1-2 個生活技能
+   - 至少 2-3 個自訂屬性
+   - 至少 2-3 個人際關係（可以是人物、群體、組織、單位等）
 
 範例格式：
 {
@@ -5696,6 +5730,11 @@ ${text}`;
   "customAttributes": [
     { "attribute": "魅力值", "value": "SSS" },
     { "attribute": "可愛度", "value": "MAX" }
+  ],
+  "relationships": [
+    { "name": "白上吹雪", "description": "GAMERS 的同期夥伴，經常一起直播" },
+    { "name": "Hololive 公司", "description": "工作單位，對公司充滿感激" },
+    { "name": "粉絲團", "description": "最重要的支持者，充滿感謝" }
   ]
 }`;
 
@@ -5787,6 +5826,10 @@ ${text}`;
   "birthplace": "出生地",
   "backstory": "背景故事（3-5句話）",
   "keyEvents": "關鍵事件",
+  "relationships": [
+    { "name": "人物/群體/單位名稱1", "description": "關係描述1" },
+    { "name": "人物/群體/單位名稱2", "description": "關係描述2" }
+  ],
   "catchphrases": "口頭禪（逗號分隔）",
   "verbalTics": "語言習慣",
   "emotionalExpression": "情緒表達方式",
@@ -5799,11 +5842,15 @@ ${text}`;
 重要規則：
 1. 只回傳純 JSON，不要包含任何其他文字、註釋或 markdown 格式（如 \`\`\`json）
 2. 一般字段的值必須是字符串類型，用雙引號包裹
-3. combatSkills、lifeSkills、customAttributes 必須是陣列格式，每個元素包含指定的屬性
+3. combatSkills、lifeSkills、customAttributes、relationships 必須是陣列格式，每個元素包含指定的屬性
 4. 確保所有引號、逗號、大括號、方括號正確匹配
 5. 不要在最後一個字段後加逗號
 6. JSON 必須能被 JSON.parse() 直接解析，不能有任何語法錯誤
-7. 請為每個角色生成至少 2-3 個戰鬥技能、1-2 個生活技能、2-3 個自訂屬性
+7. 請為每個角色生成：
+   - 至少 2-3 個戰鬥技能
+   - 至少 1-2 個生活技能
+   - 至少 2-3 個自訂屬性
+   - 至少 2-3 個人際關係（可以是人物、群體、組織、單位等）
 
 範例格式：
 {
@@ -5819,6 +5866,11 @@ ${text}`;
   "customAttributes": [
     { "attribute": "魅力值", "value": "SSS" },
     { "attribute": "可愛度", "value": "MAX" }
+  ],
+  "relationships": [
+    { "name": "白上吹雪", "description": "GAMERS 的同期夥伴，經常一起直播" },
+    { "name": "Hololive 公司", "description": "工作單位，對公司充滿感激" },
+    { "name": "粉絲團", "description": "最重要的支持者，充滿感謝" }
   ]
 }`;
 
