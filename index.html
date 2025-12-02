@@ -538,6 +538,26 @@
       transform: rotate(-90deg);
     }
 
+    /* 清空區域按鈕 */
+    .section-clear-btn {
+      padding: 4px 10px;
+      font-size: 1rem;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-left: 8px;
+    }
+
+    .section-clear-btn:hover {
+      background: var(--danger);
+      color: white;
+      border-color: var(--danger);
+      transform: scale(1.05);
+    }
+
     /* AI 區塊補充按鈕 */
     .ai-fill-btn {
       padding: 4px 12px;
@@ -2366,7 +2386,7 @@
         
         <!-- 基本資訊 -->
         <div class="form-section">
-          <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-header">
             <h3><span class="icon">📋</span> 基本資訊</h3>
             <button class="ai-import-btn"
                     onclick="event.stopPropagation(); App.import.fillSectionWithAI('basicInfo')"
@@ -2375,7 +2395,7 @@
                     style="display: none;">
               📥 讓AI讀取匯入檔
             </button>
-            <span class="section-toggle">▼</span>
+            <button class="section-clear-btn" onclick="event.stopPropagation(); clearSection(this, 'basicInfo')" title="清空此區域所有欄位">🧹</button>
           </div>
           <div class="section-content">
             <div class="form-field full-width">
@@ -2437,7 +2457,7 @@
 
         <!-- 外觀描述 -->
         <div class="form-section">
-          <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-header">
             <h3><span class="icon">👤</span> 外觀描述</h3>
             <button class="ai-import-btn"
                     onclick="event.stopPropagation(); App.import.fillSectionWithAI('appearance')"
@@ -2446,7 +2466,7 @@
                     style="display: none;">
               📥 讓AI讀取匯入檔
             </button>
-            <span class="section-toggle">▼</span>
+            <button class="section-clear-btn" onclick="event.stopPropagation(); clearSection(this, 'appearance')" title="清空此區域所有欄位">🧹</button>
           </div>
           <div class="section-content">
             <div class="form-field full-width">
@@ -2507,12 +2527,16 @@
               <label>特殊標記 <span class="hint">(疤痕、刺青、配件等)</span></label>
               <input type="text" id="features" placeholder="例：左眼下方有月牙形胎記" oninput="updatePreview()">
             </div>
+            <div class="form-field full-width full-mode-only">
+              <label>持有物 <span class="hint">(武器/道具/特殊護符)</span></label>
+              <input type="text" id="possessions" placeholder="例：青龍偃月刀、至尊魔戒、家族傳承的護身符" oninput="updatePreview()">
+            </div>
           </div>
         </div>
 
         <!-- 性格特質 -->
         <div class="form-section">
-          <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-header">
             <h3><span class="icon">💭</span> 性格特質</h3>
             <button class="ai-import-btn"
                     onclick="event.stopPropagation(); App.import.fillSectionWithAI('personality')"
@@ -2521,7 +2545,7 @@
                     style="display: none;">
               📥 讓AI讀取匯入檔
             </button>
-            <span class="section-toggle">▼</span>
+            <button class="section-clear-btn" onclick="event.stopPropagation(); clearSection(this, 'personality')" title="清空此區域所有欄位">🧹</button>
           </div>
           <div class="section-content">
             <div class="form-field full-width">
@@ -2619,7 +2643,7 @@
 
         <!-- 背景故事 -->
         <div class="form-section">
-          <div class="section-header full-mode-only" onclick="toggleSection(this)">
+          <div class="section-header full-mode-only">
             <h3><span class="icon">📖</span> 背景故事</h3>
             <button class="ai-import-btn"
                     onclick="event.stopPropagation(); App.import.fillSectionWithAI('background')"
@@ -2628,7 +2652,7 @@
                     style="display: none;">
               📥 讓AI讀取匯入檔
             </button>
-            <span class="section-toggle">▼</span>
+            <button class="section-clear-btn" onclick="event.stopPropagation(); clearSection(this, 'background')" title="清空此區域所有欄位">🧹</button>
           </div>
           <div class="section-content">
             <div class="form-field full-width full-mode-only">
@@ -2691,7 +2715,7 @@
 
         <!-- 戰鬥與生活技能 -->
         <div class="form-section">
-          <div class="section-header full-mode-only" onclick="toggleSection(this)">
+          <div class="section-header full-mode-only">
             <h3><span class="icon">⚔️</span> 戰鬥與生活技能</h3>
             <button class="ai-import-btn"
                     onclick="event.stopPropagation(); App.import.fillSectionWithAI('skills')"
@@ -2700,7 +2724,7 @@
                     style="display: none;">
               📥 讓AI讀取匯入檔
             </button>
-            <span class="section-toggle">▼</span>
+            <button class="section-clear-btn" onclick="event.stopPropagation(); clearSection(this, 'skills')" title="清空此區域所有欄位">🧹</button>
           </div>
           <div class="section-content">
             <div class="form-field full-width full-mode-only">
@@ -2746,9 +2770,9 @@
 
         <!-- 自訂屬性 -->
         <div class="form-section">
-          <div class="section-header full-mode-only" onclick="toggleSection(this)">
+          <div class="section-header full-mode-only">
             <h3><span class="icon">📊</span> 自訂屬性</h3>
-            <span class="section-toggle">▼</span>
+            <button class="section-clear-btn" onclick="event.stopPropagation(); clearSection(this, 'skills')" title="清空此區域所有欄位">🧹</button>
           </div>
           <div class="section-content">
             <div class="form-field full-width full-mode-only">
@@ -2775,7 +2799,7 @@
 
         <!-- 對話風格 -->
         <div class="form-section">
-          <div class="section-header full-mode-only" onclick="toggleSection(this)">
+          <div class="section-header full-mode-only">
             <h3><span class="icon">🗣️</span> 對話風格</h3>
             <button class="ai-import-btn"
                     onclick="event.stopPropagation(); App.import.fillSectionWithAI('speech')"
@@ -2790,7 +2814,7 @@
                     title="使用AI根據當前角色資料創意生成口頭禪、語言習慣、情緒表達">
               🎨 讓AI生成
             </button>
-            <span class="section-toggle">▼</span>
+            <button class="section-clear-btn" onclick="event.stopPropagation(); clearSection(this, 'dialogueExample')" title="清空此區域所有欄位">🧹</button>
           </div>
           <div class="section-content">
             <div class="form-field full-width full-mode-only">
@@ -2831,7 +2855,7 @@
 
         <!-- AI 核心設定 -->
         <div class="form-section">
-          <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-header">
             <h3><span class="icon">🤖</span> AI 核心設定</h3>
             <button class="ai-import-btn"
                     onclick="event.stopPropagation(); App.import.fillSectionWithAI('aiSettings')"
@@ -2840,7 +2864,7 @@
                     style="display: none;">
               📥 讓AI讀取匯入檔
             </button>
-            <span class="section-toggle">▼</span>
+            <button class="section-clear-btn" onclick="event.stopPropagation(); clearSection(this, 'aiSettings')" title="清空此區域所有欄位">🧹</button>
           </div>
           <div class="section-content">
             <div class="form-field full-width">
@@ -2900,7 +2924,7 @@
 
         <!-- 元資料 -->
         <div class="form-section">
-          <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-header">
             <h3><span class="icon">📎</span> 元資料</h3>
             <button class="ai-import-btn"
                     onclick="event.stopPropagation(); App.import.fillSectionWithAI('metadata')"
@@ -2909,7 +2933,7 @@
                     style="display: none;">
               📥 讓AI讀取匯入檔
             </button>
-            <span class="section-toggle">▼</span>
+            <button class="section-clear-btn" onclick="event.stopPropagation(); clearSection(this, 'metadata')" title="清空此區域所有欄位">🧹</button>
           </div>
           <div class="section-content">
             <div class="form-field full-width">
@@ -4360,6 +4384,7 @@
   "eyes": "眼睛描述（顏色、形狀、特徵、發光效果、眼神表現）",
   "clothing": "服裝風格（詳細描述服裝類型、狀態、特殊效果）",
   "features": "特殊標記（疤痕、刺青、配件、光環、翅膀、尾巴等，逗號分隔）",
+  "possessions": "持有物（象徵性的武器、道具或特殊護符，如：青龍偃月刀, 至尊魔戒, 家族傳承的護身符）",
 
   "personality": "性格摘要（完整描述核心性格特徵）",
   "traits": "特質標籤（逗號分隔，如：內向, 善良, 固執）",
@@ -4753,7 +4778,8 @@ ${text}`;
   "hairStyle": "髮型",
   "eyes": "眼睛顏色/特徵",
   "clothing": "服裝風格",
-  "features": "特殊標記（疤痕、刺青、配件等）"
+  "features": "特殊標記（疤痕、刺青、配件等）",
+  "possessions": "持有物（武器/道具/護符）"
 }
 
 【提取重點】：
@@ -4762,6 +4788,7 @@ ${text}`;
 - hairColor, hairStyle, eyes：五官特徵
 - clothing：服裝風格與特點
 - features：獨特的外觀標記
+- possessions：象徵性的武器、道具或護符
 
 【嚴格限制】：
 ⚠️ 只能從下方提供的「角色卡內容」中提取資訊
@@ -5428,6 +5455,7 @@ ${text}`;
   "eyes": "眼睛顏色",
   "clothing": "服裝風格",
   "features": "特殊標記",
+  "possessions": "持有物",
   "personality": "性格摘要（2-3句話）",
   "traits": "特質標籤（逗號分隔）",
   "strengths": "優點（逗號分隔）",
@@ -5461,7 +5489,9 @@ ${text}`;
   "firstMessage": "第一則訊息（角色的自我介紹對話）",
   "scenario": "初次相遇地點（1-2句話描述場景）",
   "description": "給 AI 的完整角色描述（整合所有資訊，5-8句話）",
-  "systemPrompt": "系統提示詞（指導 AI 如何扮演這個角色）"
+  "systemPrompt": "系統提示詞（指導 AI 如何扮演這個角色）",
+  "tags": "分類標籤（逗號分隔，如：奇幻, 劍士, 治療師）",
+  "worldLore": "世界觀設定（角色所處的世界背景、規則，2-3句話）"
 }
 
 用戶的角色概念：${userPrompt}
@@ -5566,6 +5596,7 @@ ${text}`;
   "eyes": "眼睛顏色",
   "clothing": "服裝風格",
   "features": "特殊標記",
+  "possessions": "持有物",
   "personality": "性格摘要（2-3句話）",
   "traits": "特質標籤（逗號分隔）",
   "strengths": "優點（逗號分隔）",
@@ -5599,7 +5630,9 @@ ${text}`;
   "firstMessage": "第一則訊息（角色的自我介紹對話）",
   "scenario": "初次相遇地點（1-2句話描述場景）",
   "description": "給 AI 的完整角色描述（整合所有資訊，5-8句話）",
-  "systemPrompt": "系統提示詞（指導 AI 如何扮演這個角色）"
+  "systemPrompt": "系統提示詞（指導 AI 如何扮演這個角色）",
+  "tags": "分類標籤（逗號分隔，如：奇幻, 劍士, 治療師）",
+  "worldLore": "世界觀設定（角色所處的世界背景、規則，2-3句話）"
 }
 
 重要規則：
@@ -5704,6 +5737,7 @@ ${text}`;
   "eyes": "眼睛顏色",
   "clothing": "服裝風格",
   "features": "特殊標記",
+  "possessions": "持有物",
   "personality": "性格摘要（2-3句話）",
   "traits": "特質標籤（逗號分隔）",
   "strengths": "優點（逗號分隔）",
@@ -5737,7 +5771,9 @@ ${text}`;
   "firstMessage": "第一則訊息（角色的自我介紹對話）",
   "scenario": "初次相遇地點（1-2句話描述場景）",
   "description": "給 AI 的完整角色描述（整合所有資訊，5-8句話）",
-  "systemPrompt": "系統提示詞（指導 AI 如何扮演這個角色）"
+  "systemPrompt": "系統提示詞（指導 AI 如何扮演這個角色）",
+  "tags": "分類標籤（逗號分隔，如：奇幻, 劍士, 治療師）",
+  "worldLore": "世界觀設定（角色所處的世界背景、規則，2-3句話）"
 }
 
 重要規則：
@@ -5840,6 +5876,7 @@ ${text}`;
   "eyes": "眼睛顏色",
   "clothing": "服裝風格",
   "features": "特殊標記",
+  "possessions": "持有物",
   "personality": "性格摘要（2-3句話）",
   "traits": "特質標籤（逗號分隔）",
   "strengths": "優點（逗號分隔）",
@@ -5873,7 +5910,9 @@ ${text}`;
   "firstMessage": "第一則訊息（角色的自我介紹對話）",
   "scenario": "初次相遇地點（1-2句話描述場景）",
   "description": "給 AI 的完整角色描述（整合所有資訊，5-8句話）",
-  "systemPrompt": "系統提示詞（指導 AI 如何扮演這個角色）"
+  "systemPrompt": "系統提示詞（指導 AI 如何扮演這個角色）",
+  "tags": "分類標籤（逗號分隔，如：奇幻, 劍士, 治療師）",
+  "worldLore": "世界觀設定（角色所處的世界背景、規則，2-3句話）"
 }
 
 重要規則：
@@ -6965,6 +7004,51 @@ ${contextInfo}
       header.nextElementSibling.classList.toggle('collapsed');
     }
 
+    // ===== 清空區域欄位 =====
+    function clearSection(button, sectionKey) {
+      // 定義每個區域的欄位ID列表
+      const sectionFields = {
+        basicInfo: ['avatarUrl', 'name', 'aliases', 'age', 'gender', 'species', 'occupation'],
+        appearance: ['appearance', 'height', 'bodyType', 'hairColor', 'hairStyle', 'eyes', 'clothing', 'features', 'possessions'],
+        personality: ['personality', 'traits', 'strengths', 'weaknesses', 'likes', 'dislikes', 'fears', 'goals', 'emotionalAttitude', 'moneyAttitude', 'morality'],
+        background: ['birthplace', 'backstory', 'keyEvents'],
+        skills: [],  // 動態欄位特殊處理
+        dialogueExample: ['catchphrases', 'verbalTics', 'emotionalExpression'],
+        speech: ['firstMessage', 'exampleDialogues'],
+        aiSettings: ['description', 'systemPrompt', 'scenario'],
+        metadata: ['tags', 'worldLore', 'creator', 'version']
+      };
+
+      const fields = sectionFields[sectionKey];
+      if (!fields) return;
+
+      // 確認對話框
+      if (!confirm(`確定要清空「${button.closest('.section-header').querySelector('h3').textContent.trim()}」區域的所有欄位嗎？`)) {
+        return;
+      }
+
+      // 清空一般欄位
+      fields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+          field.value = '';
+        }
+      });
+
+      // 特殊處理：清空動態欄位（技能區域）
+      if (sectionKey === 'skills') {
+        App.dynamicFields.clear('relationships');
+        App.dynamicFields.clear('combatSkills');
+        App.dynamicFields.clear('lifeSkills');
+        App.dynamicFields.clear('customAttributes');
+        App.dynamicFields.clear('speechStyle');
+      }
+
+      // 更新預覽
+      updatePreview();
+      showToast(`已清空「${button.closest('.section-header').querySelector('h3').textContent.trim()}」區域`, 'success');
+    }
+
     // ===== 預覽分頁切換 =====
     function switchPreviewTab(tab) {
       currentPreviewTab = tab;
@@ -7015,6 +7099,7 @@ ${contextInfo}
         eyes: document.getElementById('eyes').value,
         clothing: document.getElementById('clothing').value,
         features: document.getElementById('features').value,
+        possessions: document.getElementById('possessions').value,
         personality: document.getElementById('personality').value,
         traits: document.getElementById('traits').value,
         strengths: document.getElementById('strengths').value,
@@ -7114,7 +7199,7 @@ ${contextInfo}
       // 外觀
       const appearanceSection = document.getElementById('previewAppearanceSection');
       const appearanceContent = document.getElementById('previewAppearance');
-      let hasAppearance = data.appearance || (isFullMode && (data.height || data.bodyType || data.hairColor || data.hairStyle || data.eyes || data.clothing || data.features));
+      let hasAppearance = data.appearance || (isFullMode && (data.height || data.bodyType || data.hairColor || data.hairStyle || data.eyes || data.clothing || data.features || data.possessions));
 
       if (hasAppearance) {
         appearanceSection.style.display = 'block';
@@ -7130,6 +7215,7 @@ ${contextInfo}
           if (data.eyes) details.push(`眼睛：${data.eyes}`);
           if (data.clothing) details.push(`服裝：${data.clothing}`);
           if (data.features) details.push(`特徵：${data.features}`);
+          if (data.possessions) details.push(`持有物：${data.possessions}`);
 
           if (details.length > 0) {
             appearanceText += (appearanceText ? '\n\n' : '') + details.join('\n');
@@ -7420,7 +7506,7 @@ ${contextInfo}
       md += `\n`;
       
       // 外觀描述
-      if (data.appearance || (isFullMode && (data.height || data.bodyType || data.hairColor || data.hairStyle || data.eyes || data.clothing || data.features))) {
+      if (data.appearance || (isFullMode && (data.height || data.bodyType || data.hairColor || data.hairStyle || data.eyes || data.clothing || data.features || data.possessions))) {
         md += `## 👤 外觀描述\n\n`;
         if (data.appearance) md += `${data.appearance}\n\n`;
         // 完整版專屬欄位
@@ -7432,6 +7518,7 @@ ${contextInfo}
           if (data.eyes) md += `**眼睛**：${data.eyes}\n\n`;
           if (data.clothing) md += `**服裝風格**：${data.clothing}\n\n`;
           if (data.features) md += `**特殊標記**：${data.features}\n\n`;
+          if (data.possessions) md += `**持有物**：${data.possessions}\n\n`;
         }
       }
       
@@ -7572,7 +7659,7 @@ ${contextInfo}
       txt += '\n';
 
       // 外觀描述
-      if (data.appearance || (isFullMode && (data.height || data.bodyType || data.hairColor || data.hairStyle || data.eyes || data.clothing || data.features))) {
+      if (data.appearance || (isFullMode && (data.height || data.bodyType || data.hairColor || data.hairStyle || data.eyes || data.clothing || data.features || data.possessions))) {
         txt += '外觀描述 :\n';
         if (data.appearance) txt += ` -整體外觀 : ${data.appearance}\n`;
         // 完整版專屬欄位
@@ -7584,6 +7671,7 @@ ${contextInfo}
           if (data.eyes) txt += ` -眼睛 : ${data.eyes}\n`;
           if (data.clothing) txt += ` -服裝風格 : ${data.clothing}\n`;
           if (data.features) txt += ` -特殊標記 : ${data.features}\n`;
+          if (data.possessions) txt += ` -持有物 : ${data.possessions}\n`;
         }
         txt += '\n';
       }
@@ -7851,6 +7939,7 @@ ${contextInfo}
         output.appearance.eyes = data.eyes || "";
         output.appearance.clothing = data.clothing || "";
         output.appearance.distinguishing_features = data.features || "";
+        output.appearance.possessions = data.possessions || "";
 
         // 性格詳細欄位
         output.personality.strengths = data.strengths ? data.strengths.split(',').map(s => s.trim()) : [];
@@ -7919,7 +8008,7 @@ ${contextInfo}
       if (data.avatarUrl) desc += `Avatar: ${data.avatarUrl}\n`;
       desc += "\n";
 
-      if (data.appearance || (isFullMode && (data.height || data.bodyType || data.hairColor || data.hairStyle || data.eyes || data.clothing || data.features))) {
+      if (data.appearance || (isFullMode && (data.height || data.bodyType || data.hairColor || data.hairStyle || data.eyes || data.clothing || data.features || data.possessions))) {
         desc += "【Appearance】\n";
         if (data.appearance) desc += `${data.appearance}\n`;
         // 完整版專屬欄位
@@ -7931,6 +8020,7 @@ ${contextInfo}
           if (data.eyes) desc += `Eyes: ${data.eyes}\n`;
           if (data.clothing) desc += `Clothing: ${data.clothing}\n`;
           if (data.features) desc += `Distinguishing features: ${data.features}\n`;
+          if (data.possessions) desc += `Possessions: ${data.possessions}\n`;
         }
         desc += "\n";
       }
