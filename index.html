@@ -2399,7 +2399,10 @@
           </div>
           <div class="section-content">
             <div class="form-field full-width">
-              <label>角色頭像網址 <span class="hint">(圖片 URL)</span></label>
+              <label>
+                角色頭像網址 <span class="hint">(圖片 URL)</span>
+                <button class="helper-btn" onclick="event.preventDefault(); showImageGenerationGuide()" type="button" title="查看圖片生成服務推薦">🎨 去哪產圖？</button>
+              </label>
               <input type="url" id="avatarUrl" placeholder="https://example.com/avatar.jpg" oninput="updatePreview()">
             </div>
             <div class="form-row">
@@ -9117,6 +9120,125 @@ ${contextInfo}
           }
         });
       });
+    }
+
+    // ===== 圖片生成服務推薦對話框 =====
+    function showImageGenerationGuide() {
+      const data = collectFormData();
+
+      // 構建角色描述提示詞
+      let promptText = '';
+      if (data.name) promptText += `${data.name}, `;
+      if (data.age) promptText += `${data.age}, `;
+      if (data.gender) promptText += `${data.gender}, `;
+      if (data.species) promptText += `${data.species}, `;
+      if (data.occupation) promptText += `${data.occupation}, `;
+
+      // 外觀描述
+      const appearanceDetails = [];
+      if (data.hairColor) appearanceDetails.push(data.hairColor);
+      if (data.hairStyle) appearanceDetails.push(data.hairStyle);
+      if (data.eyes) appearanceDetails.push(data.eyes);
+      if (data.clothing) appearanceDetails.push(data.clothing);
+      if (data.features) appearanceDetails.push(data.features);
+
+      if (appearanceDetails.length > 0) {
+        promptText += appearanceDetails.join(', ');
+      }
+
+      if (data.personality) {
+        promptText += `, ${data.personality}`;
+      }
+
+      // 添加畫風建議
+      promptText += ', anime style, character portrait, high quality, detailed';
+
+      const dialogHTML = `
+        <div class="confirm-dialog-overlay" id="imageGuideOverlay" style="z-index: 10000;">
+          <div class="confirm-dialog-box" style="max-width: 700px; max-height: 80vh; overflow-y: auto;">
+            <h3 class="confirm-dialog-title">🎨 角色圖片生成服務推薦</h3>
+
+            <div style="margin: 20px 0;">
+              <p style="color: var(--text-secondary); margin-bottom: 15px;">
+                以下是推薦的圖片生成服務，你可以使用角色卡資料來生成人物半身像：
+              </p>
+
+              <div style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: var(--primary);">💰 付費服務（高品質）</h4>
+                <ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">
+                  <li><strong>Midjourney</strong> - 最高品質，需Discord使用
+                    <br><a href="https://www.midjourney.com" target="_blank" style="color: var(--primary); font-size: 0.9em;">https://www.midjourney.com</a>
+                  </li>
+                  <li><strong>OpenAI DALL-E 3</strong> - 高品質，理解複雜提示詞
+                    <br><a href="https://platform.openai.com/playground/image" target="_blank" style="color: var(--primary); font-size: 0.9em;">https://platform.openai.com/playground/image</a>
+                  </li>
+                  <li><strong>Leonardo.ai</strong> - 多種風格，可訓練模型
+                    <br><a href="https://leonardo.ai" target="_blank" style="color: var(--primary); font-size: 0.9em;">https://leonardo.ai</a>
+                  </li>
+                </ul>
+              </div>
+
+              <div style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: var(--success);">🆓 免費服務</h4>
+                <ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">
+                  <li><strong>SeaArt.ai</strong> - 免費額度多，支援繁中
+                    <br><a href="https://www.seaart.ai" target="_blank" style="color: var(--primary); font-size: 0.9em;">https://www.seaart.ai</a>
+                  </li>
+                  <li><strong>Tensor.Art</strong> - 社群模型豐富
+                    <br><a href="https://tensor.art" target="_blank" style="color: var(--primary); font-size: 0.9em;">https://tensor.art</a>
+                  </li>
+                  <li><strong>Pollinations.ai</strong> - 完全免費，無需註冊
+                    <br><a href="https://pollinations.ai" target="_blank" style="color: var(--primary); font-size: 0.9em;">https://pollinations.ai</a>
+                  </li>
+                  <li><strong>Bing Image Creator</strong> - 微軟提供，基於DALL-E
+                    <br><a href="https://www.bing.com/images/create" target="_blank" style="color: var(--primary); font-size: 0.9em;">https://www.bing.com/images/create</a>
+                  </li>
+                </ul>
+              </div>
+
+              <div style="background: var(--warning-bg); padding: 15px; border-radius: 8px; border-left: 4px solid var(--warning);">
+                <h4 style="margin: 0 0 10px 0; color: var(--warning);">📝 根據你的角色卡生成的提示詞</h4>
+                <div style="background: white; padding: 12px; border-radius: 4px; margin-bottom: 10px; font-family: monospace; font-size: 0.9em; word-wrap: break-word; color: #333;">
+                  ${promptText || '請先填寫角色資料（名稱、外觀等），系統會自動生成提示詞'}
+                </div>
+                <button
+                  onclick="copyToClipboard('${promptText.replace(/'/g, "\\'")}', '提示詞已複製！')"
+                  style="padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; width: 100%;"
+                  ${!promptText ? 'disabled' : ''}
+                >
+                  📋 複製提示詞
+                </button>
+                <p style="margin: 10px 0 0 0; font-size: 0.85em; color: var(--text-secondary);">
+                  💡 提示：你可以在上述服務中貼上這段提示詞，並根據需要調整畫風、構圖等參數
+                </p>
+              </div>
+            </div>
+
+            <button class="confirm-cancel-btn" onclick="document.getElementById('imageGuideOverlay').remove()">關閉</button>
+          </div>
+        </div>
+      `;
+
+      document.body.insertAdjacentHTML('beforeend', dialogHTML);
+
+      // 點擊背景關閉
+      const overlay = document.getElementById('imageGuideOverlay');
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.remove();
+        }
+      });
+    }
+
+    // 複製到剪貼簿的輔助函數
+    async function copyToClipboard(text, successMessage = '已複製到剪貼簿！') {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(successMessage, 'success');
+      } catch (error) {
+        console.error('複製失敗：', error);
+        showToast('複製失敗，請手動選取複製', 'error');
+      }
     }
 
     // ===== AI 生成對話框（兩個輸入框） =====
