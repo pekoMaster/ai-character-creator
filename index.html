@@ -1059,13 +1059,13 @@
     }
 
     .icon-btn {
-      padding: 10px 16px;
+      padding: 12px 20px;
       border: 2px solid var(--border-color);
       border-radius: var(--radius-md);
       background: var(--bg-secondary);
       color: var(--text-primary);
       cursor: pointer;
-      font-size: 1.2rem;
+      font-size: 1rem;
       transition: all var(--transition-base);
       display: flex;
       align-items: center;
@@ -1819,7 +1819,7 @@
     .export-btn {
       flex: 1;
       min-width: 100px;
-      padding: 14px 24px;
+      padding: 12px 20px;
       border: none;
       border-radius: var(--radius-md);
       font-weight: 600;
@@ -2346,13 +2346,13 @@
 
       <div class="settings-login-group">
         <!-- AI 生成按鈕 -->
-        <button class="icon-btn primary" onclick="App.ai.generateCharacter()" title="使用AI一鍵全部生成">
-          ✨ 使用AI一鍵全部生成
+        <button class="icon-btn primary" onclick="App.ai.generateCharacter()" title="使用AI一鍵生成所有欄位">
+          ✨ AI一鍵生成
         </button>
 
         <!-- 匯入按鈕 -->
-        <button class="icon-btn" onclick="App.ui.openImport()" title="匯入檔案">
-          📥 匯入
+        <button class="icon-btn" onclick="App.ui.openImport()" title="匯入角色卡檔案">
+          📥 匯入角色卡
         </button>
 
         <!-- 用戶資訊區（登入後顯示）-->
@@ -2373,7 +2373,7 @@
         </button>
 
         <!-- 設定按鈕 -->
-        <button class="btn secondary" onclick="App.ui.openSettings()" style="padding: 8px 16px;">
+        <button class="icon-btn" onclick="App.ui.openSettings()" title="設定 AI API 金鑰">
           🤖 設定 AI API
         </button>
       </div>
