@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI互動聊天角色卡工具</title>
   <!-- Version: 2025-01-29-fix-json-truncation -->
+
+  <!-- Google Search Console 驗證標籤 -->
+  <!-- TODO: 請在這裡添加 Google Search Console 提供的驗證標籤 -->
+  <!-- <meta name="google-site-verification" content="您的驗證碼" /> -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
   <!-- 外部資源 CDN -->
@@ -3400,11 +3404,12 @@
           });
 
           // 初始化 OAuth 客戶端（用於取得 access token）
-          this.client = google.accounts.oauth2.initTokenClient({
-            client_id: this.GOOGLE_CLIENT_ID,
-            scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly',
-            callback: this.handleTokenResponse.bind(this),
-          });
+          // 注意：Drive 功能已停用，不需要 Drive 權限
+          // this.client = google.accounts.oauth2.initTokenClient({
+          //   client_id: this.GOOGLE_CLIENT_ID,
+          //   scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly',
+          //   callback: this.handleTokenResponse.bind(this),
+          // });
         },
 
         login() {
@@ -9483,5 +9488,19 @@ ${contextInfo}
       }
     }
   </script>
+
+  <!-- 頁尾 - 隱私政策和服務條款連結 -->
+  <footer style="text-align: center; padding: 20px; background: var(--bg-secondary); border-top: 1px solid var(--border-color); margin-top: 40px;">
+    <p style="color: var(--text-secondary); font-size: 14px; margin: 0;">
+      <a href="privacy.html" target="_blank" style="color: var(--primary); text-decoration: none; margin: 0 10px;">隱私政策</a>
+      |
+      <a href="terms.html" target="_blank" style="color: var(--primary); text-decoration: none; margin: 0 10px;">服務條款</a>
+      |
+      <a href="https://github.com/pekoMaster/ai-character-creator" target="_blank" style="color: var(--primary); text-decoration: none; margin: 0 10px;">GitHub</a>
+    </p>
+    <p style="color: var(--text-tertiary); font-size: 12px; margin: 10px 0 0 0;">
+      © 2025 AI Interactive Character Card Tool
+    </p>
+  </footer>
 </body>
 </html>
