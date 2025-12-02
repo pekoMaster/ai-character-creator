@@ -924,13 +924,12 @@
     }
 
     .export-buttons {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       gap: 10px;
-      flex-wrap: wrap;
     }
 
     .export-btn {
-      flex: 1;
       min-width: 100px;
       padding: 12px 20px;
       border: none;
@@ -978,6 +977,20 @@
     .export-btn:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-lg);
+    }
+
+    /* 響應式：中等螢幕 (平板) */
+    @media (max-width: 1024px) {
+      .export-buttons {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* 響應式：小螢幕 (手機) */
+    @media (max-width: 640px) {
+      .export-buttons {
+        grid-template-columns: 1fr;
+      }
     }
 
     /* ===== 提示訊息 ===== */
