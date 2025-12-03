@@ -53,6 +53,13 @@ desktop.ini
 測試*.txt
 測試*.md
 
+# 內部文件（不公開）
+*_SPECIFICATION.md
+*_SETUP.md
+*_GUIDE.md
+*_REPORT.md
+QA*.md
+
 # Node modules（如果未來使用）
 node_modules/
 
