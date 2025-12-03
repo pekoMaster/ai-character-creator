@@ -1,3 +1,25 @@
+# 本地資料夾（不上傳）
+_local/
+_private/
+_temp/
+_ul
+_ul-Jelly-Lio-Home
+
+# 專案資料夾（不上傳）
+HoloTalk/
+Holo學院/
+拯救人質/
+海盜尋寶/
+獸人與餅/
+角色卡製作書/
+
+# Claude Code 工作紀錄
+.claude/
+
+# 工作紀錄
+工作紀錄.md
+worldview.html
+
 # 環境變數和配置文件
 .env
 # config.js - 不再排除，因為 OAuth Client ID 需要公開用於網頁
@@ -17,6 +39,19 @@ desktop.ini
 # 臨時文件
 *.tmp
 *.log
+
+# 設計和測試檔案
+*.psd
+*.ai
+*.sketch
+*.xlsx
+*.xls
+*.docx
+*.doc
+
+# 測試資料
+測試*.txt
+測試*.md
 
 # Node modules（如果未來使用）
 node_modules/
