@@ -8928,8 +8928,30 @@ ${contextInfo}
       });
     }
 
-    // ===== 角色卡所有權管理已改用 Google Email 驗證 =====
-    // localStorage 相關函數已移除，所有權驗證現在由 Google Apps Script 後端處理
+    // ===== 角色卡所有權管理 =====
+    // 使用編輯密碼機制取代 Google Email 驗證
+
+    /**
+     * 計算 SHA-256 雜湊值
+     * @param {string} message - 要雜湊的訊息
+     * @returns {Promise<string>} 雜湊值（十六進位字串）
+     */
+    async function sha256(message) {
+      const msgBuffer = new TextEncoder().encode(message);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    /**
+     * 生成密碼雜湊（使用角色卡 ID 作為 salt）
+     * @param {string} characterId - 角色卡 ID
+     * @param {string} password - 原始密碼
+     * @returns {Promise<string>} 密碼雜湊值
+     */
+    async function generatePasswordHash(characterId, password) {
+      return await sha256(characterId + password);
+    }
 
     /**
      * 顯示上傳對話框
@@ -8978,6 +9000,36 @@ ${contextInfo}
                 />
               </div>
 
+              <div style="margin: 20px 0; padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <p style="margin: 0 0 12px 0; font-size: 13px; color: var(--text-secondary);">
+                  🔐 設定編輯密碼，用於日後修改或刪除此角色卡
+                </p>
+                <div style="margin-bottom: 12px;">
+                  <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">
+                    編輯密碼 <span style="color: var(--danger);">*</span>
+                  </label>
+                  <input
+                    type="password"
+                    id="uploadPassword"
+                    placeholder="4-32 個字元"
+                    maxlength="32"
+                    style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 14px; box-sizing: border-box;"
+                  />
+                </div>
+                <div>
+                  <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">
+                    確認密碼 <span style="color: var(--danger);">*</span>
+                  </label>
+                  <input
+                    type="password"
+                    id="uploadPasswordConfirm"
+                    placeholder="再次輸入密碼"
+                    maxlength="32"
+                    style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 14px; box-sizing: border-box;"
+                  />
+                </div>
+              </div>
+
               <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
                 <button class="confirm-cancel-btn" id="uploadCancelBtn">取消</button>
                 <button class="confirm-option-btn" id="uploadConfirmBtn" style="background: var(--gradient-primary); color: white; border: none; padding: 12px 24px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 500;">
@@ -8993,6 +9045,8 @@ ${contextInfo}
         const authorInput = document.getElementById('uploadAuthor');
         const tagsInput = document.getElementById('uploadTags');
         const thumbnailInput = document.getElementById('uploadThumbnail');
+        const passwordInput = document.getElementById('uploadPassword');
+        const passwordConfirmInput = document.getElementById('uploadPasswordConfirm');
         const confirmBtn = document.getElementById('uploadConfirmBtn');
         const cancelBtn = document.getElementById('uploadCancelBtn');
 
@@ -9006,9 +9060,30 @@ ${contextInfo}
           const author = authorInput.value.trim();
           const tags = tagsInput.value.trim();
           const thumbnail = thumbnailInput.value.trim();
+          const password = passwordInput.value;
+          const passwordConfirm = passwordConfirmInput.value;
 
           if (!author) {
             showToast('請填寫作者名稱！', 'warning');
+            return;
+          }
+
+          // 密碼驗證
+          if (!password) {
+            showToast('請設定編輯密碼！', 'warning');
+            passwordInput.focus();
+            return;
+          }
+
+          if (password.length < 4) {
+            showToast('密碼至少需要 4 個字元！', 'warning');
+            passwordInput.focus();
+            return;
+          }
+
+          if (password !== passwordConfirm) {
+            showToast('兩次密碼輸入不一致！', 'warning');
+            passwordConfirmInput.focus();
             return;
           }
 
@@ -9016,7 +9091,7 @@ ${contextInfo}
           localStorage.setItem('platformAuthor', author);
 
           overlay.remove();
-          resolve({ author, tags, thumbnail });
+          resolve({ author, tags, thumbnail, password });
         });
 
         cancelBtn.addEventListener('click', () => {
@@ -9059,6 +9134,9 @@ ${contextInfo}
         // 顯示載入中
         showToast('正在上傳到平台...', 'info');
 
+        // 生成密碼雜湊（使用角色卡 ID 作為 salt）
+        const passwordHash = await generatePasswordHash(characterId, uploadInfo.password);
+
         // 準備上傳資料（移除 Google Email 依賴，改用作者名稱）
         const uploadData = {
           action: 'upload',
@@ -9071,7 +9149,8 @@ ${contextInfo}
           type: isFullMode ? '完整版' : '精簡版',
           characterData: data, // 完整的角色資料
           version: '1.0',
-          thumbnail: uploadInfo.thumbnail
+          thumbnail: uploadInfo.thumbnail,
+          passwordHash: passwordHash // 密碼雜湊用於日後編輯/刪除驗證
         };
 
         // 發送 POST 請求

@@ -6,9 +6,6 @@
   <title>角色卡共享平台</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-  <!-- Google OAuth -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-
   <!-- 配置文件 -->
   <script src="config.js"></script>
 
@@ -510,6 +507,122 @@
       display: flex;
       gap: 12px;
     }
+
+    /* ===== 密碼驗證彈窗 ===== */
+    .password-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+    }
+
+    .password-modal.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .password-modal-content {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      max-width: 400px;
+      width: 100%;
+      box-shadow: var(--shadow-lg);
+      animation: modalPop 0.3s ease;
+    }
+
+    @keyframes modalPop {
+      from {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .password-modal-header {
+      padding: 24px 24px 0;
+      text-align: center;
+    }
+
+    .password-modal-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .password-modal-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .password-modal-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .password-modal-body {
+      padding: 24px;
+    }
+
+    .password-input-group {
+      position: relative;
+    }
+
+    .password-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .password-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-glow);
+    }
+
+    .password-error {
+      color: var(--danger);
+      font-size: 13px;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .password-error.show {
+      display: block;
+    }
+
+    .password-modal-actions {
+      padding: 0 24px 24px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .password-modal-actions .btn {
+      flex: 1;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #e55858;
+      transform: translateY(-2px);
+    }
   </style>
 </head>
 <body>
@@ -521,23 +634,6 @@
         <span>角色卡共享平台</span>
       </div>
       <div class="header-actions">
-        <!-- 用戶資訊區域 -->
-        <div id="userSection">
-          <!-- 未登入時顯示 -->
-          <button class="login-btn" id="loginBtn" style="display: none;">
-            <span>🔐</span> 登入 Google
-          </button>
-
-          <!-- 已登入時顯示 -->
-          <div class="user-info" id="userInfo" style="display: none;">
-            <img class="user-avatar" id="userAvatar" src="" alt="User">
-            <span class="user-name" id="userName"></span>
-            <button class="btn btn-secondary" onclick="App.auth.logout()" style="padding: 6px 12px; font-size: 12px;">
-              登出
-            </button>
-          </div>
-        </div>
-
         <a href="index.html" class="btn btn-secondary">
           <span>✏️</span> 返回編輯器
         </a>
@@ -599,11 +695,32 @@
         <button class="modal-close" onclick="closeModal()">✕</button>
       </div>
       <div class="modal-body" id="modalBody"></div>
-      <div class="modal-actions">
+      <div class="modal-actions" id="modalActions">
         <button class="btn btn-secondary" onclick="closeModal()">關閉</button>
         <button class="btn btn-primary" onclick="downloadCharacter()">
           <span>📥</span> 下載並匯入
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 密碼驗證彈窗 -->
+  <div class="password-modal" id="passwordModal">
+    <div class="password-modal-content">
+      <div class="password-modal-header">
+        <div class="password-modal-icon" id="passwordModalIcon">🔐</div>
+        <div class="password-modal-title" id="passwordModalTitle">驗證密碼</div>
+        <div class="password-modal-desc" id="passwordModalDesc">請輸入此角色卡的編輯密碼</div>
+      </div>
+      <div class="password-modal-body">
+        <div class="password-input-group">
+          <input type="password" class="password-input" id="passwordInput" placeholder="請輸入密碼" maxlength="32">
+          <div class="password-error" id="passwordError">密碼錯誤，請重試</div>
+        </div>
+      </div>
+      <div class="password-modal-actions">
+        <button class="btn btn-secondary" onclick="closePasswordModal()">取消</button>
+        <button class="btn btn-primary" id="passwordConfirmBtn" onclick="confirmPassword()">確認</button>
       </div>
     </div>
   </div>
@@ -618,153 +735,190 @@
     let currentSearch = '';
     let selectedCharacter = null;
 
-    // ===== App 狀態管理 =====
-    const App = {
-      state: {
-        user: null,
-        isAuthenticated: false
-      },
+    // 密碼驗證相關
+    let pendingPasswordAction = null; // { action: 'edit'|'delete', characterId: string }
 
-      auth: {
-        // 初始化 Google OAuth
-        init() {
-          if (typeof google === 'undefined') {
-            console.warn('Google OAuth SDK 尚未載入');
-            setTimeout(() => this.init(), 100);
-            return;
-          }
+    // ===== SHA-256 雜湊函數 =====
+    async function sha256(message) {
+      const msgBuffer = new TextEncoder().encode(message);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
 
-          google.accounts.id.initialize({
-            client_id: CONFIG.GOOGLE_CLIENT_ID,
-            callback: this.handleCredentialResponse.bind(this)
-          });
+    async function generatePasswordHash(characterId, password) {
+      return await sha256(characterId + password);
+    }
 
-          // 顯示登入按鈕
-          const loginBtn = document.getElementById('loginBtn');
-          if (loginBtn) {
-            loginBtn.style.display = 'flex';
-            loginBtn.onclick = () => this.login();
-          }
+    // ===== 密碼驗證彈窗 =====
+    function openPasswordModal(action, characterId, title, desc, icon = '🔐') {
+      pendingPasswordAction = { action, characterId };
 
-          // 檢查是否有保存的登入狀態
-          this.checkSavedAuth();
-        },
+      document.getElementById('passwordModalIcon').textContent = icon;
+      document.getElementById('passwordModalTitle').textContent = title;
+      document.getElementById('passwordModalDesc').textContent = desc;
+      document.getElementById('passwordInput').value = '';
+      document.getElementById('passwordError').classList.remove('show');
 
-        // 處理 Google 登入回應
-        handleCredentialResponse(response) {
-          try {
-            const credential = response.credential;
-            const payload = JSON.parseFromString(atob(credential.split('.')[1]));
-
-            App.state.user = {
-              email: payload.email,
-              name: payload.name,
-              picture: payload.picture,
-              credential: credential
-            };
-            App.state.isAuthenticated = true;
-
-            // 保存登入狀態
-            localStorage.setItem('googleAuth', JSON.stringify({
-              email: payload.email,
-              name: payload.name,
-              picture: payload.picture
-            }));
-
-            this.updateUI();
-            showToast('✅ 登入成功！', 'success');
-
-            // 重新載入角色列表以更新編輯按鈕
-            filterAndDisplayCharacters();
-          } catch (error) {
-            console.error('登入處理錯誤：', error);
-            showToast('❌ 登入失敗', 'error');
-          }
-        },
-
-        // 執行登入
-        login() {
-          google.accounts.id.prompt();
-        },
-
-        // 登出
-        logout() {
-          App.state.user = null;
-          App.state.isAuthenticated = false;
-          localStorage.removeItem('googleAuth');
-
-          this.updateUI();
-          showToast('✅ 已登出', 'success');
-
-          // 重新載入角色列表以隱藏編輯按鈕
-          filterAndDisplayCharacters();
-        },
-
-        // 檢查保存的登入狀態
-        checkSavedAuth() {
-          try {
-            const saved = localStorage.getItem('googleAuth');
-            if (saved) {
-              const userData = JSON.parse(saved);
-              App.state.user = userData;
-              App.state.isAuthenticated = true;
-              this.updateUI();
-            }
-          } catch (error) {
-            console.error('讀取登入狀態錯誤：', error);
-          }
-        },
-
-        // 更新 UI 顯示
-        updateUI() {
-          const loginBtn = document.getElementById('loginBtn');
-          const userInfo = document.getElementById('userInfo');
-          const userAvatar = document.getElementById('userAvatar');
-          const userName = document.getElementById('userName');
-
-          if (App.state.isAuthenticated && App.state.user) {
-            loginBtn.style.display = 'none';
-            userInfo.style.display = 'flex';
-            userAvatar.src = App.state.user.picture || '';
-            userName.textContent = App.state.user.name || App.state.user.email;
-          } else {
-            loginBtn.style.display = 'flex';
-            userInfo.style.display = 'none';
-          }
-        }
+      // 設定確認按鈕樣式
+      const confirmBtn = document.getElementById('passwordConfirmBtn');
+      if (action === 'delete') {
+        confirmBtn.className = 'btn btn-danger';
+        confirmBtn.innerHTML = '<span>🗑️</span> 確認刪除';
+      } else {
+        confirmBtn.className = 'btn btn-primary';
+        confirmBtn.innerHTML = '確認';
       }
-    };
 
-    // ===== 修正 JSON.parseFromString（相容性修正） =====
-    JSON.parseFromString = function(str) {
-      return JSON.parse(str);
-    };
+      document.getElementById('passwordModal').classList.add('show');
+      setTimeout(() => document.getElementById('passwordInput').focus(), 100);
+    }
 
-    // ===== 角色所有權驗證（使用 Google Email） =====
+    function closePasswordModal() {
+      document.getElementById('passwordModal').classList.remove('show');
+      pendingPasswordAction = null;
+    }
 
-    // 檢查當前用戶是否擁有該角色
-    async function isMyCharacter(characterId) {
-      // 如果未登入，直接返回 false
-      if (!App.state.isAuthenticated || !App.state.user || !App.state.user.email) {
-        return false;
+    async function confirmPassword() {
+      if (!pendingPasswordAction) return;
+
+      const password = document.getElementById('passwordInput').value;
+      if (!password) {
+        document.getElementById('passwordError').textContent = '請輸入密碼';
+        document.getElementById('passwordError').classList.add('show');
+        return;
       }
+
+      const { action, characterId } = pendingPasswordAction;
+      const passwordHash = await generatePasswordHash(characterId, password);
 
       try {
-        const response = await fetch(`${API_URL}?action=checkOwnership&id=${characterId}&email=${encodeURIComponent(App.state.user.email)}`);
+        // 驗證密碼
+        const verifyResponse = await fetch(`${API_URL}?action=verifyPassword&id=${characterId}&passwordHash=${encodeURIComponent(passwordHash)}`);
+        const verifyResult = await verifyResponse.json();
+
+        if (!verifyResult.success) {
+          document.getElementById('passwordError').textContent = verifyResult.message || '驗證失敗';
+          document.getElementById('passwordError').classList.add('show');
+          return;
+        }
+
+        if (verifyResult.data.noPassword) {
+          document.getElementById('passwordError').textContent = '此角色卡沒有設定編輯密碼，無法編輯或刪除';
+          document.getElementById('passwordError').classList.add('show');
+          return;
+        }
+
+        if (!verifyResult.data.verified) {
+          document.getElementById('passwordError').textContent = '密碼錯誤，請重試';
+          document.getElementById('passwordError').classList.add('show');
+          return;
+        }
+
+        // 密碼正確，執行操作
+        closePasswordModal();
+
+        if (action === 'edit') {
+          executeEdit(characterId, passwordHash);
+        } else if (action === 'delete') {
+          executeDelete(characterId, passwordHash);
+        }
+      } catch (error) {
+        console.error('驗證錯誤：', error);
+        document.getElementById('passwordError').textContent = '網路錯誤，請稍後再試';
+        document.getElementById('passwordError').classList.add('show');
+      }
+    }
+
+    // 執行編輯
+    async function executeEdit(characterId, passwordHash) {
+      try {
+        showToast('正在載入角色資料...', 'info');
+
+        const response = await fetch(`${API_URL}?action=get&id=${characterId}`);
         const result = await response.json();
 
-        return result.success && result.data && result.data.isOwner === true;
+        if (result.success) {
+          const char = result.data;
+          const data = typeof char.data === 'string' ? JSON.parse(char.data) : char.data;
+
+          // 將資料儲存到 sessionStorage，讓編輯器讀取
+          sessionStorage.setItem('editCharacterData', JSON.stringify(data));
+          sessionStorage.setItem('editCharacterId', characterId);
+          sessionStorage.setItem('editPasswordHash', passwordHash);
+
+          // 跳轉回編輯器
+          showToast('✅ 正在跳轉到編輯器...', 'success');
+          setTimeout(() => {
+            window.location.href = 'index.html?edit=true';
+          }, 500);
+        } else {
+          showToast('❌ 載入失敗：' + result.message, 'error');
+        }
       } catch (error) {
-        console.error('檢查所有權錯誤：', error);
-        return false;
+        console.error('載入錯誤：', error);
+        showToast('❌ 載入失敗', 'error');
       }
+    }
+
+    // 執行刪除
+    async function executeDelete(characterId, passwordHash) {
+      try {
+        showToast('正在刪除角色卡...', 'info');
+
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'delete',
+            id: characterId,
+            passwordHash: passwordHash
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showToast('✅ 角色卡已刪除', 'success');
+          closeModal();
+          refreshList();
+        } else {
+          showToast('❌ 刪除失敗：' + result.message, 'error');
+        }
+      } catch (error) {
+        console.error('刪除錯誤：', error);
+        showToast('❌ 刪除失敗', 'error');
+      }
+    }
+
+    // 請求編輯角色（開啟密碼彈窗）
+    function requestEdit(characterId) {
+      const char = allCharacters.find(c => c.id === characterId);
+      if (!char) return;
+
+      if (!char.hasPassword) {
+        showToast('⚠️ 此角色卡沒有設定編輯密碼，無法編輯', 'warning');
+        return;
+      }
+
+      openPasswordModal('edit', characterId, '編輯角色卡', '請輸入此角色卡的編輯密碼', '✏️');
+    }
+
+    // 請求刪除角色（開啟密碼彈窗）
+    function requestDelete(characterId) {
+      const char = allCharacters.find(c => c.id === characterId) || selectedCharacter;
+      if (!char) return;
+
+      if (!char.hasPassword) {
+        showToast('⚠️ 此角色卡沒有設定編輯密碼，無法刪除', 'warning');
+        return;
+      }
+
+      openPasswordModal('delete', characterId, '刪除角色卡', '此操作無法復原！請輸入密碼確認刪除', '🗑️');
     }
 
     // 初始化
     document.addEventListener('DOMContentLoaded', () => {
-      // 初始化 Google 認證
-      App.auth.init();
-
       loadCharacters();
       setupEventListeners();
 
@@ -798,6 +952,20 @@
       document.getElementById('detailModal').addEventListener('click', (e) => {
         if (e.target.id === 'detailModal') {
           closeModal();
+        }
+      });
+
+      // 密碼彈窗背景點擊關閉
+      document.getElementById('passwordModal').addEventListener('click', (e) => {
+        if (e.target.id === 'passwordModal') {
+          closePasswordModal();
+        }
+      });
+
+      // 密碼輸入框 Enter 鍵提交
+      document.getElementById('passwordInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          confirmPassword();
         }
       });
     }
@@ -846,8 +1014,8 @@
       displayCharacters(filtered);
     }
 
-    // 顯示角色卡（異步版本，支援所有權檢查）
-    async function displayCharacters(characters) {
+    // 顯示角色卡
+    function displayCharacters(characters) {
       const grid = document.getElementById('cardsGrid');
       const loading = document.getElementById('loading');
 
@@ -859,17 +1027,6 @@
         displayEmpty();
         return;
       }
-
-      // 批量檢查所有權
-      const ownershipChecks = await Promise.all(
-        characters.map(char => isMyCharacter(char.id))
-      );
-
-      // 建立所有權映射表
-      const ownershipMap = {};
-      characters.forEach((char, index) => {
-        ownershipMap[char.id] = ownershipChecks[index];
-      });
 
       grid.innerHTML = characters.map(char => `
         <div class="character-card" onclick="showDetail('${char.id}')">
@@ -894,18 +1051,17 @@
               </div>
             ` : ''}
             <div class="card-actions">
-              ${ownershipMap[char.id] ? `
-                <button class="btn btn-small" onclick="event.stopPropagation(); editCharacter('${char.id}')" style="background: var(--gradient-sunset); color: white; flex: 1;">
-                  <span>✏️</span> 編輯
+              <button class="btn btn-small btn-secondary" onclick="event.stopPropagation(); showDetail('${char.id}')">
+                <span>👁️</span> 查看
+              </button>
+              <button class="btn btn-small btn-primary" onclick="event.stopPropagation(); quickDownload('${char.id}')">
+                <span>📥</span> 下載
+              </button>
+              ${char.hasPassword ? `
+                <button class="btn btn-small" onclick="event.stopPropagation(); requestEdit('${char.id}')" style="background: var(--gradient-sunset); color: white;">
+                  <span>✏️</span>
                 </button>
-              ` : `
-                <button class="btn btn-small btn-secondary" onclick="event.stopPropagation(); showDetail('${char.id}')">
-                  <span>👁️</span> 查看
-                </button>
-                <button class="btn btn-small btn-primary" onclick="event.stopPropagation(); quickDownload('${char.id}')">
-                  <span>📥</span> 下載
-                </button>
-              `}
+              ` : ''}
             </div>
           </div>
         </div>
@@ -978,6 +1134,22 @@
             ` : ''}
           `;
 
+          // 更新按鈕區域（如果有密碼則顯示編輯/刪除按鈕）
+          document.getElementById('modalActions').innerHTML = `
+            <button class="btn btn-secondary" onclick="closeModal()">關閉</button>
+            <button class="btn btn-primary" onclick="downloadCharacter()">
+              <span>📥</span> 下載並匯入
+            </button>
+            ${char.hasPassword ? `
+              <button class="btn" onclick="requestEdit('${char.id}')" style="background: var(--gradient-sunset); color: white;">
+                <span>✏️</span> 編輯
+              </button>
+              <button class="btn btn-danger" onclick="requestDelete('${char.id}')">
+                <span>🗑️</span> 刪除
+              </button>
+            ` : ''}
+          `;
+
           document.getElementById('detailModal').classList.add('show');
         }
       } catch (error) {
@@ -1024,54 +1196,6 @@
       } catch (error) {
         console.error('下載錯誤：', error);
         showToast('❌ 下載失敗', 'error');
-      }
-    }
-
-    // 編輯角色（僅原作者可用）
-    async function editCharacter(id) {
-      try {
-        // 檢查登入狀態
-        if (!App.state.isAuthenticated || !App.state.user || !App.state.user.email) {
-          showToast('⚠️ 請先登入 Google 才能編輯角色卡', 'warning');
-          setTimeout(() => {
-            if (confirm('需要登入 Google 才能編輯角色卡。\n\n是否要立即登入？')) {
-              App.auth.login();
-            }
-          }, 500);
-          return;
-        }
-
-        // 驗證所有權
-        const isOwner = await isMyCharacter(id);
-        if (!isOwner) {
-          showToast('❌ 您無權編輯此角色卡（非原作者）', 'error');
-          return;
-        }
-
-        showToast('正在載入角色資料...', 'info');
-
-        const response = await fetch(`${API_URL}?action=get&id=${id}`);
-        const result = await response.json();
-
-        if (result.success) {
-          const char = result.data;
-          const data = typeof char.data === 'string' ? JSON.parse(char.data) : char.data;
-
-          // 將資料儲存到 sessionStorage，讓編輯器讀取
-          sessionStorage.setItem('editCharacterData', JSON.stringify(data));
-          sessionStorage.setItem('editCharacterId', id);
-
-          // 跳轉回編輯器
-          showToast('✅ 正在跳轉到編輯器...', 'success');
-          setTimeout(() => {
-            window.location.href = 'index.html?edit=true';
-          }, 500);
-        } else {
-          showToast('❌ 載入失敗', 'error');
-        }
-      } catch (error) {
-        console.error('載入錯誤：', error);
-        showToast('❌ 載入失敗', 'error');
       }
     }
 
