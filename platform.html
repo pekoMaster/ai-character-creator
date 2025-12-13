@@ -655,8 +655,6 @@
       <button class="filter-btn active" data-filter="all">全部</button>
       <button class="filter-btn" data-filter="完整版">完整版</button>
       <button class="filter-btn" data-filter="精簡版">精簡版</button>
-      <button class="filter-btn" data-filter="原創">原創</button>
-      <button class="filter-btn" data-filter="fanwork">同人</button>
     </div>
   </div>
 
@@ -996,17 +994,13 @@
 
       // 套用篩選器
       if (currentFilter !== 'all') {
-        if (currentFilter === 'fanwork') {
-          filtered = filtered.filter(c => c.source && c.source !== '原創');
-        } else {
-          filtered = filtered.filter(c => c.type === currentFilter || c.source === currentFilter);
-        }
+        filtered = filtered.filter(c => c.type === currentFilter);
       }
 
       // 套用搜尋
       if (currentSearch) {
         filtered = filtered.filter(c => {
-          const searchText = `${c.name} ${c.author} ${c.source} ${c.tags}`.toLowerCase();
+          const searchText = `${c.name} ${c.author} ${c.tags}`.toLowerCase();
           return searchText.includes(currentSearch);
         });
       }
@@ -1039,10 +1033,6 @@
               <div class="card-meta-item">
                 <span>👤</span>
                 <span>${char.author || '匿名'}</span>
-              </div>
-              <div class="card-meta-item">
-                <span>📚</span>
-                <span>${char.source || '原創'}</span>
               </div>
             </div>
             ${char.tags ? `
@@ -1091,7 +1081,6 @@
               <div class="modal-section-title">基本資訊</div>
               <div class="modal-section-content">
                 <p><strong>作者：</strong>${char.author}</p>
-                <p><strong>原作品：</strong>${char.source}</p>
                 <p><strong>類型：</strong>${char.type}</p>
                 <p><strong>版本：</strong>${char.version}</p>
                 <p><strong>上傳時間：</strong>${new Date(char.uploadDate).toLocaleString('zh-TW')}</p>
