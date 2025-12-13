@@ -1050,19 +1050,13 @@
                 ${char.tags.split(',').map(tag => `<span class="tag">${tag.trim()}</span>`).join('')}
               </div>
             ` : ''}
-            <div class="card-actions">
-              <button class="btn btn-small btn-secondary" onclick="event.stopPropagation(); showDetail('${char.id}')">
-                <span>👁️</span> 查看
-              </button>
-              <button class="btn btn-small btn-primary" onclick="event.stopPropagation(); quickDownload('${char.id}')">
-                <span>📥</span> 下載
-              </button>
-              ${char.hasPassword ? `
+            ${char.hasPassword ? `
+              <div class="card-actions">
                 <button class="btn btn-small" onclick="event.stopPropagation(); requestEdit('${char.id}')" style="background: var(--gradient-sunset); color: white;">
-                  <span>✏️</span>
+                  <span>✏️</span> 編輯
                 </button>
-              ` : ''}
-            </div>
+              </div>
+            ` : ''}
           </div>
         </div>
       `).join('');
