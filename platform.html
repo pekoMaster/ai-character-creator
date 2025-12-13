@@ -1050,13 +1050,6 @@
                 ${char.tags.split(',').map(tag => `<span class="tag">${tag.trim()}</span>`).join('')}
               </div>
             ` : ''}
-            ${char.hasPassword ? `
-              <div class="card-actions">
-                <button class="btn btn-small" onclick="event.stopPropagation(); requestEdit('${char.id}')" style="background: var(--gradient-sunset); color: white;">
-                  <span>✏️</span> 編輯
-                </button>
-              </div>
-            ` : ''}
           </div>
         </div>
       `).join('');
