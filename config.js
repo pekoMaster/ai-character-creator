@@ -10,5 +10,5 @@ const CONFIG = {
   GOOGLE_DRIVE_FOLDER_ID: '', // 已停用
 
   // 共享平台 Google Apps Script API URL
-  PLATFORM_API_URL: 'https://script.google.com/macros/s/AKfycbxdE7VDz43Zy8Nak2Y-wEhXFvX73XHDH1OZn6pNrIDh3iKyMXYYGfs0ORySJrQ6NYEN/exec'
+  PLATFORM_API_URL: 'https://script.google.com/macros/s/AKfycbzAoKC8JxpFOi_BNeGYTk1rZNkv2UrRwgIAEy9W7avwZPAWBL0ADqYa5-fQKnl3LFk/exec'
 };
