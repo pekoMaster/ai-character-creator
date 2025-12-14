@@ -51,6 +51,12 @@ const I18n = {
     this.languages['ja'] = window.LANG_JA || null;
     this.languages['ko'] = window.LANG_KO || null;
 
+    // 調試日誌
+    const loadedLangs = Object.entries(this.languages)
+      .filter(([k, v]) => v !== null)
+      .map(([k]) => k);
+    console.log('[I18n] Initialized. Current language:', this.currentLanguage, 'Loaded languages:', loadedLangs);
+
     return this;
   },
 
@@ -302,13 +308,14 @@ const I18n = {
     const styles = `
       .language-selector {
         position: relative;
-        z-index: 1000;
+        z-index: 9999;
       }
 
       .language-selector-fixed {
         position: fixed;
         top: 15px;
         right: 15px;
+        z-index: 9999;
       }
 
       .language-selector-inline {
@@ -453,10 +460,15 @@ const I18n = {
       const container = document.getElementById(containerId);
       if (container) {
         container.innerHTML = html;
+        console.log('[I18n] Language selector inserted into container:', containerId);
+      } else {
+        console.warn('[I18n] Container not found:', containerId, '- inserting into body');
+        document.body.insertAdjacentHTML('afterbegin', html);
       }
     } else {
       // 插入到 body 開頭
       document.body.insertAdjacentHTML('afterbegin', html);
+      console.log('[I18n] Language selector inserted into body');
     }
 
     // 點擊外部關閉下拉選單
