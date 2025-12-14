@@ -20,6 +20,13 @@
   <!-- 配置文件 -->
   <script src="config.js"></script>
 
+  <!-- 多語言系統 -->
+  <script src="lang/zh-TW.js"></script>
+  <script src="lang/en.js"></script>
+  <script src="lang/ja.js"></script>
+  <script src="lang/ko.js"></script>
+  <script src="lang/i18n.js"></script>
+
   <style>
     /* ===== CSS 變數定義 ===== */
     :root {
@@ -2316,17 +2323,20 @@
   </style>
 </head>
 <body>
+  <!-- 語言選擇器容器 -->
+  <div id="languageSelectorContainer"></div>
+
   <div class="app-container">
     <!-- 頁首 -->
     <header class="header">
-      <h1>🎭 AI互動聊天角色卡工具</h1>
-      <p>創建專業的 AI 互動角色卡，支援多平台格式輸出</p>
+      <h1 data-i18n="editor.title">🎭 AI互動聊天角色卡工具</h1>
+      <p data-i18n="editor.subtitle">創建專業的 AI 互動角色卡，支援多平台格式輸出</p>
       <div style="display: flex; gap: 12px; justify-content: center; margin-top: 16px;">
         <button class="icon-btn" onclick="uploadToPlatform()" style="background: var(--gradient-primary); color: white; border: none; font-weight: 500;">
-          <span>☁️</span> 上傳到共享平台
+          <span>☁️</span> <span data-i18n="editor.uploadToPlatform">上傳到共享平台</span>
         </button>
         <button class="icon-btn" onclick="openPlatform()" style="background: var(--gradient-ocean); color: white; border: none; font-weight: 500;">
-          <span>🌐</span> 瀏覽共享平台
+          <span>🌐</span> <span data-i18n="editor.openPlatform">瀏覽共享平台</span>
         </button>
       </div>
     </header>
@@ -2359,20 +2369,20 @@
 
       <div class="settings-login-group">
         <!-- AI 生成按鈕 -->
-        <button class="icon-btn primary" onclick="App.ai.generateCharacter()" title="使用AI一鍵生成所有欄位">
-          ✨ AI一鍵生成
+        <button class="icon-btn primary" onclick="App.ai.generateCharacter()" data-i18n-title="editor.aiGenerate">
+          ✨ <span data-i18n="editor.aiGenerate">AI一鍵生成</span>
         </button>
 
         <!-- 匯入按鈕 -->
-        <button class="icon-btn" onclick="App.ui.openImport()" title="匯入角色卡檔案">
-          📥 匯入角色卡
+        <button class="icon-btn" onclick="App.ui.openImport()" data-i18n-title="editor.importCard">
+          📥 <span data-i18n="editor.importCard">匯入角色卡</span>
         </button>
 
         <!-- Google 登入和雲端功能已移除 -->
 
         <!-- 設定按鈕 -->
-        <button class="icon-btn" onclick="App.ui.openSettings()" title="設定 AI API 金鑰">
-          🤖 設定 AI API
+        <button class="icon-btn" onclick="App.ui.openSettings()" data-i18n-title="editor.settings">
+          🤖 <span data-i18n="editor.settings">設定 AI API</span>
         </button>
       </div>
     </div>
@@ -2385,7 +2395,7 @@
         <!-- 基本資訊 -->
         <div class="form-section">
           <div class="section-header">
-            <h3><span class="icon">📋</span> 基本資訊</h3>
+            <h3><span class="icon">📋</span> <span data-i18n="editor.basicInfo">基本資訊</span></h3>
             <button class="ai-import-btn"
                     onclick="event.stopPropagation(); App.import.fillSectionWithAI('basicInfo')"
                     title="從匯入檔案中讀取資料填充此區塊"
@@ -2538,7 +2548,7 @@
         <!-- 性格特質 -->
         <div class="form-section">
           <div class="section-header">
-            <h3><span class="icon">💭</span> 性格特質</h3>
+            <h3><span class="icon">💭</span> <span data-i18n="editor.personality">性格特質</span></h3>
             <button class="ai-import-btn"
                     onclick="event.stopPropagation(); App.import.fillSectionWithAI('personality')"
                     title="從匯入檔案中讀取資料填充此區塊"
@@ -2645,7 +2655,7 @@
         <!-- 背景故事 -->
         <div class="form-section full-mode-only">
           <div class="section-header">
-            <h3><span class="icon">📖</span> 背景故事</h3>
+            <h3><span class="icon">📖</span> <span data-i18n="editor.background">背景故事</span></h3>
             <button class="ai-import-btn"
                     onclick="event.stopPropagation(); App.import.fillSectionWithAI('background')"
                     title="從匯入檔案中讀取資料填充此區塊"
@@ -2717,7 +2727,7 @@
         <!-- 戰鬥與生活技能 -->
         <div class="form-section full-mode-only">
           <div class="section-header">
-            <h3><span class="icon">⚔️</span> 戰鬥與生活技能</h3>
+            <h3><span class="icon">⚔️</span> <span data-i18n="editor.skills">戰鬥與生活技能</span></h3>
             <button class="ai-import-btn"
                     onclick="event.stopPropagation(); App.import.fillSectionWithAI('skills')"
                     title="從匯入檔案中讀取資料填充此區塊"
@@ -2772,7 +2782,7 @@
         <!-- 自訂屬性 -->
         <div class="form-section full-mode-only">
           <div class="section-header">
-            <h3><span class="icon">📊</span> 自訂屬性</h3>
+            <h3><span class="icon">📊</span> <span data-i18n="editor.customAttrs">自訂屬性</span></h3>
             <button class="section-clear-btn" onclick="event.stopPropagation(); clearSection(this, 'skills')" title="清空此區域所有欄位">🧹</button>
           </div>
           <div class="section-content">
@@ -2801,7 +2811,7 @@
         <!-- 對話風格 -->
         <div class="form-section full-mode-only">
           <div class="section-header">
-            <h3><span class="icon">🗣️</span> 對話風格</h3>
+            <h3><span class="icon">🗣️</span> <span data-i18n="editor.dialogStyle">對話風格</span></h3>
             <button class="ai-import-btn"
                     onclick="event.stopPropagation(); App.import.fillSectionWithAI('speech')"
                     title="從匯入檔案中讀取資料填充此區塊"
@@ -8817,6 +8827,18 @@ ${contextInfo}
 
     // ===== 初始化 =====
     document.addEventListener('DOMContentLoaded', function() {
+      // 初始化多語言系統
+      I18n.init();
+      I18n.insertSelector('languageSelectorContainer', 'top-right');
+      I18n.onLanguageChange = function(lang) {
+        // 更新頁面標題
+        document.title = I18n.t('editor.title');
+        // 更新所有帶 data-i18n 的元素
+        I18n.updatePageTexts();
+      };
+      // 初始套用當前語言
+      I18n.updatePageTexts();
+
       // Google OAuth 初始化已移除
       // 因 Google 要求自有網域才能使用 OAuth，故停用此功能
 

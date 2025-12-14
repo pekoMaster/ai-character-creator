@@ -9,6 +9,13 @@
   <!-- 配置文件 -->
   <script src="config.js"></script>
 
+  <!-- 多語言系統 -->
+  <script src="lang/zh-TW.js"></script>
+  <script src="lang/en.js"></script>
+  <script src="lang/ja.js"></script>
+  <script src="lang/ko.js"></script>
+  <script src="lang/i18n.js"></script>
+
   <style>
     /* ===== CSS 變數定義 ===== */
     :root {
@@ -626,19 +633,22 @@
   </style>
 </head>
 <body>
+  <!-- 語言選擇器容器 -->
+  <div id="languageSelectorContainer"></div>
+
   <!-- 頂部導航列 -->
   <header class="header">
     <div class="header-content">
       <div class="logo">
         <span>🌐</span>
-        <span>角色卡共享平台</span>
+        <span data-i18n="platform.title">角色卡共享平台</span>
       </div>
       <div class="header-actions">
         <a href="index.html" class="btn btn-secondary">
-          <span>✏️</span> 返回編輯器
+          <span>✏️</span> <span data-i18n="platform.backToEditor">返回編輯器</span>
         </a>
         <button class="btn btn-primary" onclick="refreshList()">
-          <span>🔄</span> 重新整理
+          <span>🔄</span> <span data-i18n="common.refresh">重新整理</span>
         </button>
       </div>
     </div>
@@ -647,14 +657,14 @@
   <!-- 搜尋與篩選區 -->
   <div class="search-section">
     <div class="search-box">
-      <input type="text" class="search-input" id="searchInput" placeholder="搜尋角色名稱、作者或標籤...">
+      <input type="text" class="search-input" id="searchInput" data-i18n-placeholder="platform.searchPlaceholder" placeholder="搜尋角色名稱、作者或標籤...">
       <span class="search-icon">🔍</span>
     </div>
 
     <div class="filters">
-      <button class="filter-btn active" data-filter="all">全部</button>
-      <button class="filter-btn" data-filter="完整版">完整版</button>
-      <button class="filter-btn" data-filter="精簡版">精簡版</button>
+      <button class="filter-btn active" data-filter="all" data-i18n="common.all">全部</button>
+      <button class="filter-btn" data-filter="完整版" data-i18n="platform.fullVersion">完整版</button>
+      <button class="filter-btn" data-filter="精簡版" data-i18n="platform.simpleVersion">精簡版</button>
     </div>
   </div>
 
@@ -662,11 +672,11 @@
   <div class="stats">
     <div class="stat-item">
       <span>📊</span>
-      <span>總共 <strong id="totalCount">0</strong> 張角色卡</span>
+      <span><span data-i18n="platform.totalCards">總共</span> <strong id="totalCount">0</strong> <span data-i18n="platform.cards">張角色卡</span></span>
     </div>
     <div class="stat-item">
       <span>👥</span>
-      <span>由 <strong id="authorCount">0</strong> 位作者創建</span>
+      <span><span data-i18n="platform.createdBy">由</span> <strong id="authorCount">0</strong> <span data-i18n="platform.authors">位作者創建</span></span>
     </div>
   </div>
 
@@ -675,7 +685,7 @@
     <!-- 載入中 -->
     <div class="loading" id="loading">
       <div class="loading-spinner"></div>
-      <div>正在載入角色卡...</div>
+      <div data-i18n="common.loading">正在載入角色卡...</div>
     </div>
   </div>
 
@@ -694,9 +704,9 @@
       </div>
       <div class="modal-body" id="modalBody"></div>
       <div class="modal-actions" id="modalActions">
-        <button class="btn btn-secondary" onclick="closeModal()">關閉</button>
+        <button class="btn btn-secondary" onclick="closeModal()" data-i18n="common.close">關閉</button>
         <button class="btn btn-primary" onclick="downloadCharacter()">
-          <span>📥</span> 下載並匯入
+          <span>📥</span> <span data-i18n="platform.downloadAndImport">下載並匯入</span>
         </button>
       </div>
     </div>
@@ -707,18 +717,18 @@
     <div class="password-modal-content">
       <div class="password-modal-header">
         <div class="password-modal-icon" id="passwordModalIcon">🔐</div>
-        <div class="password-modal-title" id="passwordModalTitle">驗證密碼</div>
-        <div class="password-modal-desc" id="passwordModalDesc">請輸入此角色卡的編輯密碼</div>
+        <div class="password-modal-title" id="passwordModalTitle" data-i18n="platform.verifyPassword">驗證密碼</div>
+        <div class="password-modal-desc" id="passwordModalDesc" data-i18n="platform.enterPassword">請輸入此角色卡的編輯密碼</div>
       </div>
       <div class="password-modal-body">
         <div class="password-input-group">
           <input type="password" class="password-input" id="passwordInput" placeholder="請輸入密碼" maxlength="32">
-          <div class="password-error" id="passwordError">密碼錯誤，請重試</div>
+          <div class="password-error" id="passwordError" data-i18n="platform.passwordError">密碼錯誤，請重試</div>
         </div>
       </div>
       <div class="password-modal-actions">
-        <button class="btn btn-secondary" onclick="closePasswordModal()">取消</button>
-        <button class="btn btn-primary" id="passwordConfirmBtn" onclick="confirmPassword()">確認</button>
+        <button class="btn btn-secondary" onclick="closePasswordModal()" data-i18n="common.cancel">取消</button>
+        <button class="btn btn-primary" id="passwordConfirmBtn" onclick="confirmPassword()" data-i18n="common.confirm">確認</button>
       </div>
     </div>
   </div>
@@ -917,6 +927,15 @@
 
     // 初始化
     document.addEventListener('DOMContentLoaded', () => {
+      // 初始化多語言系統
+      I18n.init();
+      I18n.insertSelector('languageSelectorContainer', 'top-right');
+      I18n.onLanguageChange = function(lang) {
+        document.title = I18n.t('platform.title');
+        I18n.updatePageTexts();
+      };
+      I18n.updatePageTexts();
+
       loadCharacters();
       setupEventListeners();
 
