@@ -15,8 +15,8 @@ export default function EditEventPage() {
   const eventId = params.id as string;
   const event = getEvent(eventId);
 
-  const handleSubmit = (data: Omit<HololiveEvent, 'id' | 'createdAt' | 'updatedAt'>) => {
-    updateEvent(eventId, data);
+  const handleSubmit = async (data: Omit<HololiveEvent, 'id' | 'createdAt' | 'updatedAt'>) => {
+    await updateEvent(eventId, data);
     router.push('/admin/events');
   };
 

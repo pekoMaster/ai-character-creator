@@ -16,7 +16,7 @@ import { Calendar, MapPin, Image, Ticket, FileText, Plus, Trash2 } from 'lucide-
 
 interface EventFormProps {
   initialData?: HololiveEvent;
-  onSubmit: (data: Omit<HololiveEvent, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onSubmit: (data: Omit<HololiveEvent, 'id' | 'createdAt' | 'updatedAt'>) => void | Promise<void>;
   isEditing?: boolean;
 }
 
@@ -119,27 +119,36 @@ export default function EventForm({ initialData, onSubmit, isEditing }: EventFor
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validate()) return;
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
 
     // 只保留有效的票價等級
     const validPriceTiers = priceTiers.filter((tier) => tier.priceJPY > 0);
 
-    onSubmit({
-      name: formData.name.trim(),
-      artist: formData.artist.trim(),
-      eventDate: new Date(formData.eventDate),
-      eventEndDate: formData.eventEndDate ? new Date(formData.eventEndDate) : undefined,
-      venue: formData.venue.trim(),
-      venueAddress: formData.venueAddress.trim() || undefined,
-      imageUrl: formData.imageUrl.trim() || undefined,
-      description: formData.description.trim() || undefined,
-      ticketPriceTiers: validPriceTiers,
-      category: formData.category as EventCategory,
-      isActive: formData.isActive,
-    });
+    try {
+      await onSubmit({
+        name: formData.name.trim(),
+        artist: formData.artist.trim(),
+        eventDate: new Date(formData.eventDate),
+        eventEndDate: formData.eventEndDate ? new Date(formData.eventEndDate) : undefined,
+        venue: formData.venue.trim(),
+        venueAddress: formData.venueAddress.trim() || undefined,
+        imageUrl: formData.imageUrl.trim() || undefined,
+        description: formData.description.trim() || undefined,
+        ticketPriceTiers: validPriceTiers,
+        category: formData.category as EventCategory,
+        isActive: formData.isActive,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const seatGrades: SeatGrade[] = ['SS', 'S', 'A', 'B'];
@@ -505,9 +514,10 @@ export default function EventForm({ initialData, onSubmit, isEditing }: EventFor
         </button>
         <button
           type="submit"
-          className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
+          disabled={isSubmitting}
+          className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isEditing ? '儲存變更' : '新增活動'}
+          {isSubmitting ? '處理中...' : (isEditing ? '儲存變更' : '新增活動')}
         </button>
       </div>
     </form>

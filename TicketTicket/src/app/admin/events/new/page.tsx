@@ -10,9 +10,13 @@ export default function NewEventPage() {
   const router = useRouter();
   const { addEvent } = useAdmin();
 
-  const handleSubmit = (data: Parameters<typeof addEvent>[0]) => {
-    addEvent(data);
-    router.push('/admin/events');
+  const handleSubmit = async (data: Parameters<typeof addEvent>[0]) => {
+    const result = await addEvent(data);
+    if (result) {
+      router.push('/admin/events');
+    } else {
+      alert('新增活動失敗，請檢查控制台錯誤訊息');
+    }
   };
 
   return (
