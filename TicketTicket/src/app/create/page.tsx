@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useApp } from '@/contexts/AppContext';
 import { useAdmin } from '@/contexts/AdminContext';
 import { useTranslations } from 'next-intl';
@@ -19,14 +20,11 @@ import {
   TICKET_TYPE_INFO,
   NATIONALITY_OPTIONS,
   LANGUAGE_OPTIONS,
-  convertJPYtoTWD,
 } from '@/types';
 import {
   Calendar,
   MapPin,
   Clock,
-  JapaneseYen,
-  DollarSign,
   Check,
   AlertTriangle,
   Globe,
@@ -46,7 +44,8 @@ const CLOTHING_TAG_KEYS = [
 
 export default function CreateListingPage() {
   const router = useRouter();
-  const { currentUser, addListing } = useApp();
+  const { data: session } = useSession();
+  const { addListing } = useApp();
   const { events } = useAdmin();
   const t = useTranslations('create');
 
@@ -61,7 +60,7 @@ export default function CreateListingPage() {
   const [ticketType, setTicketType] = useState<TicketType | ''>('');
   const [seatGrade, setSeatGrade] = useState<SeatGrade | ''>('');
   const [ticketCountType, setTicketCountType] = useState<TicketCountType | ''>('');
-  const [askingPriceTWD, setAskingPriceTWD] = useState('');
+  const [askingPriceJPY, setAskingPriceJPY] = useState('');
   const [hostNationality, setHostNationality] = useState('');
   const [hostLanguages, setHostLanguages] = useState<string[]>([]);
   const [identificationFeatures, setIdentificationFeatures] = useState('');
@@ -111,27 +110,25 @@ export default function CreateListingPage() {
   // 原價（日圓）- 從管理員設定自動取得
   const originalPriceJPY = selectedPriceTier?.priceJPY || 0;
 
-  // 計算價格限制
+  // 計算價格限制（統一使用日圓）
   const priceCalc = useMemo(() => {
     const jpy = originalPriceJPY;
-    const asking = parseInt(askingPriceTWD) || 0;
-    const twdConverted = convertJPYtoTWD(jpy);
+    const asking = parseInt(askingPriceJPY) || 0;
 
     // 如果是尋找同行者，價格上限為一半
     const isFindCompanion = ticketType === 'find_companion';
-    const maxAllowed = isFindCompanion ? Math.round(twdConverted / 2) : twdConverted;
+    const maxAllowed = isFindCompanion ? Math.round(jpy / 2) : jpy;
 
     const isValid = asking > 0 && asking <= maxAllowed;
 
     return {
       originalJPY: jpy,
-      twdConverted,
       maxAllowed,
       isValid,
       asking,
       isFindCompanion,
     };
-  }, [originalPriceJPY, askingPriceTWD, ticketType]);
+  }, [originalPriceJPY, askingPriceJPY, ticketType]);
 
   // 當座位等級改變時，重置票種類型
   useEffect(() => {
@@ -205,45 +202,44 @@ export default function CreateListingPage() {
   };
 
   const handleSubmit = async () => {
-    if (!currentUser || !isFormValid) return;
+    if (!session?.user?.dbId || !isFormValid) return;
 
     setIsSubmitting(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const result = await addListing({
+        eventName,
+        artistTags,
+        eventDate,
+        venue,
+        meetingTime: `${eventDate}T${meetingTime}`,
+        meetingLocation,
+        originalPriceJPY,
+        askingPriceJPY: priceCalc.asking,
+        totalSlots: ticketCountType === 'duo' ? 2 : 1,
+        ticketType: ticketType as TicketType,
+        seatGrade: seatGrade as SeatGrade,
+        ticketCountType: ticketCountType as TicketCountType,
+        hostNationality,
+        hostLanguages,
+        identificationFeatures,
+        description: description || undefined,
+      });
 
-    const newListing = {
-      id: `listing-${Date.now()}`,
-      hostId: currentUser.id,
-      eventName,
-      artistTags,
-      eventDate: new Date(eventDate),
-      venue,
-      meetingTime: new Date(`${eventDate}T${meetingTime}`),
-      meetingLocation,
-      originalPriceJPY,
-      originalPriceTWD: priceCalc.twdConverted,
-      askingPriceTWD: priceCalc.asking,
-      totalSlots: ticketCountType === 'duo' ? 2 : 1,
-      availableSlots: ticketCountType === 'duo' ? 1 : 0,
-      ticketType: ticketType as TicketType,
-      seatGrade: seatGrade as SeatGrade,
-      ticketCountType: ticketCountType as TicketCountType,
-      hostNationality,
-      hostLanguages,
-      identificationFeatures,
-      status: 'open' as const,
-      description: description || undefined,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    addListing(newListing);
-    setIsSubmitting(false);
-    setShowSuccess(true);
-
-    setTimeout(() => {
-      router.push('/');
-    }, 2000);
+      if (result) {
+        setShowSuccess(true);
+        setTimeout(() => {
+          router.push('/');
+        }, 2000);
+      } else {
+        alert('發布失敗，請稍後再試');
+      }
+    } catch (error) {
+      console.error('Error creating listing:', error);
+      alert('發布失敗，請稍後再試');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // 票券類型選項
@@ -438,15 +434,9 @@ export default function CreateListingPage() {
                     <Info className="w-4 h-4 text-gray-500" />
                     <span className="text-sm font-medium text-gray-700">{t('priceInfoByAdmin')}</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">{t('originalPriceJPYLabel')}</span>
-                      <p className="font-medium text-gray-900">¥{originalPriceJPY.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">{t('convertedTWDLabel')}</span>
-                      <p className="font-medium text-gray-900">${priceCalc.twdConverted.toLocaleString()}</p>
-                    </div>
+                  <div className="text-sm">
+                    <span className="text-gray-500">{t('originalPriceJPYLabel')}</span>
+                    <p className="font-medium text-gray-900 text-lg">¥{originalPriceJPY.toLocaleString()}</p>
                   </div>
                 </div>
               )}
@@ -504,7 +494,7 @@ export default function CreateListingPage() {
           {/* 希望費用 */}
           <Card>
             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <DollarSign className="w-5 h-5 text-indigo-500" />
+              <span className="text-indigo-500 font-bold text-lg">¥</span>
               {t('askingPriceSection')}
             </h3>
 
@@ -523,12 +513,12 @@ export default function CreateListingPage() {
               )}
 
               <Input
-                label={t('askingPriceTWD')}
+                label={t('askingPriceJPY')}
                 type="number"
                 placeholder={priceCalc.maxAllowed > 0 ? t('maxPrice', { max: priceCalc.maxAllowed }) : t('pleaseSelectTicket')}
-                value={askingPriceTWD}
-                onChange={(e) => setAskingPriceTWD(e.target.value)}
-                leftIcon={<DollarSign className="w-5 h-5" />}
+                value={askingPriceJPY}
+                onChange={(e) => setAskingPriceJPY(e.target.value)}
+                leftIcon={<span className="text-gray-400 font-medium">¥</span>}
                 required
                 disabled={!selectedPriceTier}
                 error={

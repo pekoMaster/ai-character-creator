@@ -9,11 +9,20 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) UNIQUE NOT NULL,
   username VARCHAR(100) NOT NULL,
   avatar_url TEXT,
+  custom_avatar_url TEXT, -- 用戶上傳的自訂頭像
   rating DECIMAL(3,2) DEFAULT 0,
   review_count INTEGER DEFAULT 0,
   is_verified BOOLEAN DEFAULT FALSE,
-  provider VARCHAR(50) NOT NULL, -- 'google' or 'line'
+  provider VARCHAR(50) NOT NULL, -- 'google'
   provider_id VARCHAR(255) NOT NULL,
+  -- 聯絡資料
+  phone_country_code VARCHAR(10),
+  phone_number VARCHAR(20),
+  -- 連結帳號
+  line_id VARCHAR(100),
+  discord_id VARCHAR(100),
+  show_line BOOLEAN DEFAULT FALSE,
+  show_discord BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(provider, provider_id)
@@ -49,8 +58,7 @@ CREATE TABLE IF NOT EXISTS listings (
   meeting_time TIMESTAMP WITH TIME ZONE NOT NULL,
   meeting_location VARCHAR(255) NOT NULL,
   original_price_jpy INTEGER NOT NULL,
-  original_price_twd INTEGER NOT NULL,
-  asking_price_twd INTEGER NOT NULL,
+  asking_price_jpy INTEGER NOT NULL,
   total_slots INTEGER NOT NULL DEFAULT 1,
   available_slots INTEGER NOT NULL DEFAULT 1,
   ticket_type VARCHAR(50) NOT NULL, -- 'find_companion', 'main_ticket_transfer', 'sub_ticket_transfer'
@@ -117,6 +125,7 @@ CREATE INDEX IF NOT EXISTS idx_applications_listing_id ON applications(listing_i
 CREATE INDEX IF NOT EXISTS idx_applications_guest_id ON applications(guest_id);
 CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_reviewee_id ON reviews(reviewee_id);
+CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone_country_code, phone_number);
 
 -- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()

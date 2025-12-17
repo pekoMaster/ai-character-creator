@@ -77,7 +77,7 @@ export default function ListingCard({ listing, host }: ListingCardProps) {
         <div className="flex items-center gap-3 mb-4">
           <div className="flex-1 bg-indigo-50 rounded-lg py-2 px-3 text-center">
             <p className="text-lg font-bold text-indigo-600">
-              ${listing.askingPriceTWD.toLocaleString()}
+              ¥{listing.askingPriceJPY.toLocaleString()}
             </p>
             <p className="text-xs text-indigo-400">{t('perPerson')}</p>
           </div>

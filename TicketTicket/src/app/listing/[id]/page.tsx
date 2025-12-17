@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useApp } from '@/contexts/AppContext';
 import { useTranslations } from 'next-intl';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -14,7 +15,7 @@ import { TicketTypeTag } from '@/components/ui/Tag';
 import Avatar from '@/components/ui/Avatar';
 import StarRating from '@/components/ui/StarRating';
 import SafetyBanner from '@/components/ui/SafetyBanner';
-import { TicketType } from '@/types';
+import { TicketType, Listing } from '@/types';
 import {
   Calendar,
   MapPin,
@@ -23,12 +24,16 @@ import {
   AlertTriangle,
   MessageCircle,
   Check,
+  Loader2,
+  Star,
 } from 'lucide-react';
+import ReviewModal from '@/components/features/ReviewModal';
 
 export default function ListingDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { listings, applications, currentUser, getUserById, addApplication } = useApp();
+  const { data: session } = useSession();
+  const { listings } = useApp();
   const t = useTranslations('listing');
   const tApply = useTranslations('apply');
   const tTicket = useTranslations('ticketType');
@@ -38,17 +43,81 @@ export default function ListingDetailPage() {
   const [applyMessage, setApplyMessage] = useState('');
   const [isApplying, setIsApplying] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
+  const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
+  const [isCheckingApplication, setIsCheckingApplication] = useState(true);
+
+  // Review states
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [canReview, setCanReview] = useState(false);
+  const [isHostForReview, setIsHostForReview] = useState(false);
+  const [reviewableUsers, setReviewableUsers] = useState<Array<{
+    id: string;
+    username: string;
+    avatar_url?: string;
+    custom_avatar_url?: string;
+  }>>([]);
+  const tReview = useTranslations('review');
 
   const listing = listings.find((l) => l.id === params.id);
-  const host = listing ? getUserById(listing.hostId) : undefined;
-
-  // 檢查是否已申請
-  const existingApplication = applications.find(
-    (a) => a.listingId === listing?.id && a.guestId === currentUser?.id
-  );
+  const host = listing?.host;
+  const currentUserId = session?.user?.dbId;
 
   // 檢查是否為主辦方
-  const isHost = listing?.hostId === currentUser?.id;
+  const isHost = listing?.hostId === currentUserId;
+
+  // 檢查是否已申請
+  const checkApplication = useCallback(async () => {
+    if (!currentUserId || !listing) {
+      setIsCheckingApplication(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/applications');
+      if (response.ok) {
+        const data = await response.json();
+        const existingApp = data.sent?.find(
+          (app: { listing_id: string }) => app.listing_id === listing.id
+        );
+        if (existingApp) {
+          setHasApplied(true);
+          setApplicationStatus(existingApp.status);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking application:', error);
+    } finally {
+      setIsCheckingApplication(false);
+    }
+  }, [currentUserId, listing]);
+
+  // 檢查是否可以評價
+  const checkCanReview = useCallback(async () => {
+    if (!currentUserId || !listing) return;
+
+    try {
+      const response = await fetch(`/api/reviews/can-review/${listing.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setCanReview(data.canReview);
+        setIsHostForReview(data.isHost || false);
+        setReviewableUsers(data.reviewableUsers || []);
+      }
+    } catch (error) {
+      console.error('Error checking review eligibility:', error);
+    }
+  }, [currentUserId, listing]);
+
+  useEffect(() => {
+    checkApplication();
+  }, [checkApplication]);
+
+  useEffect(() => {
+    if (hasApplied || isHost) {
+      checkCanReview();
+    }
+  }, [hasApplied, isHost, checkCanReview]);
 
   // Helper to get ticket type info translations
   const getTicketTypeInfo = (type: TicketType) => {
@@ -85,28 +154,35 @@ export default function ListingDetailPage() {
   };
 
   const handleApply = async () => {
-    if (!currentUser) return;
+    if (!currentUserId) return;
 
     setIsApplying(true);
 
-    // 模擬申請過程
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch('/api/applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          listingId: listing.id,
+          message: applyMessage || undefined,
+        }),
+      });
 
-    const newApplication = {
-      id: `app-${Date.now()}`,
-      listingId: listing.id,
-      guestId: currentUser.id,
-      status: 'pending' as const,
-      message: applyMessage || undefined,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    addApplication(newApplication);
-
-    setIsApplying(false);
-    setShowApplyModal(false);
-    setShowSuccessModal(true);
+      if (response.ok) {
+        setHasApplied(true);
+        setApplicationStatus('pending');
+        setShowApplyModal(false);
+        setShowSuccessModal(true);
+      } else {
+        const error = await response.json();
+        alert(error.error || '申請失敗');
+      }
+    } catch (error) {
+      console.error('Error applying:', error);
+      alert('申請失敗，請稍後再試');
+    } finally {
+      setIsApplying(false);
+    }
   };
 
   const ticketInfo = getTicketTypeInfo(listing.ticketType);
@@ -154,7 +230,7 @@ export default function ListingDetailPage() {
               <div>
                 <p className="text-sm text-gray-500">{t('price')}</p>
                 <p className="text-3xl font-bold text-indigo-600">
-                  ${listing.askingPriceTWD.toLocaleString()}
+                  ¥{listing.askingPriceJPY.toLocaleString()}
                   <span className="text-base font-normal text-gray-500">{t('perPerson')}</span>
                 </p>
               </div>
@@ -170,7 +246,7 @@ export default function ListingDetailPage() {
             </div>
 
             <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600">
-              <p>{t('originalPrice')}: ¥{listing.originalPriceJPY.toLocaleString()} (≈ ${listing.originalPriceTWD.toLocaleString()} TWD)</p>
+              <p>{t('originalPrice')}: ¥{listing.originalPriceJPY.toLocaleString()}</p>
             </div>
           </Card>
         </div>
@@ -204,7 +280,7 @@ export default function ListingDetailPage() {
             <Card>
               <h3 className="font-semibold text-gray-900 mb-3">{t('host')}</h3>
               <div className="flex items-center gap-3">
-                <Avatar src={host.avatarUrl} size="lg" />
+                <Avatar src={host.customAvatarUrl || host.avatarUrl} size="lg" />
                 <div className="flex-1">
                   <p className="font-medium text-gray-900">{host.username}</p>
                   <StarRating
@@ -214,7 +290,55 @@ export default function ListingDetailPage() {
                     showValue
                     totalReviews={host.reviewCount}
                   />
+                  {/* 已申請後顯示聯絡方式圖示 */}
+                  {hasApplied && (host.showLine || host.showDiscord) && (
+                    <div className="flex items-center gap-2 mt-2">
+                      {host.showLine && host.lineId && (
+                        <div className="flex items-center gap-1 px-2 py-1 bg-[#00B900]/10 rounded-full" title={`LINE: ${host.lineId}`}>
+                          <svg className="w-4 h-4 text-[#00B900]" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" />
+                          </svg>
+                          <span className="text-xs text-[#00B900] font-medium">{host.lineId}</span>
+                        </div>
+                      )}
+                      {host.showDiscord && host.discordId && (
+                        <div className="flex items-center gap-1 px-2 py-1 bg-[#5865F2]/10 rounded-full" title={`Discord: ${host.discordId}`}>
+                          <svg className="w-4 h-4 text-[#5865F2]" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z" />
+                          </svg>
+                          <span className="text-xs text-[#5865F2] font-medium">{host.discordId}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* 評價按鈕 */}
+        {canReview && reviewableUsers.length > 0 && (
+          <div className="px-4 pb-4">
+            <Card className="bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                    <Star className="w-5 h-5 text-yellow-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      {isHostForReview ? tReview('reviewGuest') : tReview('reviewHost')}
+                    </p>
+                    <p className="text-sm text-gray-500">{tReview('leaveReview')}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowReviewModal(true)}
+                >
+                  {tReview('writeReview')}
+                </Button>
               </div>
             </Card>
           </div>
@@ -228,17 +352,22 @@ export default function ListingDetailPage() {
 
       {/* 底部操作列 */}
       <div className="fixed bottom-16 left-0 right-0 lg:left-64 lg:bottom-0 bg-white border-t border-gray-100 px-4 py-3 safe-area-bottom">
-        {isHost ? (
+        {isCheckingApplication ? (
+          <Button fullWidth disabled variant="secondary">
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            載入中...
+          </Button>
+        ) : isHost ? (
           <Button fullWidth onClick={() => router.push(`/messages`)}>
             <MessageCircle className="w-5 h-5 mr-2" />
             {t('manageApplications')}
           </Button>
-        ) : existingApplication ? (
+        ) : hasApplied ? (
           <Button fullWidth disabled variant="secondary">
             <Check className="w-5 h-5 mr-2" />
-            {existingApplication.status === 'pending' && t('applied')}
-            {existingApplication.status === 'accepted' && t('matched')}
-            {existingApplication.status === 'rejected' && t('rejected')}
+            {applicationStatus === 'pending' && t('applied')}
+            {applicationStatus === 'accepted' && t('matched')}
+            {applicationStatus === 'rejected' && t('rejected')}
           </Button>
         ) : listing.availableSlots === 0 ? (
           <Button fullWidth disabled variant="secondary">
@@ -263,7 +392,7 @@ export default function ListingDetailPage() {
               {listing.eventName}
             </p>
             <p className="text-gray-600 text-sm">
-              {t('price')}: ${listing.askingPriceTWD}{t('perPerson')}
+              {t('price')}: ¥{listing.askingPriceJPY.toLocaleString()}{t('perPerson')}
             </p>
           </div>
 
@@ -312,6 +441,19 @@ export default function ListingDetailPage() {
           </Button>
         </div>
       </Modal>
+
+      {/* 評價 Modal */}
+      <ReviewModal
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        listingId={listing.id}
+        reviewableUsers={reviewableUsers}
+        isHost={isHostForReview}
+        onSubmitSuccess={() => {
+          setCanReview(false);
+          setReviewableUsers([]);
+        }}
+      />
     </div>
   );
 }

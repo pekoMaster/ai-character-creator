@@ -4,11 +4,37 @@ export interface User {
   username: string;
   email: string;
   avatarUrl?: string;
+  customAvatarUrl?: string;        // 用戶上傳的自訂頭像
   rating: number;
   reviewCount: number;
   createdAt: Date;
   isVerified: boolean;
+  // 聯絡資料
+  phoneCountryCode?: string;
+  phoneNumber?: string;
+  // 連結帳號
+  lineId?: string;
+  discordId?: string;
+  showLine?: boolean;
+  showDiscord?: boolean;
 }
+
+// 常用國碼選項
+export const PHONE_COUNTRY_CODES = [
+  { value: '+81', label: '+81', country: '日本' },
+  { value: '+886', label: '+886', country: '台灣' },
+  { value: '+852', label: '+852', country: '香港' },
+  { value: '+86', label: '+86', country: '中國' },
+  { value: '+82', label: '+82', country: '韓國' },
+  { value: '+1', label: '+1', country: '美國/加拿大' },
+  { value: '+60', label: '+60', country: '馬來西亞' },
+  { value: '+65', label: '+65', country: '新加坡' },
+  { value: '+62', label: '+62', country: '印尼' },
+  { value: '+66', label: '+66', country: '泰國' },
+  { value: '+63', label: '+63', country: '菲律賓' },
+  { value: '+61', label: '+61', country: '澳洲' },
+  { value: '+44', label: '+44', country: '英國' },
+];
 
 // 票券類型（新版）
 // find_companion: 尋找同行者（必須是二人票，價格為一半）
@@ -35,9 +61,8 @@ export interface Listing {
   venue: string;
   meetingTime: Date;
   meetingLocation: string;
-  originalPriceJPY: number;
-  originalPriceTWD: number;
-  askingPriceTWD: number;
+  originalPriceJPY: number;                // 原價（日圓）
+  askingPriceJPY: number;                  // 希望費用（日圓）
   totalSlots: number;
   availableSlots: number;
   ticketType: TicketType;
@@ -50,6 +75,7 @@ export interface Listing {
   description?: string;                    // 其他注意事項
   createdAt: Date;
   updatedAt: Date;
+  host?: User;                             // 刊登者資訊（從 API 載入時附帶）
 }
 
 // 申請狀態
@@ -222,16 +248,9 @@ export const LANGUAGE_OPTIONS = [
   { value: 'vi', label: 'Tiếng Việt' },
 ];
 
-// 匯率常數
-export const JPY_TO_TWD_RATE = 0.22;
-
 // 價格計算工具
-export function convertJPYtoTWD(jpy: number): number {
-  return Math.round(jpy * JPY_TO_TWD_RATE);
-}
-
-export function calculateMaxPrice(originalPriceTWD: number, totalSlots: number): number {
-  return Math.round(originalPriceTWD / totalSlots);
+export function calculateMaxPrice(originalPriceJPY: number, totalSlots: number): number {
+  return Math.round(originalPriceJPY / totalSlots);
 }
 
 export function validatePrice(askingPrice: number, maxPrice: number): boolean {

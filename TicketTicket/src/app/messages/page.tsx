@@ -1,98 +1,153 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useApp } from '@/contexts/AppContext';
+import { useState, useEffect, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import Header from '@/components/layout/Header';
 import Card from '@/components/ui/Card';
 import Avatar from '@/components/ui/Avatar';
 import Tag from '@/components/ui/Tag';
 import Button from '@/components/ui/Button';
-import { MessageCircle, Users, Clock, Check, X } from 'lucide-react';
+import { MessageCircle, Users, Clock, Check, X, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
+interface User {
+  id: string;
+  username: string;
+  avatar_url?: string;
+  rating: number;
+  review_count: number;
+}
+
+interface Listing {
+  id: string;
+  event_name: string;
+  venue: string;
+  host_id: string;
+  host?: User;
+}
+
+interface Application {
+  id: string;
+  listing_id: string;
+  guest_id: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'cancelled';
+  message?: string;
+  created_at: string;
+  listing?: Listing;
+  guest?: User;
+}
+
+interface Conversation {
+  id: string;
+  listing_id: string;
+  host_id: string;
+  guest_id: string;
+  listing?: Listing;
+  host?: User;
+  guest?: User;
+  otherUser?: User;
+  lastMessage?: { content: string; created_at: string };
+  unreadCount: number;
+}
+
 export default function MessagesPage() {
-  const { currentUser, listings, applications, getUserById, updateApplication, updateListing } =
-    useApp();
+  const { data: session } = useSession();
   const t = useTranslations('messages');
 
-  // 作為主辦方的刊登和申請
-  const myListings = useMemo(() => {
-    if (!currentUser) return [];
-    return listings
-      .filter((l) => l.hostId === currentUser.id)
-      .map((listing) => ({
-        listing,
-        applications: applications.filter((a) => a.listingId === listing.id),
-      }));
-  }, [currentUser, listings, applications]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [sentApplications, setSentApplications] = useState<Application[]>([]);
+  const [receivedApplications, setReceivedApplications] = useState<Application[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // 作為賓客的申請
-  const myApplications = useMemo(() => {
-    if (!currentUser) return [];
-    return applications
-      .filter((a) => a.guestId === currentUser.id)
-      .map((app) => ({
-        application: app,
-        listing: listings.find((l) => l.id === app.listingId),
-      }));
-  }, [currentUser, applications, listings]);
+  const currentUserId = session?.user?.dbId;
 
-  // 已配對的對話（已接受的申請）
-  const matchedConversations = useMemo(() => {
-    const fromHost = myListings.flatMap(({ listing, applications }) =>
-      applications
-        .filter((a) => a.status === 'accepted')
-        .map((a) => ({
-          type: 'host' as const,
-          listing,
-          application: a,
-          otherUser: getUserById(a.guestId),
-        }))
-    );
+  // 獲取對話和申請資料
+  const fetchData = useCallback(async () => {
+    if (!currentUserId) {
+      setIsLoading(false);
+      return;
+    }
 
-    const fromGuest = myApplications
-      .filter(({ application }) => application.status === 'accepted')
-      .map(({ application, listing }) => ({
-        type: 'guest' as const,
-        listing,
-        application,
-        otherUser: listing ? getUserById(listing.hostId) : undefined,
-      }));
+    try {
+      // 並行獲取對話和申請
+      const [convoRes, appRes] = await Promise.all([
+        fetch('/api/conversations'),
+        fetch('/api/applications'),
+      ]);
 
-    return [...fromHost, ...fromGuest];
-  }, [myListings, myApplications, getUserById]);
+      if (convoRes.ok) {
+        const convoData = await convoRes.json();
+        setConversations(convoData);
+      }
 
-  // 待處理的申請（我是主辦方）
-  const pendingApplications = useMemo(() => {
-    return myListings.flatMap(({ listing, applications }) =>
-      applications
-        .filter((a) => a.status === 'pending')
-        .map((a) => ({
-          listing,
-          application: a,
-          guest: getUserById(a.guestId),
-        }))
-    );
-  }, [myListings, getUserById]);
+      if (appRes.ok) {
+        const appData = await appRes.json();
+        setSentApplications(appData.sent || []);
+        setReceivedApplications(appData.received || []);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentUserId]);
 
-  const handleAccept = (applicationId: string, listingId: string) => {
-    updateApplication(applicationId, { status: 'accepted' });
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-    // 更新刊登的可用名額
-    const listing = listings.find((l) => l.id === listingId);
-    if (listing && listing.availableSlots > 0) {
-      const newSlots = listing.availableSlots - 1;
-      updateListing(listingId, {
-        availableSlots: newSlots,
-        status: newSlots === 0 ? 'matched' : 'open',
+  // 待處理的申請（收到的）
+  const pendingApplications = receivedApplications.filter(
+    (app) => app.status === 'pending'
+  );
+
+  // 處理接受申請
+  const handleAccept = async (applicationId: string) => {
+    try {
+      const response = await fetch(`/api/applications/${applicationId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'accepted' }),
       });
+
+      if (response.ok) {
+        // 重新載入資料
+        await fetchData();
+      }
+    } catch (error) {
+      console.error('Error accepting application:', error);
     }
   };
 
-  const handleReject = (applicationId: string) => {
-    updateApplication(applicationId, { status: 'rejected' });
+  // 處理拒絕申請
+  const handleReject = async (applicationId: string) => {
+    try {
+      const response = await fetch(`/api/applications/${applicationId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'rejected' }),
+      });
+
+      if (response.ok) {
+        // 重新載入資料
+        await fetchData();
+      }
+    } catch (error) {
+      console.error('Error rejecting application:', error);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header title={t('title')} />
+        <div className="pt-14 flex items-center justify-center h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -111,16 +166,16 @@ export default function MessagesPage() {
             </div>
 
             <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-              {pendingApplications.map(({ listing, application, guest }) => (
-                <Card key={application.id}>
+              {pendingApplications.map((app) => (
+                <Card key={app.id}>
                   <div className="flex items-start gap-3">
-                    <Avatar src={guest?.avatarUrl} size="lg" />
+                    <Avatar src={app.guest?.avatar_url} size="lg" />
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900">{guest?.username}</p>
-                      <p className="text-sm text-gray-500 truncate">{listing.eventName}</p>
-                      {application.message && (
+                      <p className="font-medium text-gray-900">{app.guest?.username}</p>
+                      <p className="text-sm text-gray-500 truncate">{app.listing?.event_name}</p>
+                      {app.message && (
                         <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                          「{application.message}」
+                          「{app.message}」
                         </p>
                       )}
                     </div>
@@ -131,7 +186,7 @@ export default function MessagesPage() {
                       variant="secondary"
                       size="sm"
                       className="flex-1"
-                      onClick={() => handleReject(application.id)}
+                      onClick={() => handleReject(app.id)}
                     >
                       <X className="w-4 h-4 mr-1" />
                       {t('reject')}
@@ -139,7 +194,7 @@ export default function MessagesPage() {
                     <Button
                       size="sm"
                       className="flex-1"
-                      onClick={() => handleAccept(application.id, listing.id)}
+                      onClick={() => handleAccept(app.id)}
                     >
                       <Check className="w-4 h-4 mr-1" />
                       {t('accept')}
@@ -158,28 +213,38 @@ export default function MessagesPage() {
             <h2 className="text-lg font-semibold text-gray-900">{t('conversations')}</h2>
           </div>
 
-          {matchedConversations.length > 0 ? (
+          {conversations.length > 0 ? (
             <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-              {matchedConversations.map(({ type, listing, application, otherUser }) => (
-                <Link
-                  key={application.id}
-                  href={`/chat/${listing?.id}?with=${otherUser?.id}`}
-                >
-                  <Card hoverable className="flex items-center gap-3">
-                    <Avatar src={otherUser?.avatarUrl} size="lg" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-gray-900">{otherUser?.username}</p>
-                        <Tag variant={type === 'host' ? 'purple' : 'info'} size="sm">
-                          {type === 'host' ? t('imHost') : t('imGuest')}
-                        </Tag>
+              {conversations.map((convo) => {
+                const isHost = convo.host_id === currentUserId;
+                return (
+                  <Link key={convo.id} href={`/chat/${convo.id}`}>
+                    <Card hoverable className="flex items-center gap-3">
+                      <Avatar src={convo.otherUser?.avatar_url} size="lg" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-gray-900">{convo.otherUser?.username}</p>
+                          <Tag variant={isHost ? 'purple' : 'info'} size="sm">
+                            {isHost ? t('imHost') : t('imGuest')}
+                          </Tag>
+                          {convo.unreadCount > 0 && (
+                            <span className="bg-red-500 text-white text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                              {convo.unreadCount}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-500 truncate">{convo.listing?.event_name}</p>
+                        {convo.lastMessage && (
+                          <p className="text-xs text-gray-400 truncate mt-1">
+                            {convo.lastMessage.content}
+                          </p>
+                        )}
                       </div>
-                      <p className="text-sm text-gray-500 truncate">{listing?.eventName}</p>
-                    </div>
-                    <MessageCircle className="w-5 h-5 text-gray-400" />
-                  </Card>
-                </Link>
-              ))}
+                      <MessageCircle className="w-5 h-5 text-gray-400" />
+                    </Card>
+                  </Link>
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-12">
@@ -196,7 +261,7 @@ export default function MessagesPage() {
         </section>
 
         {/* 我的申請狀態 */}
-        {myApplications.length > 0 && (
+        {sentApplications.length > 0 && (
           <section>
             <div className="flex items-center gap-2 mb-4">
               <Users className="w-5 h-5 text-gray-500" />
@@ -204,29 +269,29 @@ export default function MessagesPage() {
             </div>
 
             <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-              {myApplications.map(({ application, listing }) => (
-                <Card key={application.id}>
+              {sentApplications.map((app) => (
+                <Card key={app.id}>
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-gray-900 truncate">
-                        {listing?.eventName}
+                        {app.listing?.event_name}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {listing?.venue}
+                        {app.listing?.venue}
                       </p>
                     </div>
                     <Tag
                       variant={
-                        application.status === 'pending'
+                        app.status === 'pending'
                           ? 'warning'
-                          : application.status === 'accepted'
+                          : app.status === 'accepted'
                           ? 'success'
                           : 'error'
                       }
                     >
-                      {application.status === 'pending' && t('waiting')}
-                      {application.status === 'accepted' && t('accepted')}
-                      {application.status === 'rejected' && t('rejected')}
+                      {app.status === 'pending' && t('waiting')}
+                      {app.status === 'accepted' && t('accepted')}
+                      {app.status === 'rejected' && t('rejected')}
                     </Tag>
                   </div>
                 </Card>

@@ -13,7 +13,7 @@ type SortOption = 'date' | 'price_asc' | 'price_desc' | 'newest';
 type DateFilter = 'all' | 'week' | 'month' | 'custom';
 
 export default function ExplorePage() {
-  const { listings, getUserById } = useApp();
+  const { listings, isLoadingListings } = useApp();
   const t = useTranslations('explore');
   const tTicket = useTranslations('ticketType');
   const tCommon = useTranslations('common');
@@ -81,10 +81,10 @@ export default function ExplorePage() {
         result.sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
         break;
       case 'price_asc':
-        result.sort((a, b) => a.askingPriceTWD - b.askingPriceTWD);
+        result.sort((a, b) => a.askingPriceJPY - b.askingPriceJPY);
         break;
       case 'price_desc':
-        result.sort((a, b) => b.askingPriceTWD - a.askingPriceTWD);
+        result.sort((a, b) => b.askingPriceJPY - a.askingPriceJPY);
         break;
       case 'newest':
         result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -274,12 +274,16 @@ export default function ExplorePage() {
 
         {/* 刊登列表 */}
         <div className="px-4 lg:px-6 pb-6 space-y-4 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-4 lg:space-y-0">
-          {filteredListings.length > 0 ? (
+          {isLoadingListings ? (
+            <div className="text-center py-12 lg:col-span-full">
+              <p className="text-gray-500">{t('loading')}</p>
+            </div>
+          ) : filteredListings.length > 0 ? (
             filteredListings.map((listing) => (
               <ListingCard
                 key={listing.id}
                 listing={listing}
-                host={getUserById(listing.hostId)}
+                host={listing.host}
               />
             ))
           ) : (

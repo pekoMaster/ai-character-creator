@@ -1,57 +1,161 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, Listing, Application, Message, Review } from '@/types';
-import {
-  mockUsers,
-  mockListings,
-  mockApplications,
-  mockMessages,
-  mockReviews,
-} from '@/data/mock';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { Listing, Application, Review } from '@/types';
+
+// API 回傳的用戶類型
+interface ApiUser {
+  id: string;
+  username: string;
+  avatar_url?: string;
+  custom_avatar_url?: string;
+  rating: number;
+  review_count: number;
+  is_verified?: boolean;
+  line_id?: string;
+  discord_id?: string;
+  show_line?: boolean;
+  show_discord?: boolean;
+}
+
+// API 回傳的刊登類型
+interface ApiListing {
+  id: string;
+  host_id: string;
+  event_name: string;
+  artist_tags: string[];
+  event_date: string;
+  venue: string;
+  meeting_time: string;
+  meeting_location: string;
+  original_price_jpy: number;
+  asking_price_jpy: number;
+  total_slots: number;
+  available_slots: number;
+  ticket_type: 'find_companion' | 'main_ticket_transfer' | 'sub_ticket_transfer';
+  seat_grade: 'B' | 'A' | 'S' | 'SS';
+  ticket_count_type: 'solo' | 'duo';
+  host_nationality: string;
+  host_languages: string[];
+  identification_features?: string;
+  status: 'open' | 'matched' | 'closed';
+  description?: string;
+  created_at: string;
+  updated_at: string;
+  host?: ApiUser;
+}
+
+// 轉換 API 資料為前端格式
+function convertApiListingToListing(apiListing: ApiListing): Listing {
+  return {
+    id: apiListing.id,
+    hostId: apiListing.host_id,
+    eventName: apiListing.event_name,
+    artistTags: apiListing.artist_tags,
+    eventDate: new Date(apiListing.event_date),
+    venue: apiListing.venue,
+    meetingTime: new Date(apiListing.meeting_time),
+    meetingLocation: apiListing.meeting_location,
+    originalPriceJPY: apiListing.original_price_jpy,
+    askingPriceJPY: apiListing.asking_price_jpy,
+    totalSlots: apiListing.total_slots,
+    availableSlots: apiListing.available_slots,
+    ticketType: apiListing.ticket_type,
+    seatGrade: apiListing.seat_grade,
+    ticketCountType: apiListing.ticket_count_type,
+    hostNationality: apiListing.host_nationality,
+    hostLanguages: apiListing.host_languages,
+    identificationFeatures: apiListing.identification_features || '',
+    status: apiListing.status,
+    description: apiListing.description || '',
+    createdAt: new Date(apiListing.created_at),
+    updatedAt: new Date(apiListing.updated_at),
+    host: apiListing.host ? {
+      id: apiListing.host.id,
+      email: '',
+      username: apiListing.host.username,
+      avatarUrl: apiListing.host.avatar_url || '',
+      customAvatarUrl: apiListing.host.custom_avatar_url,
+      rating: apiListing.host.rating,
+      reviewCount: apiListing.host.review_count,
+      isVerified: apiListing.host.is_verified || false,
+      lineId: apiListing.host.line_id,
+      discordId: apiListing.host.discord_id,
+      showLine: apiListing.host.show_line,
+      showDiscord: apiListing.host.show_discord,
+      createdAt: new Date(),
+    } : undefined,
+  };
+}
 
 interface AppContextType {
-  // 當前用戶
-  currentUser: User | null;
-  setCurrentUser: (user: User | null) => void;
-
   // 刊登
   listings: Listing[];
-  addListing: (listing: Listing) => void;
-  updateListing: (id: string, updates: Partial<Listing>) => void;
+  isLoadingListings: boolean;
+  fetchListings: () => Promise<void>;
+  addListing: (listingData: CreateListingData) => Promise<Listing | null>;
+  updateListing: (id: string, updates: Partial<Listing>) => Promise<void>;
 
   // 申請
   applications: Application[];
   addApplication: (application: Application) => void;
   updateApplication: (id: string, updates: Partial<Application>) => void;
 
-  // 訊息
-  messages: Message[];
-  addMessage: (message: Message) => void;
-
   // 評價
   reviews: Review[];
   addReview: (review: Review) => void;
-
-  // 用戶
-  users: User[];
-  getUserById: (id: string) => User | undefined;
 
   // 免責聲明同意
   hasAgreedToDisclaimer: boolean;
   setHasAgreedToDisclaimer: (agreed: boolean) => void;
 }
 
+// 創建刊登的資料類型
+interface CreateListingData {
+  eventName: string;
+  artistTags?: string[];
+  eventDate: string;
+  venue: string;
+  meetingTime: string;
+  meetingLocation: string;
+  originalPriceJPY: number;
+  askingPriceJPY: number;
+  totalSlots?: number;
+  ticketType: 'find_companion' | 'main_ticket_transfer' | 'sub_ticket_transfer';
+  seatGrade: 'B' | 'A' | 'S' | 'SS';
+  ticketCountType: 'solo' | 'duo';
+  hostNationality: string;
+  hostLanguages?: string[];
+  identificationFeatures?: string;
+  description?: string;
+}
+
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [listings, setListings] = useState<Listing[]>([]);
+  const [isLoadingListings, setIsLoadingListings] = useState(true);
   const [applications, setApplications] = useState<Application[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [users] = useState<User[]>(mockUsers);
   const [hasAgreedToDisclaimer, setHasAgreedToDisclaimerState] = useState(false);
+
+  // 獲取刊登列表
+  const fetchListings = useCallback(async () => {
+    setIsLoadingListings(true);
+    try {
+      const response = await fetch('/api/listings');
+      if (response.ok) {
+        const data: ApiListing[] = await response.json();
+        setListings(data.map(convertApiListingToListing));
+      } else {
+        console.error('Failed to fetch listings');
+      }
+    } catch (error) {
+      console.error('Error fetching listings:', error);
+    } finally {
+      setIsLoadingListings(false);
+    }
+  }, []);
 
   // 初始化資料
   useEffect(() => {
@@ -59,19 +163,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const agreed = localStorage.getItem('disclaimerAgreed') === 'true';
     setHasAgreedToDisclaimerState(agreed);
 
-    // 設定當前用戶（模擬登入）
-    const savedUserId = localStorage.getItem('currentUserId');
-    const user = savedUserId
-      ? mockUsers.find((u) => u.id === savedUserId)
-      : mockUsers.find((u) => u.id === 'current-user');
-    setCurrentUser(user || null);
-
-    // 載入模擬資料
-    setListings(mockListings);
-    setApplications(mockApplications);
-    setMessages(mockMessages);
-    setReviews(mockReviews);
-  }, []);
+    // 載入刊登資料
+    fetchListings();
+  }, [fetchListings]);
 
   // 設定免責聲明同意狀態
   const setHasAgreedToDisclaimer = (agreed: boolean) => {
@@ -80,17 +174,49 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   // 新增刊登
-  const addListing = (listing: Listing) => {
-    setListings((prev) => [listing, ...prev]);
+  const addListing = async (listingData: CreateListingData): Promise<Listing | null> => {
+    try {
+      const response = await fetch('/api/listings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(listingData),
+      });
+
+      if (response.ok) {
+        const data: ApiListing = await response.json();
+        const newListing = convertApiListingToListing(data);
+        setListings((prev) => [newListing, ...prev]);
+        return newListing;
+      } else {
+        const error = await response.json();
+        console.error('Failed to create listing:', error);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error creating listing:', error);
+      return null;
+    }
   };
 
   // 更新刊登
-  const updateListing = (id: string, updates: Partial<Listing>) => {
-    setListings((prev) =>
-      prev.map((listing) =>
-        listing.id === id ? { ...listing, ...updates, updatedAt: new Date() } : listing
-      )
-    );
+  const updateListing = async (id: string, updates: Partial<Listing>) => {
+    try {
+      const response = await fetch(`/api/listings/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+
+      if (response.ok) {
+        setListings((prev) =>
+          prev.map((listing) =>
+            listing.id === id ? { ...listing, ...updates, updatedAt: new Date() } : listing
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error updating listing:', error);
+    }
   };
 
   // 新增申請
@@ -107,38 +233,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  // 新增訊息
-  const addMessage = (message: Message) => {
-    setMessages((prev) => [...prev, message]);
-  };
-
   // 新增評價
   const addReview = (review: Review) => {
     setReviews((prev) => [review, ...prev]);
   };
 
-  // 取得用戶
-  const getUserById = (id: string): User | undefined => {
-    return users.find((user) => user.id === id);
-  };
-
   return (
     <AppContext.Provider
       value={{
-        currentUser,
-        setCurrentUser,
         listings,
+        isLoadingListings,
+        fetchListings,
         addListing,
         updateListing,
         applications,
         addApplication,
         updateApplication,
-        messages,
-        addMessage,
         reviews,
         addReview,
-        users,
-        getUserById,
         hasAgreedToDisclaimer,
         setHasAgreedToDisclaimer,
       }}

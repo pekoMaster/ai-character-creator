@@ -261,8 +261,10 @@ export default function AdminLayout({
         </header>
 
         {/* Page Content */}
-        <main className="pt-14 lg:pt-0 p-4 lg:p-8 min-h-screen">
-          {children}
+        <main className="pt-14 lg:pt-0 p-4 lg:p-8 min-h-screen w-full">
+          <div className="w-full">
+            {children}
+          </div>
         </main>
       </div>
     </div>

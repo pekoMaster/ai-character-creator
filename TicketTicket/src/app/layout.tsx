@@ -7,15 +7,15 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import { AdminProvider } from '@/contexts/AdminContext';
 import SessionProvider from '@/components/providers/SessionProvider';
 import ReCaptchaProvider from '@/components/providers/ReCaptchaProvider';
-import BottomNav from '@/components/layout/BottomNav';
-import SideNav from '@/components/layout/SideNav';
-import DisclaimerModal from '@/components/layout/DisclaimerModal';
-import LanguageModal from '@/components/layout/LanguageModal';
+import MainLayout from '@/components/layout/MainLayout';
 
 export const metadata: Metadata = {
   title: 'TicketTicket - Concert Companion Matching',
   description: 'Find your concert companion and enjoy live music together',
   keywords: ['concert', 'companion', 'matching', 'ticket', 'live music'],
+  verification: {
+    google: 'VasyI-zBTHn_uu8sQ8Evapg18hH-VXdID1O6VAPQI1A',
+  },
 };
 
 export const viewport: Viewport = {
@@ -43,17 +43,9 @@ export default async function RootLayout({
               <LanguageProvider>
               <AppProvider>
                 <AdminProvider>
-                  <LanguageModal />
-                  <DisclaimerModal />
-                  <div className="flex">
-                    <SideNav />
-                    <main className="flex-1 min-h-screen pb-20 lg:pb-0 lg:ml-64">
-                      <div className="lg:max-w-4xl lg:mx-auto">
-                        {children}
-                      </div>
-                    </main>
-                  </div>
-                  <BottomNav />
+                  <MainLayout>
+                    {children}
+                  </MainLayout>
                 </AdminProvider>
               </AppProvider>
               </LanguageProvider>

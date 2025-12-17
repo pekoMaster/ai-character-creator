@@ -2,8 +2,20 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+// 一般客戶端（受 RLS 限制）
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// 管理員客戶端（繞過 RLS，僅用於伺服器端）
+export const supabaseAdmin = supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
+  : supabase; // Fallback to regular client if no service key
 
 // Database types
 export interface DbUser {
@@ -31,8 +43,7 @@ export interface DbListing {
   meeting_time: string;
   meeting_location: string;
   original_price_jpy: number;
-  original_price_twd: number;
-  asking_price_twd: number;
+  asking_price_jpy: number;
   total_slots: number;
   available_slots: number;
   ticket_type: 'find_companion' | 'main_ticket_transfer' | 'sub_ticket_transfer';

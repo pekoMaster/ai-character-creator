@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useSession, signOut } from 'next-auth/react';
 import { useApp } from '@/contexts/AppContext';
 import { useTranslations } from 'next-intl';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -12,6 +13,7 @@ import StarRating from '@/components/ui/StarRating';
 import Tag from '@/components/ui/Tag';
 import { TicketTypeTag } from '@/components/ui/Tag';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
+import ReviewCard from '@/components/features/ReviewCard';
 import {
   Ticket,
   Calendar,
@@ -22,14 +24,105 @@ import {
   FileText,
   LogOut,
   Scale,
+  Star,
 } from 'lucide-react';
 
+interface ApiReview {
+  id: string;
+  rating: number;
+  comment?: string;
+  created_at: string;
+  reviewer: {
+    id: string;
+    username: string;
+    avatar_url?: string;
+    custom_avatar_url?: string;
+  };
+  listing?: {
+    id: string;
+    event_name: string;
+    event_date: string;
+  };
+}
+
+interface UserProfile {
+  id: string;
+  username: string;
+  email: string;
+  avatarUrl?: string;
+  customAvatarUrl?: string;
+  rating: number;
+  reviewCount: number;
+  isVerified: boolean;
+}
+
 export default function ProfilePage() {
-  const { currentUser, listings, applications, reviews } = useApp();
+  const { data: session } = useSession();
+  const { listings, applications } = useApp();
   const t = useTranslations('profile');
   const tStatus = useTranslations('status');
   const tLegal = useTranslations('legal');
+  const tReview = useTranslations('review');
   const { locale } = useLanguage();
+
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userReviews, setUserReviews] = useState<ApiReview[]>([]);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  // 取得用戶資料和評價
+  const fetchUserData = useCallback(async () => {
+    if (!session?.user?.dbId) {
+      setIsLoadingProfile(false);
+      return;
+    }
+
+    try {
+      // 並行取得用戶資料和評價
+      const [profileRes, reviewsRes] = await Promise.all([
+        fetch('/api/profile'),
+        fetch(`/api/reviews?userId=${session.user.dbId}`),
+      ]);
+
+      if (profileRes.ok) {
+        const profileData = await profileRes.json();
+        setUserProfile({
+          id: profileData.id,
+          username: profileData.username,
+          email: profileData.email || '',
+          avatarUrl: profileData.avatarUrl,
+          customAvatarUrl: profileData.customAvatarUrl,
+          rating: profileData.rating || 0,
+          reviewCount: profileData.reviewCount || 0,
+          isVerified: profileData.isVerified || false,
+        });
+      }
+
+      if (reviewsRes.ok) {
+        const reviewsData = await reviewsRes.json();
+        setUserReviews(reviewsData);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  }, [session?.user?.dbId]);
+
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData]);
+
+  // 使用 API 回傳的用戶資訊，fallback 到 session
+  const currentUser = userProfile || (session?.user ? {
+    id: session.user.dbId || session.user.id || '',
+    username: session.user.name || '用戶',
+    email: session.user.email || '',
+    avatarUrl: session.user.image || undefined,
+    customAvatarUrl: undefined,
+    rating: 0,
+    reviewCount: 0,
+    isVerified: false,
+  } : null);
 
   // 我的刊登
   const myListings = useMemo(() => {
@@ -42,12 +135,6 @@ export default function ProfilePage() {
     if (!currentUser) return [];
     return applications.filter((a) => a.guestId === currentUser.id);
   }, [currentUser, applications]);
-
-  // 我收到的評價
-  const myReviews = useMemo(() => {
-    if (!currentUser) return [];
-    return reviews.filter((r) => r.revieweeId === currentUser.id);
-  }, [currentUser, reviews]);
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString(locale, {
@@ -72,7 +159,7 @@ export default function ProfilePage() {
         {/* 個人資訊卡片 */}
         <Card>
           <div className="flex items-center gap-4">
-            <Avatar src={currentUser.avatarUrl} size="xl" />
+            <Avatar src={currentUser.customAvatarUrl || currentUser.avatarUrl} size="xl" />
             <div className="flex-1">
               <h2 className="text-xl font-semibold text-gray-900">
                 {currentUser.username}
@@ -103,7 +190,7 @@ export default function ProfilePage() {
               <p className="text-xs text-gray-500">{t('applications')}</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-indigo-600">{myReviews.length}</p>
+              <p className="text-2xl font-bold text-indigo-600">{userReviews.length}</p>
               <p className="text-xs text-gray-500">{t('reviews')}</p>
             </div>
           </div>
@@ -174,6 +261,29 @@ export default function ProfilePage() {
           )}
         </section>
 
+        {/* 收到的評價 */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-gray-900">{tReview('receivedReviews')}</h3>
+            {userReviews.length > 0 && (
+              <span className="text-sm text-gray-500">{userReviews.length}</span>
+            )}
+          </div>
+
+          {userReviews.length > 0 ? (
+            <div className="space-y-3">
+              {userReviews.slice(0, 5).map((review) => (
+                <ReviewCard key={review.id} review={review} showEvent />
+              ))}
+            </div>
+          ) : (
+            <Card className="text-center py-8">
+              <Star className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+              <p className="text-gray-500 text-sm">{tReview('noReviewsYet')}</p>
+            </Card>
+          )}
+        </section>
+
         {/* 設定選單 */}
         <section>
           <h3 className="font-semibold text-gray-900 mb-3">{t('settings')}</h3>
@@ -182,7 +292,7 @@ export default function ProfilePage() {
             <MenuItem
               icon={<Settings className="w-5 h-5" />}
               label={t('accountSettings')}
-              href="#"
+              href="/profile/settings"
             />
             <MenuItem
               icon={<HelpCircle className="w-5 h-5" />}
@@ -192,20 +302,21 @@ export default function ProfilePage() {
             <MenuItem
               icon={<FileText className="w-5 h-5" />}
               label={t('terms')}
-              href="#"
+              href="/legal/terms"
             />
             <MenuItem
               icon={<Scale className="w-5 h-5" />}
               label={tLegal('tokushoho')}
               href="/legal/tokushoho"
             />
-            <MenuItem
-              icon={<LogOut className="w-5 h-5" />}
-              label={t('logout')}
-              href="#"
-              danger
-              isLast
-            />
+            <button
+              onClick={() => signOut({ callbackUrl: '/login' })}
+              className="flex items-center gap-3 px-4 py-3.5 w-full text-left text-red-500 hover:bg-gray-50 transition-colors"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="flex-1 font-medium">{t('logout')}</span>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            </button>
           </Card>
         </section>
 

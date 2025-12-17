@@ -146,7 +146,7 @@ export default function EventForm({ initialData, onSubmit, isEditing }: EventFor
   const ticketCountTypes: TicketCountType[] = ['solo', 'duo'];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 lg:space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-6 lg:space-y-8 w-full max-w-none">
       {/* 基本資訊 */}
       <section className="bg-white rounded-xl p-4 sm:p-6 lg:p-8 shadow-sm border border-gray-200">
         <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 lg:mb-6 flex items-center gap-2">

@@ -1,6 +1,8 @@
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import Line from "next-auth/providers/line"
+import Discord from "next-auth/providers/discord"
+import { supabase } from "@/lib/supabase"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -12,15 +14,61 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientId: process.env.AUTH_LINE_ID,
       clientSecret: process.env.AUTH_LINE_SECRET,
     }),
+    Discord({
+      clientId: process.env.AUTH_DISCORD_ID,
+      clientSecret: process.env.AUTH_DISCORD_SECRET,
+    }),
   ],
   pages: {
     signIn: '/login',
     error: '/login',
   },
   callbacks: {
+    async signIn({ user, account }) {
+      if (!account || !user.email) return true;
+
+      try {
+        // 檢查用戶是否已存在
+        const { data: existingUser } = await supabase
+          .from('users')
+          .select('id')
+          .eq('provider', account.provider)
+          .eq('provider_id', account.providerAccountId)
+          .single();
+
+        if (!existingUser) {
+          // 新用戶，插入資料庫
+          await supabase.from('users').insert({
+            email: user.email,
+            username: user.name || user.email.split('@')[0],
+            avatar_url: user.image,
+            provider: account.provider,
+            provider_id: account.providerAccountId,
+          });
+        } else {
+          // 更新頭像和名稱
+          await supabase
+            .from('users')
+            .update({
+              username: user.name || user.email.split('@')[0],
+              avatar_url: user.image,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('provider', account.provider)
+            .eq('provider_id', account.providerAccountId);
+        }
+      } catch (error) {
+        console.error('Error syncing user to database:', error);
+      }
+
+      return true;
+    },
     async session({ session, token }) {
       if (token.sub && session.user) {
         session.user.id = token.sub;
+      }
+      if (token.dbUserId) {
+        session.user.dbId = token.dbUserId as string;
       }
       return session;
     },
@@ -30,6 +78,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       if (account) {
         token.provider = account.provider;
+        token.providerAccountId = account.providerAccountId;
+
+        // 獲取資料庫中的用戶ID
+        try {
+          const { data: dbUser } = await supabase
+            .from('users')
+            .select('id')
+            .eq('provider', account.provider)
+            .eq('provider_id', account.providerAccountId)
+            .single();
+
+          if (dbUser) {
+            token.dbUserId = dbUser.id;
+          }
+        } catch (error) {
+          console.error('Error fetching user from database:', error);
+        }
       }
       return token;
     },
