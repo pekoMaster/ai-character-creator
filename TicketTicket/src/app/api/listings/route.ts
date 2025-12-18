@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { auth } from '@/auth';
 
 // GET /api/listings - 獲取所有刊登
 export async function GET() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('listings')
       .select(`
         *,
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('listings')
       .insert({
         host_id: session.user.dbId,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 // GET - 檢查用戶是否可以評價此刊登
 export async function GET(
@@ -17,7 +17,7 @@ export async function GET(
 
   try {
     // 取得刊登資訊
-    const { data: listing } = await supabase
+    const { data: listing } = await supabaseAdmin
       .from('listings')
       .select('id, event_date, host_id')
       .eq('id', listingId)
@@ -38,7 +38,7 @@ export async function GET(
     }
 
     // 檢查是否已經評價過
-    const { data: existingReview } = await supabase
+    const { data: existingReview } = await supabaseAdmin
       .from('reviews')
       .select('id')
       .eq('reviewer_id', session.user.dbId)
@@ -53,7 +53,7 @@ export async function GET(
 
     if (isHost) {
       // 主辦方：檢查是否有被接受的申請者
-      const { data: acceptedApplications } = await supabase
+      const { data: acceptedApplications } = await supabaseAdmin
         .from('applications')
         .select('guest_id, guest:guest_id (id, username, avatar_url, custom_avatar_url)')
         .eq('listing_id', listingId)
@@ -66,7 +66,7 @@ export async function GET(
       // 檢查哪些申請者還沒被評價過
       const reviewableGuests = [];
       for (const app of acceptedApplications) {
-        const { data: existingGuestReview } = await supabase
+        const { data: existingGuestReview } = await supabaseAdmin
           .from('reviews')
           .select('id')
           .eq('reviewer_id', session.user.dbId)
@@ -90,7 +90,7 @@ export async function GET(
       });
     } else {
       // 申請者：檢查申請是否被接受
-      const { data: application } = await supabase
+      const { data: application } = await supabaseAdmin
         .from('applications')
         .select('id')
         .eq('listing_id', listingId)
@@ -103,7 +103,7 @@ export async function GET(
       }
 
       // 取得主辦方資訊
-      const { data: host } = await supabase
+      const { data: host } = await supabaseAdmin
         .from('users')
         .select('id, username, avatar_url, custom_avatar_url')
         .eq('id', listing.host_id)

@@ -2,7 +2,7 @@ import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import Line from "next-auth/providers/line"
 import Discord from "next-auth/providers/discord"
-import { supabase } from "@/lib/supabase"
+import { supabaseAdmin } from "@/lib/supabase"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -29,7 +29,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       try {
         // 檢查用戶是否已存在
-        const { data: existingUser } = await supabase
+        const { data: existingUser } = await supabaseAdmin
           .from('users')
           .select('id')
           .eq('provider', account.provider)
@@ -38,7 +38,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!existingUser) {
           // 新用戶，插入資料庫
-          await supabase.from('users').insert({
+          await supabaseAdmin.from('users').insert({
             email: user.email,
             username: user.name || user.email.split('@')[0],
             avatar_url: user.image,
@@ -47,7 +47,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           });
         } else {
           // 更新頭像和名稱
-          await supabase
+          await supabaseAdmin
             .from('users')
             .update({
               username: user.name || user.email.split('@')[0],
@@ -82,7 +82,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         // 獲取資料庫中的用戶ID
         try {
-          const { data: dbUser } = await supabase
+          const { data: dbUser } = await supabaseAdmin
             .from('users')
             .select('id')
             .eq('provider', account.provider)

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { auth } from '@/auth';
 
 // GET /api/listings/[id] - 獲取單一刊登
@@ -10,7 +10,7 @@ export async function GET(
   try {
     const { id } = await params;
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('listings')
       .select(`
         *,
@@ -46,7 +46,7 @@ export async function PATCH(
     const body = await request.json();
 
     // 確認是刊登擁有者
-    const { data: listing } = await supabase
+    const { data: listing } = await supabaseAdmin
       .from('listings')
       .select('host_id')
       .eq('id', id)
@@ -56,7 +56,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('listings')
       .update(body)
       .eq('id', id)
@@ -89,7 +89,7 @@ export async function DELETE(
     const { id } = await params;
 
     // 確認是刊登擁有者
-    const { data: listing } = await supabase
+    const { data: listing } = await supabaseAdmin
       .from('listings')
       .select('host_id')
       .eq('id', id)
@@ -99,7 +99,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('listings')
       .delete()
       .eq('id', id);

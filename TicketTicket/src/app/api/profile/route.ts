@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 // GET /api/profile - 取得當前用戶資料
 export async function GET() {
@@ -11,7 +11,7 @@ export async function GET() {
   }
 
   try {
-    const { data: user, error } = await supabase
+    const { data: user, error } = await supabaseAdmin
       .from('users')
       .select('*')
       .eq('id', session.user.dbId)
@@ -129,7 +129,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // 執行更新
-    const { data: updatedUser, error } = await supabase
+    const { data: updatedUser, error } = await supabaseAdmin
       .from('users')
       .update(updateData)
       .eq('id', session.user.dbId)

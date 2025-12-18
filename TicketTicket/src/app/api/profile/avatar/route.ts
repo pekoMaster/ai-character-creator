@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 // POST /api/profile/avatar - 上傳頭像
 export async function POST(request: NextRequest) {
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const buffer = new Uint8Array(arrayBuffer);
 
     // 上傳到 Supabase Storage
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from('avatars')
       .upload(fileName, buffer, {
         contentType: file.type,
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       const dataUrl = `data:${file.type};base64,${base64}`;
 
       // 儲存 data URL 到資料庫
-      const { error: updateError } = await supabase
+      const { error: updateError } = await supabaseAdmin
         .from('users')
         .update({ custom_avatar_url: dataUrl })
         .eq('id', session.user.dbId);
@@ -66,14 +66,14 @@ export async function POST(request: NextRequest) {
     }
 
     // 取得公開 URL
-    const { data: publicUrlData } = supabase.storage
+    const { data: publicUrlData } = supabaseAdmin.storage
       .from('avatars')
       .getPublicUrl(fileName);
 
     const avatarUrl = publicUrlData.publicUrl;
 
     // 更新用戶的頭像 URL
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('users')
       .update({ custom_avatar_url: avatarUrl })
       .eq('id', session.user.dbId);
@@ -100,7 +100,7 @@ export async function DELETE() {
 
   try {
     // 清除自訂頭像
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('users')
       .update({ custom_avatar_url: null })
       .eq('id', session.user.dbId);

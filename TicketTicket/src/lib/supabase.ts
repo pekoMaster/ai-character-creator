@@ -4,18 +4,41 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// 一般客戶端（受 RLS 限制）
+/**
+ * ⚠️ 重要說明：
+ *
+ * 本專案使用 NextAuth 進行認證，而非 Supabase Auth。
+ * Supabase RLS 政策依賴 auth.uid()（Supabase Auth），
+ * 但我們的 auth.uid() 永遠是 NULL，因此 RLS 無法正常運作。
+ *
+ * 解決方案：
+ * - 所有伺服器端操作統一使用 supabaseAdmin（service role key）
+ * - 認證授權在 API 層由 NextAuth 處理
+ * - supabase（anon key）僅用於客戶端公開讀取（如未登入時瀏覽）
+ */
+
+// 一般客戶端（受 RLS 限制，僅用於公開讀取）
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// 管理員客戶端（繞過 RLS，僅用於伺服器端）
-export const supabaseAdmin = supabaseServiceKey
-  ? createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    })
-  : supabase; // Fallback to regular client if no service key
+// 伺服器端客戶端（繞過 RLS，用於所有 API 操作）
+// ⚠️ 必須設定 SUPABASE_SERVICE_ROLE_KEY 環境變數！
+if (!supabaseServiceKey) {
+  console.warn(
+    '⚠️ SUPABASE_SERVICE_ROLE_KEY 未設定！資料庫寫入操作將會失敗。' +
+    '請在 .env.local 和 Vercel 環境變數中加入此 key。'
+  );
+}
+
+export const supabaseAdmin = createClient(
+  supabaseUrl,
+  supabaseServiceKey || supabaseAnonKey,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  }
+);
 
 // Database types
 export interface DbUser {

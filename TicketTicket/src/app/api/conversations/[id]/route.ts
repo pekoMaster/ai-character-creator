@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { auth } from '@/auth';
 
 // GET /api/conversations/[id] - 獲取對話詳情和訊息
@@ -17,7 +17,7 @@ export async function GET(
     const userId = session.user.dbId;
 
     // 獲取對話
-    const { data: conversation, error: convoError } = await supabase
+    const { data: conversation, error: convoError } = await supabaseAdmin
       .from('conversations')
       .select(`
         *,
@@ -38,7 +38,7 @@ export async function GET(
     }
 
     // 獲取訊息
-    const { data: messages, error: msgError } = await supabase
+    const { data: messages, error: msgError } = await supabaseAdmin
       .from('messages')
       .select('*')
       .eq('conversation_id', id)
@@ -49,7 +49,7 @@ export async function GET(
     }
 
     // 標記訊息為已讀
-    await supabase
+    await supabaseAdmin
       .from('messages')
       .update({ is_read: true })
       .eq('conversation_id', id)
@@ -90,7 +90,7 @@ export async function POST(
     }
 
     // 確認用戶是對話參與者
-    const { data: conversation } = await supabase
+    const { data: conversation } = await supabaseAdmin
       .from('conversations')
       .select('host_id, guest_id')
       .eq('id', id)
@@ -104,7 +104,7 @@ export async function POST(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('messages')
       .insert({
         conversation_id: id,

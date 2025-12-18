@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { auth } from '@/auth';
 
 // GET /api/applications - 獲取用戶相關的申請
@@ -13,7 +13,7 @@ export async function GET() {
     const userId = session.user.dbId;
 
     // 獲取用戶發出的申請
-    const { data: sentApplications, error: sentError } = await supabase
+    const { data: sentApplications, error: sentError } = await supabaseAdmin
       .from('applications')
       .select(`
         *,
@@ -36,7 +36,7 @@ export async function GET() {
     }
 
     // 獲取用戶收到的申請（針對自己的刊登）
-    const { data: receivedApplications, error: receivedError } = await supabase
+    const { data: receivedApplications, error: receivedError } = await supabaseAdmin
       .from('applications')
       .select(`
         *,
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     const { listingId, message } = body;
 
     // 檢查刊登是否存在且開放
-    const { data: listing } = await supabase
+    const { data: listing } = await supabaseAdmin
       .from('listings')
       .select('id, host_id, status')
       .eq('id', listingId)
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 檢查是否已申請
-    const { data: existingApp } = await supabase
+    const { data: existingApp } = await supabaseAdmin
       .from('applications')
       .select('id')
       .eq('listing_id', listingId)
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Already applied' }, { status: 400 });
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('applications')
       .insert({
         listing_id: listingId,

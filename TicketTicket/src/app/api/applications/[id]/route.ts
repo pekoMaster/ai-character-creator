@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { auth } from '@/auth';
 
 // PATCH /api/applications/[id] - 更新申請狀態
@@ -18,7 +18,7 @@ export async function PATCH(
     const { status } = body;
 
     // 獲取申請和刊登資訊
-    const { data: application } = await supabase
+    const { data: application } = await supabaseAdmin
       .from('applications')
       .select(`
         *,
@@ -44,7 +44,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Only host can accept/reject' }, { status: 403 });
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('applications')
       .update({ status })
       .eq('id', id)
@@ -58,7 +58,7 @@ export async function PATCH(
 
     // 如果接受申請，創建對話
     if (status === 'accepted') {
-      const { data: existingConvo } = await supabase
+      const { data: existingConvo } = await supabaseAdmin
         .from('conversations')
         .select('id')
         .eq('listing_id', application.listing_id)
@@ -66,7 +66,7 @@ export async function PATCH(
         .single();
 
       if (!existingConvo) {
-        await supabase.from('conversations').insert({
+        await supabaseAdmin.from('conversations').insert({
           listing_id: application.listing_id,
           host_id: application.listing.host_id,
           guest_id: application.guest_id,

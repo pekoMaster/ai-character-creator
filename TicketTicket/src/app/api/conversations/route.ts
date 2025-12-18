@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { auth } from '@/auth';
 
 // GET /api/conversations - 獲取用戶的所有對話
@@ -12,7 +12,7 @@ export async function GET() {
 
     const userId = session.user.dbId;
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('conversations')
       .select(`
         *,

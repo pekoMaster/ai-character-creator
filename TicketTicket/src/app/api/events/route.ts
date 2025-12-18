@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { auth } from '@/auth';
 
 // 管理員 email 列表（可以放到環境變數）
@@ -11,10 +11,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const includeInactive = searchParams.get('includeInactive') === 'true';
 
-    // 使用 admin client 取得所有活動（含未啟用的），否則用一般 client
-    const client = includeInactive ? supabaseAdmin : supabase;
-
-    let query = client
+    // 統一使用 admin client（因為 RLS 與 NextAuth 不兼容）
+    let query = supabaseAdmin
       .from('events')
       .select('*')
       .order('event_date', { ascending: true });

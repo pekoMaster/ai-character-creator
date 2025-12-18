@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 // GET - 取得指定用戶的評價列表
 export async function GET(request: NextRequest) {
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // 取得該用戶收到的評價
-    const { data: reviews, error } = await supabase
+    const { data: reviews, error } = await supabaseAdmin
       .from('reviews')
       .select(`
         *,
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 檢查是否已經評價過此刊登
-    const { data: existingReview } = await supabase
+    const { data: existingReview } = await supabaseAdmin
       .from('reviews')
       .select('id')
       .eq('reviewer_id', session.user.dbId)
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 檢查刊登是否存在
-    const { data: listing } = await supabase
+    const { data: listing } = await supabaseAdmin
       .from('listings')
       .select('id, event_date, host_id')
       .eq('id', listingId)
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
 
     if (isHost) {
       // 主辦方評價申請者
-      const { data: application } = await supabase
+      const { data: application } = await supabaseAdmin
         .from('applications')
         .select('id')
         .eq('listing_id', listingId)
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Can only review the host' }, { status: 400 });
       }
 
-      const { data: application } = await supabase
+      const { data: application } = await supabaseAdmin
         .from('applications')
         .select('id')
         .eq('listing_id', listingId)
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 建立評價
-    const { data: newReview, error: insertError } = await supabase
+    const { data: newReview, error: insertError } = await supabaseAdmin
       .from('reviews')
       .insert({
         reviewer_id: session.user.dbId,
