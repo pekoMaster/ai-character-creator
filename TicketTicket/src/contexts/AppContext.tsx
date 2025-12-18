@@ -32,14 +32,19 @@ interface ApiListing {
   asking_price_jpy: number;
   total_slots: number;
   available_slots: number;
-  ticket_type: 'find_companion' | 'main_ticket_transfer' | 'sub_ticket_transfer';
-  seat_grade: 'B' | 'A' | 'S' | 'SS';
+  ticket_type: 'find_companion' | 'main_ticket_transfer' | 'sub_ticket_transfer' | 'ticket_exchange';
+  seat_grade: string;
   ticket_count_type: 'solo' | 'duo';
   host_nationality: string;
   host_languages: string[];
   identification_features?: string;
   status: 'open' | 'matched' | 'closed';
   description?: string;
+  // 換票專用欄位
+  exchange_event_name?: string;
+  exchange_seat_grade?: string;
+  subsidy_amount?: number;
+  subsidy_direction?: 'i_pay_you' | 'you_pay_me';
   created_at: string;
   updated_at: string;
   host?: ApiUser;
@@ -68,6 +73,11 @@ function convertApiListingToListing(apiListing: ApiListing): Listing {
     identificationFeatures: apiListing.identification_features || '',
     status: apiListing.status,
     description: apiListing.description || '',
+    // 換票專用欄位
+    exchangeEventName: apiListing.exchange_event_name,
+    exchangeSeatGrade: apiListing.exchange_seat_grade,
+    subsidyAmount: apiListing.subsidy_amount,
+    subsidyDirection: apiListing.subsidy_direction,
     createdAt: new Date(apiListing.created_at),
     updatedAt: new Date(apiListing.updated_at),
     host: apiListing.host ? {
@@ -94,7 +104,8 @@ interface AppContextType {
   isLoadingListings: boolean;
   fetchListings: () => Promise<void>;
   addListing: (listingData: CreateListingData) => Promise<Listing | null>;
-  updateListing: (id: string, updates: Partial<Listing>) => Promise<void>;
+  updateListing: (id: string, updates: Partial<Listing>) => Promise<boolean>;
+  deleteListing: (id: string) => Promise<boolean>;
 
   // 申請
   applications: Application[];
@@ -121,13 +132,18 @@ interface CreateListingData {
   originalPriceJPY: number;
   askingPriceJPY: number;
   totalSlots?: number;
-  ticketType: 'find_companion' | 'main_ticket_transfer' | 'sub_ticket_transfer';
-  seatGrade: 'B' | 'A' | 'S' | 'SS';
+  ticketType: 'find_companion' | 'main_ticket_transfer' | 'sub_ticket_transfer' | 'ticket_exchange';
+  seatGrade: string;
   ticketCountType: 'solo' | 'duo';
   hostNationality: string;
   hostLanguages?: string[];
   identificationFeatures?: string;
   description?: string;
+  // 換票專用欄位
+  exchangeEventName?: string;
+  exchangeSeatGrade?: string;
+  subsidyAmount?: number;
+  subsidyDirection?: 'i_pay_you' | 'you_pay_me';
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -199,7 +215,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   // 更新刊登
-  const updateListing = async (id: string, updates: Partial<Listing>) => {
+  const updateListing = async (id: string, updates: Partial<Listing>): Promise<boolean> => {
     try {
       const response = await fetch(`/api/listings/${id}`, {
         method: 'PATCH',
@@ -213,9 +229,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
             listing.id === id ? { ...listing, ...updates, updatedAt: new Date() } : listing
           )
         );
+        return true;
       }
+      return false;
     } catch (error) {
       console.error('Error updating listing:', error);
+      return false;
+    }
+  };
+
+  // 刪除刊登
+  const deleteListing = async (id: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`/api/listings/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setListings((prev) => prev.filter((listing) => listing.id !== id));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error deleting listing:', error);
+      return false;
     }
   };
 
@@ -246,6 +283,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         fetchListings,
         addListing,
         updateListing,
+        deleteListing,
         applications,
         addApplication,
         updateApplication,

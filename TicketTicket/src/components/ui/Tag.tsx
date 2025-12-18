@@ -62,6 +62,7 @@ export function TicketTypeTag({ type, showWarning = false, size = 'sm' }: Ticket
       case 'find_companion': return t('findCompanion');
       case 'main_ticket_transfer': return t('mainTicketTransfer');
       case 'sub_ticket_transfer': return t('subTicketTransfer');
+      case 'ticket_exchange': return t('ticketExchange');
     }
   };
 
@@ -69,6 +70,7 @@ export function TicketTypeTag({ type, showWarning = false, size = 'sm' }: Ticket
     find_companion: 'info',
     main_ticket_transfer: 'purple',
     sub_ticket_transfer: 'green',
+    ticket_exchange: 'orange',
   };
 
   // All types have warnings now

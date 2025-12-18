@@ -36,29 +36,40 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
+    // 準備插入資料
+    const insertData: Record<string, unknown> = {
+      host_id: session.user.dbId,
+      event_name: body.eventName,
+      artist_tags: body.artistTags || [],
+      event_date: body.eventDate,
+      venue: body.venue,
+      meeting_time: body.meetingTime,
+      meeting_location: body.meetingLocation,
+      original_price_jpy: body.originalPriceJPY,
+      asking_price_jpy: body.askingPriceJPY,
+      total_slots: body.totalSlots || 1,
+      available_slots: body.totalSlots || 1,
+      ticket_type: body.ticketType,
+      seat_grade: body.seatGrade,
+      ticket_count_type: body.ticketCountType,
+      host_nationality: body.hostNationality,
+      host_languages: body.hostLanguages || [],
+      identification_features: body.identificationFeatures || '',
+      description: body.description || '',
+      status: 'open',
+    };
+
+    // 如果是換票類型，添加換票專用欄位
+    if (body.ticketType === 'ticket_exchange') {
+      insertData.exchange_event_name = body.exchangeEventName || '';
+      insertData.exchange_seat_grade = body.exchangeSeatGrade || '';
+      insertData.subsidy_amount = body.subsidyAmount || 0;
+      insertData.subsidy_direction = body.subsidyDirection || 'i_pay_you';
+    }
+
     const { data, error } = await supabaseAdmin
       .from('listings')
-      .insert({
-        host_id: session.user.dbId,
-        event_name: body.eventName,
-        artist_tags: body.artistTags || [],
-        event_date: body.eventDate,
-        venue: body.venue,
-        meeting_time: body.meetingTime,
-        meeting_location: body.meetingLocation,
-        original_price_jpy: body.originalPriceJPY,
-        asking_price_jpy: body.askingPriceJPY,
-        total_slots: body.totalSlots || 1,
-        available_slots: body.totalSlots || 1,
-        ticket_type: body.ticketType,
-        seat_grade: body.seatGrade,
-        ticket_count_type: body.ticketCountType,
-        host_nationality: body.hostNationality,
-        host_languages: body.hostLanguages || [],
-        identification_features: body.identificationFeatures || '',
-        description: body.description || '',
-        status: 'open',
-      })
+      .insert(insertData)
       .select()
       .single();
 

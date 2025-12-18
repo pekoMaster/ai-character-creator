@@ -7,9 +7,7 @@ import {
   EventCategory,
   EVENT_CATEGORY_INFO,
   TicketPriceTier,
-  SeatGrade,
   TicketCountType,
-  SEAT_GRADE_INFO,
   TICKET_COUNT_TYPE_INFO,
 } from '@/types';
 import { Calendar, MapPin, Image, Ticket, FileText, Plus, Trash2 } from 'lucide-react';
@@ -20,7 +18,7 @@ interface EventFormProps {
   isEditing?: boolean;
 }
 
-// 預設票價等級列（5列）
+// 預設票價等級列（5列）- 座位等級現在是自訂字串
 const createDefaultPriceTiers = (): TicketPriceTier[] => [
   { seatGrade: 'SS', ticketCountType: 'solo', priceJPY: 0 },
   { seatGrade: 'S', ticketCountType: 'solo', priceJPY: 0 },
@@ -84,7 +82,7 @@ export default function EventForm({ initialData, onSubmit, isEditing }: EventFor
   };
 
   const addPriceTier = () => {
-    setPriceTiers((prev) => [...prev, { seatGrade: 'A', ticketCountType: 'solo', priceJPY: 0 }]);
+    setPriceTiers((prev) => [...prev, { seatGrade: '', ticketCountType: 'solo', priceJPY: 0 }]);
   };
 
   const removePriceTier = (index: number) => {
@@ -109,10 +107,10 @@ export default function EventForm({ initialData, onSubmit, isEditing }: EventFor
       newErrors.venue = '請輸入場地';
     }
 
-    // 檢查至少有一個有效的票價
-    const validPriceTiers = priceTiers.filter((tier) => tier.priceJPY > 0);
+    // 檢查至少有一個有效的票價（有座位等級名稱且價格大於0）
+    const validPriceTiers = priceTiers.filter((tier) => tier.seatGrade.trim() !== '' && tier.priceJPY > 0);
     if (validPriceTiers.length === 0) {
-      newErrors.priceTiers = '請至少設定一個票價';
+      newErrors.priceTiers = '請至少設定一個票價（須填寫座位等級名稱和價格）';
     }
 
     setErrors(newErrors);
@@ -129,8 +127,8 @@ export default function EventForm({ initialData, onSubmit, isEditing }: EventFor
 
     setIsSubmitting(true);
 
-    // 只保留有效的票價等級
-    const validPriceTiers = priceTiers.filter((tier) => tier.priceJPY > 0);
+    // 只保留有效的票價等級（有座位等級名稱且價格大於0）
+    const validPriceTiers = priceTiers.filter((tier) => tier.seatGrade.trim() !== '' && tier.priceJPY > 0);
 
     try {
       await onSubmit({
@@ -151,7 +149,6 @@ export default function EventForm({ initialData, onSubmit, isEditing }: EventFor
     }
   };
 
-  const seatGrades: SeatGrade[] = ['SS', 'S', 'A', 'B'];
   const ticketCountTypes: TicketCountType[] = ['solo', 'duo'];
 
   return (
@@ -337,7 +334,7 @@ export default function EventForm({ initialData, onSubmit, isEditing }: EventFor
         <div className="space-y-3">
           {/* 表頭 - 只在桌面顯示 */}
           <div className="hidden sm:grid grid-cols-12 gap-2 text-sm font-medium text-gray-600 pb-2 border-b">
-            <div className="col-span-4">座位等級</div>
+            <div className="col-span-4">座位等級名稱（自訂）</div>
             <div className="col-span-4">票種類型</div>
             <div className="col-span-3">價格（日圓）</div>
             <div className="col-span-1"></div>
@@ -361,18 +358,14 @@ export default function EventForm({ initialData, onSubmit, isEditing }: EventFor
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-xs text-gray-500 mb-1 block">座位等級</label>
-                    <select
+                    <label className="text-xs text-gray-500 mb-1 block">座位等級名稱</label>
+                    <input
+                      type="text"
                       value={tier.seatGrade}
                       onChange={(e) => handlePriceTierChange(index, 'seatGrade', e.target.value)}
-                      className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
-                    >
-                      {seatGrades.map((grade) => (
-                        <option key={grade} value={grade}>
-                          {SEAT_GRADE_INFO[grade].label}
-                        </option>
-                      ))}
-                    </select>
+                      placeholder="例：SS、S、A、B"
+                      className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                    />
                   </div>
                   <div>
                     <label className="text-xs text-gray-500 mb-1 block">票種類型</label>
@@ -404,17 +397,13 @@ export default function EventForm({ initialData, onSubmit, isEditing }: EventFor
               {/* 桌面版 - 表格式 */}
               <div className="hidden sm:grid grid-cols-12 gap-2 items-center">
                 <div className="col-span-4">
-                  <select
+                  <input
+                    type="text"
                     value={tier.seatGrade}
                     onChange={(e) => handlePriceTierChange(index, 'seatGrade', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
-                  >
-                    {seatGrades.map((grade) => (
-                      <option key={grade} value={grade}>
-                        {SEAT_GRADE_INFO[grade].label}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="例：SS、S、A、B"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  />
                 </div>
                 <div className="col-span-4">
                   <select

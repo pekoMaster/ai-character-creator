@@ -115,11 +115,12 @@ export default function ExplorePage() {
 
   const hasActiveFilters = selectedTypes.length > 0 || selectedTags.length > 0 || sortBy !== 'date' || dateFilter !== 'all';
 
-  const ticketTypes: TicketType[] = ['find_companion', 'main_ticket_transfer', 'sub_ticket_transfer'];
+  const ticketTypes: TicketType[] = ['find_companion', 'main_ticket_transfer', 'sub_ticket_transfer', 'ticket_exchange'];
   const ticketTypeLabels: Record<TicketType, string> = {
     find_companion: tTicket('findCompanion'),
     main_ticket_transfer: tTicket('mainTicketTransfer'),
     sub_ticket_transfer: tTicket('subTicketTransfer'),
+    ticket_exchange: tTicket('ticketExchange'),
   };
 
   return (

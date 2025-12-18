@@ -38,18 +38,22 @@ export const PHONE_COUNTRY_CODES = [
 
 // 票券類型（新版）
 // find_companion: 尋找同行者（必須是二人票，價格為一半）
-// main_ticket_transfer: 母票轉讓（須提供持票帳號或見面時借出手機）
+// main_ticket_transfer: 母票轉讓（須提供持票帳號或見面時借出手機）- 暫時停用
 // sub_ticket_transfer: 子票轉讓（須確認對方持有且可啟用ZAIKO）
-export type TicketType = 'find_companion' | 'main_ticket_transfer' | 'sub_ticket_transfer';
+// ticket_exchange: 換票（與其他用戶交換票券）
+export type TicketType = 'find_companion' | 'main_ticket_transfer' | 'sub_ticket_transfer' | 'ticket_exchange';
 
-// 座位等級
-export type SeatGrade = 'B' | 'A' | 'S' | 'SS';
+// 座位等級（改為動態字串，由管理員自訂）
+export type SeatGrade = string;
 
 // 票種類型（移除家庭票）
 export type TicketCountType = 'solo' | 'duo';
 
 // 刊登狀態
 export type ListingStatus = 'open' | 'matched' | 'closed';
+
+// 補貼方向
+export type SubsidyDirection = 'i_pay_you' | 'you_pay_me';
 
 // 票券刊登
 export interface Listing {
@@ -73,6 +77,11 @@ export interface Listing {
   identificationFeatures: string;          // 辨識特徵（穿著等）
   status: ListingStatus;
   description?: string;                    // 其他注意事項
+  // 換票專用欄位
+  exchangeEventName?: string;              // 想換的活動名稱
+  exchangeSeatGrade?: string;              // 想換的座位等級（'any' 為任意）
+  subsidyAmount?: number;                  // 補貼金額（日圓）
+  subsidyDirection?: SubsidyDirection;     // 補貼方向
   createdAt: Date;
   updatedAt: Date;
   host?: User;                             // 刊登者資訊（從 API 載入時附帶）
@@ -175,6 +184,7 @@ export const TICKET_TYPE_INFO: Record<TicketType, {
   warning?: string;
   color: string;
   requiresDuo?: boolean;  // 是否必須是二人票
+  disabled?: boolean;     // 是否暫時停用
 }> = {
   find_companion: {
     label: '尋找同行者',
@@ -188,6 +198,7 @@ export const TICKET_TYPE_INFO: Record<TicketType, {
     description: '轉讓主票，需提供持票帳號給對方或見面時借出手機',
     warning: '須提供 ZAIKO 帳號或現場借出手機入場',
     color: 'bg-purple-100 text-purple-800',
+    disabled: true,  // 暫時停用
   },
   sub_ticket_transfer: {
     label: '子票轉讓',
@@ -195,17 +206,39 @@ export const TICKET_TYPE_INFO: Record<TicketType, {
     warning: '請確認對方已安裝 ZAIKO 並可接收票券',
     color: 'bg-green-100 text-green-800',
   },
+  ticket_exchange: {
+    label: '換票',
+    description: '與其他用戶交換票券',
+    warning: '需選擇想換的活動和票種',
+    color: 'bg-orange-100 text-orange-800',
+  },
 };
 
-// 座位等級資訊
-export const SEAT_GRADE_INFO: Record<SeatGrade, {
-  label: string;
-  color: string;
-}> = {
-  B: { label: 'B席', color: 'bg-gray-100 text-gray-800' },
-  A: { label: 'A席', color: 'bg-blue-100 text-blue-800' },
-  S: { label: 'S席', color: 'bg-purple-100 text-purple-800' },
-  SS: { label: 'SS席', color: 'bg-yellow-100 text-yellow-800' },
+// 座位等級資訊（預設，用於顯示顏色）
+// 由於座位等級現在是動態字串，使用函數取得標籤
+export const DEFAULT_SEAT_GRADE_COLORS: Record<string, string> = {
+  B: 'bg-gray-100 text-gray-800',
+  A: 'bg-blue-100 text-blue-800',
+  S: 'bg-purple-100 text-purple-800',
+  SS: 'bg-yellow-100 text-yellow-800',
+};
+
+// 取得座位等級顯示標籤
+export function getSeatGradeLabel(grade: string): string {
+  return grade; // 直接返回等級名稱
+}
+
+// 取得座位等級顏色
+export function getSeatGradeColor(grade: string): string {
+  return DEFAULT_SEAT_GRADE_COLORS[grade] || 'bg-indigo-100 text-indigo-800';
+}
+
+// 向後相容：SEAT_GRADE_INFO（已廢棄，請使用 getSeatGradeLabel 和 getSeatGradeColor）
+export const SEAT_GRADE_INFO: Record<string, { label: string; color: string }> = {
+  B: { label: 'B', color: 'bg-gray-100 text-gray-800' },
+  A: { label: 'A', color: 'bg-blue-100 text-blue-800' },
+  S: { label: 'S', color: 'bg-purple-100 text-purple-800' },
+  SS: { label: 'SS', color: 'bg-yellow-100 text-yellow-800' },
 };
 
 // 票種類型資訊（移除家庭票）

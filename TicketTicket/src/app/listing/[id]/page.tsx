@@ -26,6 +26,9 @@ import {
   Check,
   Loader2,
   Star,
+  Edit3,
+  Trash2,
+  MoreVertical,
 } from 'lucide-react';
 import ReviewModal from '@/components/features/ReviewModal';
 
@@ -33,10 +36,11 @@ export default function ListingDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { data: session } = useSession();
-  const { listings } = useApp();
+  const { listings, deleteListing, updateListing } = useApp();
   const t = useTranslations('listing');
   const tApply = useTranslations('apply');
   const tTicket = useTranslations('ticketType');
+  const tCommon = useTranslations('common');
   const { locale } = useLanguage();
 
   const [showApplyModal, setShowApplyModal] = useState(false);
@@ -46,6 +50,13 @@ export default function ListingDetailPage() {
   const [hasApplied, setHasApplied] = useState(false);
   const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
   const [isCheckingApplication, setIsCheckingApplication] = useState(true);
+
+  // Host management states
+  const [showHostMenu, setShowHostMenu] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showStatusMenu, setShowStatusMenu] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   // Review states
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -187,9 +198,86 @@ export default function ListingDetailPage() {
 
   const ticketInfo = getTicketTypeInfo(listing.ticketType);
 
+  // 處理刪除刊登
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    const success = await deleteListing(listing.id);
+    setIsDeleting(false);
+    if (success) {
+      setShowDeleteModal(false);
+      router.push('/profile');
+    } else {
+      alert('刪除失敗，請稍後再試');
+    }
+  };
+
+  // 處理更新狀態
+  const handleUpdateStatus = async (newStatus: 'open' | 'matched' | 'closed') => {
+    setIsUpdatingStatus(true);
+    const success = await updateListing(listing.id, { status: newStatus });
+    setIsUpdatingStatus(false);
+    setShowStatusMenu(false);
+    if (!success) {
+      alert('更新失敗，請稍後再試');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header title={t('detail')} showBack />
+      <Header
+        title={t('detail')}
+        showBack
+        rightAction={isHost ? (
+          <div className="relative">
+            <button
+              onClick={() => setShowHostMenu(!showHostMenu)}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <MoreVertical className="w-5 h-5 text-gray-600" />
+            </button>
+            {showHostMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setShowHostMenu(false)}
+                />
+                <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+                  <button
+                    onClick={() => {
+                      setShowHostMenu(false);
+                      router.push(`/listing/${listing.id}/edit`);
+                    }}
+                    className="w-full px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                    {t('edit')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowHostMenu(false);
+                      setShowStatusMenu(true);
+                    }}
+                    className="w-full px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <Clock className="w-4 h-4" />
+                    {t('changeStatus')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowHostMenu(false);
+                      setShowDeleteModal(true);
+                    }}
+                    className="w-full px-4 py-2.5 text-left text-red-600 hover:bg-red-50 flex items-center gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    {t('delete')}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        ) : undefined}
+      />
 
       <div className="pt-14 pb-24">
         {/* 主要資訊 */}
@@ -454,6 +542,67 @@ export default function ListingDetailPage() {
           setReviewableUsers([]);
         }}
       />
+
+      {/* 刪除確認 Modal */}
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        title={t('deleteConfirmTitle')}
+      >
+        <div className="p-4">
+          <p className="text-gray-600 mb-6">{t('deleteConfirmMessage')}</p>
+          <div className="flex gap-3">
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => setShowDeleteModal(false)}
+            >
+              {tCommon('cancel')}
+            </Button>
+            <Button
+              fullWidth
+              onClick={handleDelete}
+              loading={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {t('delete')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* 狀態更改 Modal */}
+      <Modal
+        isOpen={showStatusMenu}
+        onClose={() => setShowStatusMenu(false)}
+        title={t('changeStatus')}
+      >
+        <div className="p-4 space-y-2">
+          {(['open', 'matched', 'closed'] as const).map((status) => (
+            <button
+              key={status}
+              onClick={() => handleUpdateStatus(status)}
+              disabled={isUpdatingStatus || listing.status === status}
+              className={`
+                w-full px-4 py-3 text-left rounded-lg transition-colors flex items-center justify-between
+                ${listing.status === status
+                  ? 'bg-indigo-50 text-indigo-700 font-medium'
+                  : 'hover:bg-gray-50 text-gray-700'}
+                ${isUpdatingStatus ? 'opacity-50 cursor-not-allowed' : ''}
+              `}
+            >
+              <span>
+                {status === 'open' && t('statusOpen')}
+                {status === 'matched' && t('statusMatched')}
+                {status === 'closed' && t('statusClosed')}
+              </span>
+              {listing.status === status && (
+                <Check className="w-5 h-5 text-indigo-600" />
+              )}
+            </button>
+          ))}
+        </div>
+      </Modal>
     </div>
   );
 }
