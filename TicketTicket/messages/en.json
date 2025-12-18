@@ -27,7 +27,15 @@
     "filter": "Filter",
     "sort": "Sort",
     "all": "All",
-    "none": "None"
+    "none": "None",
+    "publishFailed": "Publish failed, please try again later",
+    "applyFailed": "Application failed, please try again later",
+    "deleteFailed": "Delete failed, please try again later",
+    "updateFailed": "Update failed, please try again later",
+    "defaultUser": "User",
+    "inputMessage": "Type a message...",
+    "chatWith": "Chat with {name}",
+    "chat": "Chat"
   },
   "nav": {
     "home": "Home",
@@ -137,7 +145,14 @@
     "updating": "Updating...",
     "statusOpen": "Open",
     "statusMatched": "Matched",
-    "statusClosed": "Closed"
+    "statusClosed": "Closed",
+    "exchangeInfo": "Exchange Details",
+    "wantToExchange": "Want to Exchange For",
+    "wantSeatGrade": "Desired Seat Grade",
+    "subsidyInfo": "Subsidy Information",
+    "myTicketPrice": "My Ticket Original Price",
+    "noFeeTitle": "Zero Fees - Completely Free",
+    "noFeeDesc": "This platform charges no service fees, broker fees, or any other additional charges. All matching services are provided free of charge."
   },
   "edit": {
     "title": "Edit Listing",

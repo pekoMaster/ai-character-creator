@@ -27,7 +27,15 @@
     "filter": "筛选",
     "sort": "排序",
     "all": "全部",
-    "none": "无"
+    "none": "无",
+    "publishFailed": "发布失败，请稍后再试",
+    "applyFailed": "申请失败，请稍后再试",
+    "deleteFailed": "删除失败，请稍后再试",
+    "updateFailed": "更新失败，请稍后再试",
+    "defaultUser": "用户",
+    "inputMessage": "输入消息...",
+    "chatWith": "与 {name} 聊天",
+    "chat": "聊天"
   },
   "nav": {
     "home": "首页",
@@ -137,7 +145,14 @@
     "updating": "更新中...",
     "statusOpen": "开放中",
     "statusMatched": "已配对",
-    "statusClosed": "已关闭"
+    "statusClosed": "已关闭",
+    "exchangeInfo": "换票信息",
+    "wantToExchange": "想换的活动",
+    "wantSeatGrade": "想换的票种等级",
+    "subsidyInfo": "补贴信息",
+    "myTicketPrice": "我持有的票券原价",
+    "noFeeTitle": "零手续费・完全免费",
+    "noFeeDesc": "本平台不收取任何手续费、中介费或其他额外费用。所有配对服务均为免费提供。"
   },
   "edit": {
     "title": "编辑刊登",

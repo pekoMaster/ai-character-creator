@@ -63,6 +63,7 @@ export default function ProfilePage() {
   const tStatus = useTranslations('status');
   const tLegal = useTranslations('legal');
   const tReview = useTranslations('review');
+  const tCommon = useTranslations('common');
   const { locale } = useLanguage();
 
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -115,7 +116,7 @@ export default function ProfilePage() {
   // 使用 API 回傳的用戶資訊，fallback 到 session
   const currentUser = userProfile || (session?.user ? {
     id: session.user.dbId || session.user.id || '',
-    username: session.user.name || '用戶',
+    username: session.user.name || tCommon('defaultUser'),
     email: session.user.email || '',
     avatarUrl: session.user.image || undefined,
     customAvatarUrl: undefined,

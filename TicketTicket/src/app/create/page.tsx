@@ -48,6 +48,7 @@ export default function CreateListingPage() {
   const { addListing } = useApp();
   const { events } = useAdmin();
   const t = useTranslations('create');
+  const tCommon = useTranslations('common');
 
   // 表單狀態
   const [eventName, setEventName] = useState('');
@@ -287,11 +288,11 @@ export default function CreateListingPage() {
           router.push('/');
         }, 2000);
       } else {
-        alert('發布失敗，請稍後再試');
+        alert(tCommon('publishFailed'));
       }
     } catch (error) {
       console.error('Error creating listing:', error);
-      alert('發布失敗，請稍後再試');
+      alert(tCommon('publishFailed'));
     } finally {
       setIsSubmitting(false);
     }

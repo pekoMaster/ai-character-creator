@@ -9,6 +9,7 @@ import SafetyBanner from '@/components/ui/SafetyBanner';
 import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import { Send, Calendar, MapPin, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface Message {
   id: string;
@@ -57,6 +58,7 @@ export default function ChatPage() {
   const { data: session } = useSession();
   const supabase = useSupabaseClient();
   const conversationId = params.id as string;
+  const tCommon = useTranslations('common');
 
   const [conversationData, setConversationData] = useState<ConversationData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -246,7 +248,7 @@ export default function ChatPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
       <Header
-        title={otherUser ? `與 ${otherUser.username} 聊天` : '聊天'}
+        title={otherUser ? tCommon('chatWith', { name: otherUser.username }) : tCommon('chat')}
         showBack
       />
 
@@ -324,7 +326,7 @@ export default function ChatPage() {
           <div className="flex gap-2">
             <input
               type="text"
-              placeholder="輸入訊息..."
+              placeholder={tCommon('inputMessage')}
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}

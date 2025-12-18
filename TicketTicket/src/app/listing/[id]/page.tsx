@@ -15,7 +15,7 @@ import { TicketTypeTag } from '@/components/ui/Tag';
 import Avatar from '@/components/ui/Avatar';
 import StarRating from '@/components/ui/StarRating';
 import SafetyBanner from '@/components/ui/SafetyBanner';
-import { TicketType, Listing } from '@/types';
+import { TicketType, Listing, SubsidyDirection } from '@/types';
 import {
   Calendar,
   MapPin,
@@ -29,6 +29,9 @@ import {
   Edit3,
   Trash2,
   MoreVertical,
+  ArrowLeftRight,
+  Banknote,
+  ShieldCheck,
 } from 'lucide-react';
 import ReviewModal from '@/components/features/ReviewModal';
 
@@ -41,6 +44,7 @@ export default function ListingDetailPage() {
   const tApply = useTranslations('apply');
   const tTicket = useTranslations('ticketType');
   const tCommon = useTranslations('common');
+  const tCreate = useTranslations('create');
   const { locale } = useLanguage();
 
   const [showApplyModal, setShowApplyModal] = useState(false);
@@ -76,6 +80,9 @@ export default function ListingDetailPage() {
 
   // 檢查是否為主辦方
   const isHost = listing?.hostId === currentUserId;
+
+  // 判斷是否為換票類型
+  const isExchangeMode = listing?.ticketType === 'ticket_exchange';
 
   // 檢查是否已申請
   const checkApplication = useCallback(async () => {
@@ -132,12 +139,23 @@ export default function ListingDetailPage() {
 
   // Helper to get ticket type info translations
   const getTicketTypeInfo = (type: TicketType) => {
-    const labelKey = type === 'find_companion' ? 'findCompanion' : type === 'main_ticket_transfer' ? 'mainTicketTransfer' : 'subTicketTransfer';
-    const warningKey = type === 'find_companion' ? 'findCompanionWarning' : type === 'main_ticket_transfer' ? 'mainTicketTransferWarning' : 'subTicketTransferWarning';
+    const typeMapping: Record<TicketType, { labelKey: string; warningKey: string }> = {
+      find_companion: { labelKey: 'findCompanion', warningKey: 'findCompanionWarning' },
+      main_ticket_transfer: { labelKey: 'mainTicketTransfer', warningKey: 'mainTicketTransferWarning' },
+      sub_ticket_transfer: { labelKey: 'subTicketTransfer', warningKey: 'subTicketTransferWarning' },
+      ticket_exchange: { labelKey: 'ticketExchange', warningKey: 'ticketExchangeWarning' },
+    };
+    const { labelKey, warningKey } = typeMapping[type];
     return {
       label: tTicket(labelKey),
       warning: tTicket(warningKey),
     };
+  };
+
+  // Helper to get subsidy direction label
+  const getSubsidyDirectionLabel = (direction?: SubsidyDirection) => {
+    if (!direction) return '';
+    return direction === 'i_pay_you' ? tCreate('iPayYou') : tCreate('youPayMe');
   };
 
   if (!listing) {
@@ -186,11 +204,11 @@ export default function ListingDetailPage() {
         setShowSuccessModal(true);
       } else {
         const error = await response.json();
-        alert(error.error || '申請失敗');
+        alert(error.error || tCommon('applyFailed'));
       }
     } catch (error) {
       console.error('Error applying:', error);
-      alert('申請失敗，請稍後再試');
+      alert(tCommon('applyFailed'));
     } finally {
       setIsApplying(false);
     }
@@ -207,7 +225,7 @@ export default function ListingDetailPage() {
       setShowDeleteModal(false);
       router.push('/profile');
     } else {
-      alert('刪除失敗，請稍後再試');
+      alert(tCommon('deleteFailed'));
     }
   };
 
@@ -218,7 +236,7 @@ export default function ListingDetailPage() {
     setIsUpdatingStatus(false);
     setShowStatusMenu(false);
     if (!success) {
-      alert('更新失敗，請稍後再試');
+      alert(tCommon('updateFailed'));
     }
   };
 
@@ -311,32 +329,92 @@ export default function ListingDetailPage() {
           </div>
         </div>
 
-        {/* 價格資訊 */}
+        {/* 價格資訊 / 換票資訊 */}
         <div className="px-4 py-4">
           <Card>
-            <div className="flex items-center justify-between mb-4">
+            {isExchangeMode ? (
+              /* 換票模式 */
               <div>
-                <p className="text-sm text-gray-500">{t('price')}</p>
-                <p className="text-3xl font-bold text-indigo-600">
-                  ¥{listing.askingPriceJPY.toLocaleString()}
-                  <span className="text-base font-normal text-gray-500">{t('perPerson')}</span>
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-gray-500">{t('availableSlots')}</p>
-                <div className="flex items-center gap-1">
-                  <Users className="w-5 h-5 text-gray-400" />
-                  <span className="text-2xl font-bold text-gray-700">
-                    {listing.availableSlots}/{listing.totalSlots}
-                  </span>
+                <div className="flex items-center gap-2 mb-4">
+                  <ArrowLeftRight className="w-5 h-5 text-orange-500" />
+                  <h3 className="font-semibold text-gray-900">{t('exchangeInfo')}</h3>
+                </div>
+
+                {/* 想換的活動 */}
+                {listing.exchangeEventName && (
+                  <div className="mb-3">
+                    <p className="text-sm text-gray-500">{t('wantToExchange')}</p>
+                    <p className="font-medium text-gray-900">{listing.exchangeEventName}</p>
+                  </div>
+                )}
+
+                {/* 想換的票種 */}
+                {listing.exchangeSeatGrade && (
+                  <div className="mb-3">
+                    <p className="text-sm text-gray-500">{t('wantSeatGrade')}</p>
+                    <p className="font-medium text-gray-900">
+                      {listing.exchangeSeatGrade === 'any' ? tCreate('anyGrade') : listing.exchangeSeatGrade}
+                    </p>
+                  </div>
+                )}
+
+                {/* 補貼資訊 */}
+                {(listing.subsidyAmount !== undefined && listing.subsidyAmount > 0) && (
+                  <div className="bg-orange-50 rounded-lg p-3 mt-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Banknote className="w-4 h-4 text-orange-600" />
+                      <p className="text-sm font-medium text-orange-800">{t('subsidyInfo')}</p>
+                    </div>
+                    <p className="text-orange-700">
+                      {getSubsidyDirectionLabel(listing.subsidyDirection)}: ¥{listing.subsidyAmount.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+
+                {/* 持有票券原價 */}
+                <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600 mt-3">
+                  <p>{t('myTicketPrice')}: ¥{listing.originalPriceJPY.toLocaleString()}</p>
                 </div>
               </div>
-            </div>
+            ) : (
+              /* 一般模式：價格資訊 */
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-sm text-gray-500">{t('price')}</p>
+                    <p className="text-3xl font-bold text-indigo-600">
+                      ¥{listing.askingPriceJPY.toLocaleString()}
+                      <span className="text-base font-normal text-gray-500">{t('perPerson')}</span>
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-500">{t('availableSlots')}</p>
+                    <div className="flex items-center gap-1">
+                      <Users className="w-5 h-5 text-gray-400" />
+                      <span className="text-2xl font-bold text-gray-700">
+                        {listing.availableSlots}/{listing.totalSlots}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-            <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600">
-              <p>{t('originalPrice')}: ¥{listing.originalPriceJPY.toLocaleString()}</p>
-            </div>
+                <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600">
+                  <p>{t('originalPrice')}: ¥{listing.originalPriceJPY.toLocaleString()}</p>
+                </div>
+              </>
+            )}
           </Card>
+        </div>
+
+        {/* 零手續費聲明 */}
+        <div className="px-4 pb-4">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
+            <ShieldCheck className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium text-green-800">{t('noFeeTitle')}</p>
+              <p className="text-sm text-green-700 mt-1">{t('noFeeDesc')}</p>
+            </div>
+          </div>
         </div>
 
         {/* 票券類型警告 */}

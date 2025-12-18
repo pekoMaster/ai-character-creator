@@ -27,7 +27,15 @@
     "filter": "篩選",
     "sort": "排序",
     "all": "全部",
-    "none": "無"
+    "none": "無",
+    "publishFailed": "發布失敗，請稍後再試",
+    "applyFailed": "申請失敗，請稍後再試",
+    "deleteFailed": "刪除失敗，請稍後再試",
+    "updateFailed": "更新失敗，請稍後再試",
+    "defaultUser": "用戶",
+    "inputMessage": "輸入訊息...",
+    "chatWith": "與 {name} 聊天",
+    "chat": "聊天"
   },
   "nav": {
     "home": "首頁",
@@ -137,7 +145,14 @@
     "updating": "更新中...",
     "statusOpen": "開放中",
     "statusMatched": "已配對",
-    "statusClosed": "已關閉"
+    "statusClosed": "已關閉",
+    "exchangeInfo": "換票資訊",
+    "wantToExchange": "想換的活動",
+    "wantSeatGrade": "想換的票種等級",
+    "subsidyInfo": "補貼資訊",
+    "myTicketPrice": "我持有的票券原價",
+    "noFeeTitle": "零手續費・完全免費",
+    "noFeeDesc": "本平台不收取任何手續費、仲介費或其他額外費用。所有配對服務均為免費提供。"
   },
   "edit": {
     "title": "編輯刊登",

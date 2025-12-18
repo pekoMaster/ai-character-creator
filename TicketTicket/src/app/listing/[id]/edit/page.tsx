@@ -51,6 +51,7 @@ export default function EditListingPage() {
   const { events } = useAdmin();
   const t = useTranslations('create');
   const tEdit = useTranslations('edit');
+  const tCommon = useTranslations('common');
 
   // 載入狀態
   const [isLoading, setIsLoading] = useState(true);
@@ -282,11 +283,11 @@ export default function EditListingPage() {
         }, 2000);
       } else {
         const error = await response.json();
-        alert(error.error || '更新失敗');
+        alert(error.error || tCommon('updateFailed'));
       }
     } catch (error) {
       console.error('Error updating listing:', error);
-      alert('更新失敗，請稍後再試');
+      alert(tCommon('updateFailed'));
     } finally {
       setIsSubmitting(false);
     }

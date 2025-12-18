@@ -27,7 +27,15 @@
     "filter": "フィルター",
     "sort": "並べ替え",
     "all": "すべて",
-    "none": "なし"
+    "none": "なし",
+    "publishFailed": "投稿に失敗しました。後でもう一度お試しください",
+    "applyFailed": "申請に失敗しました。後でもう一度お試しください",
+    "deleteFailed": "削除に失敗しました。後でもう一度お試しください",
+    "updateFailed": "更新に失敗しました。後でもう一度お試しください",
+    "defaultUser": "ユーザー",
+    "inputMessage": "メッセージを入力...",
+    "chatWith": "{name}とチャット",
+    "chat": "チャット"
   },
   "nav": {
     "home": "ホーム",
@@ -137,7 +145,14 @@
     "updating": "更新中...",
     "statusOpen": "募集中",
     "statusMatched": "マッチング済",
-    "statusClosed": "終了"
+    "statusClosed": "終了",
+    "exchangeInfo": "交換情報",
+    "wantToExchange": "交換希望のイベント",
+    "wantSeatGrade": "交換希望の席種",
+    "subsidyInfo": "補填情報",
+    "myTicketPrice": "所持チケットの定価",
+    "noFeeTitle": "手数料無料・完全無料",
+    "noFeeDesc": "このプラットフォームはサービス料、仲介料、その他の追加料金を一切いただきません。すべてのマッチングサービスは無料で提供されます。"
   },
   "edit": {
     "title": "募集を編集",
