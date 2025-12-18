@@ -3,7 +3,13 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { auth } from '@/auth';
 
 // 管理員 email 列表（可以放到環境變數）
-const ADMIN_EMAILS = ['16861@gm.ncyu.edu.tw', 'admin@ticketticket.live'];
+const ADMIN_EMAILS = [
+  '16861@gm.ncyu.edu.tw',
+  'admin@ticketticket.live',
+  'lmmlmm16861@gmail.com',
+  'pekopekopekopekomura@gmail.com',
+  'lmm16861@gmail.com',
+];
 
 // GET /api/events - 獲取活動列表
 export async function GET(request: NextRequest) {
